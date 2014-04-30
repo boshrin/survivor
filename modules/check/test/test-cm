@@ -1,0 +1,133 @@
+#!/usr/bin/perl -w
+# Usage: test-cm -h host,host+ <-t timeout> [arg=value [...]]
+
+# Test module that always exits with return code provided in test= argument.
+
+# Version: $Revision: 0.3 $
+# Date: $Date: 2004/06/12 00:11:05 $
+#
+# Copyright (c) 2002 - 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my $s = new Survivor::Check;
+
+my %argfmt =
+          ("test1" => "optional relation",     #lt(x),gt(x),eq(x),ne(x),nb(x,y),bt(x,y)
+	   "test2" => "string",                              # nb = not between
+	   "test3" => "optional number between(0,100)", # use "inf" to denote no bound
+	   "test4" => "string list any(blue,white)",
+	   "test5" => "optional boolean",      # no list for boolean
+	   "test6" => "string one(black,red)",
+	   "test7" => "optional flags any(s,q,v)", # no list for flags
+	   "test8" => "optional string default(foo)",
+	   "test9" => "string list",           # list of strings
+	   "test10" => "file",                 # file must exist
+	   "test11" => "directory",            # directory must exist
+	   "test12" => "password",             # string, maybe special later
+	   "test13" => "optional extraction");
+
+sub TestValidate {
+    my ($self) = @_;
+
+    return(MODEXEC_OK, 0, "Test OK");
+}
+
+# Process options passed to us first, since that may alter how we behave.
+# Also, error checking on bad options doesn't need to be multithreaded.
+
+$s->GetOpt(\%argfmt, \&TestValidate);
+my $r = $s->Exec(\&CmCheck);
+
+exit($r);
+
+# This is the subroutine that CmExec will execute to perform the actual
+# check.  It *must* be thread safe, and all functions it calls *must*
+# be thread safe (or serialized to avoid concurrency issues).
+
+# It will be passed the name of the host to be examined.
+# It should return a tuple of (result code, scalar value, comment).
+
+sub CmCheck {
+    my ($self, $host) = @_;
+
+    # This is an example of how to reference the variables.
+    # Don't printf from within a check module, as it is non-conformant.
+
+    my $x = "";
+
+    if($self->Arg("test1")) {
+	my $rel = $self->Arg("test1");
+	my %relhash = %$rel;
+
+	if(defined($relhash{"s"})) {
+	    $x .= "test1=" . $relhash{"rel"} . "(" . $relhash{"s"} . ")";
+	} else {
+	    $x .= "test1=" . $relhash{"rel"} . "(" . $relhash{"x"};
+
+	    if(defined($relhash{"y"})) {
+		$x .= "," . $relhash{"y"};
+	    }
+
+	    $x .= "),";
+	}
+    }
+    
+    $x .= "test2=" . $self->Arg("test2") . ",";
+
+    if($self->Arg("test3")) {
+	$x .= "test3=" . $self->Arg("test3") . ",";
+    }
+
+    $x .= "test4=";
+    my @array = $self->Arg("test4");
+    foreach my $m (@array) {
+	$x .= "$m,";
+    }
+    
+    if($self->Arg("test5")) {
+	$x .= "test5=" . $self->Arg("test5") . ",";
+    }
+
+    $x .= "test6=" . $self->Arg("test6") . ",";
+
+    if($self->Arg("test7")) {
+	$x .= "test7=" . $self->Arg("test7") . ",";
+    }
+
+    $x .= "test8=" . $self->Arg("test8") . ",";
+
+    $x .= "test9=";
+    @array = $self->Arg("test9");
+    foreach my $m (@array) {
+	$x .= "$m,";
+    }
+
+    $x .= "test10=" . $self->Arg("test10") . ",";
+    $x .= "test11=" . $self->Arg("test11") . ",";
+    $x .= "test12=" . $self->Arg("test12") . ",";
+    
+    if($self->Arg("test13")) {
+	my $ext = $self->Arg("test13");
+	my %exthash = %$ext;
+
+	$x .= "test13=" . $exthash{"ext"} . "(" . $exthash{"x"};
+
+	if(defined($exthash{"y"})) {
+	    $x .= "," . $exthash{"y"};
+	}
+
+	$x .= "),";
+    }
+     
+    chop($x);
+    
+    return(MODEXEC_OK, 0, "Test requested for $host with named args $x"); 
+}

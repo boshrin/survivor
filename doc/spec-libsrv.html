@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: libsrv Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: libsrv Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>libsrv</TT> is a library containing common functionality used by
+ the various pieces of the package.  Using <TT>libsrv</TT> requires
+ following some simple procedures.
+
+ <H3>Specification</H3>
+
+ <OL>
+ <LI>The application must <TT>#include &lt;libsrv.H></TT> to access
+     the class and function definitions.  It is recommended that the
+     application <TT>#include &lt;survivor.H></TT>, which will
+     automatically include this file.
+     <P>
+
+ <LI>The application must call <TT>libsrvinit(argv[0])</TT> at the
+     beginning of its <TT>main()</TT> function.  This will perform the
+     following:
+
+     <UL>
+     <LI>Set the global variable <TT>progname</TT> to point to the
+     "basename" of <TT>argv[0]</TT>.
+
+     <LI>Establish and initialize the (weak) psuedo-random number generator
+     as the global object <TT>prng</TT>.
+
+     <LI>Set to NULL the global objects <TT>args</TT> and <TT>cf</TT>.
+     </UL>
+     <P>
+
+ <LI>The application must call <TT>libsrvexit()</TT> at the end of its
+     <TT>main()</TT> function.  This will clear <TT>progname</TT> and
+     deallocate <TT>prng</TT>, <TT>args</TT>, and <TT>cf</TT>, if they
+     are allocated.
+     <P>
+ </OL>
+
+ <HR>
+ <I>$Date: 2006/11/20 00:11:47 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

@@ -1,0 +1,21 @@
+----------------------------
+revision 0.5
+date: 2006/02/11 20:40:23;  author: ekg2002;  state: Exp;  lines: +6 -3
+applied patch for error condition, bug #580
+----------------------------
+revision 0.4
+date: 2003/01/29 01:28:15;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.3
+date: 2002/12/31 04:10:22;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.2
+date: 2002/12/24 22:59:09;  author: selsky;  state: Exp;  lines: +27 -24
+update for Survivor::Check
+----------------------------
+revision 0.1
+date: 2002/07/31 04:24:36;  author: selsky;  state: Exp;
+initial revision
+=============================================================================

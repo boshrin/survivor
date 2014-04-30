@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=View Clipboards}
+@{SET norefresh=true}
+@{INCLUDE header.html}
+
+<!-- clipboards.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ @{IF DEFINED FLAG cn}
+ @{SET cn=@[FLAG cn]}
+ > <A CLASS="navspacer" HREF="@{URITOP}?file=clipboards.html">View
+   Clipboards</A>
+ > @{ECHO $cn}
+ @{ELSE}
+ > View Clipboards
+ @{ENDIF}
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+@{SET auth=@[AUTHLEVEL clipboard]}
+@{SET admin=@[AUTHLEVEL admin]}
+@{IF NUMBER $auth = 1}
+ @{IF DEFINED FLAG cn}
+ <FORM NAME="clipboard-action" METHOD="POST" ACTION="@{URITOP}">
+ @{URITAGS style=hidden omit=cc}
+ <TABLE CLASS="spacer">
+ <TR CLASS="spacer">
+ <TD CLASS="spacer">
+ <TABLE CLASS="infobody">
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">@{ECHO $cn}</TH>
+  </TR>
+
+  <TR CLASS="infobody">
+  <TD CLASS="infobar">
+   <TEXTAREA NAME=cc ROWS=25 COLS=70>@{CLIPBOARD $cn}</TEXTAREA>
+   <P>
+   <INPUT TYPE=submit NAME=ca VALUE=Save>
+   <INPUT TYPE=submit NAME=ca VALUE=Clear>
+  </TD>
+  </TR>
+  <TR>
+  <TD>
+   <TABLE CLASS="infobody">
+   <TR CLASS="infobody">
+   <TH CLASS="infobody">Send to CallList</TH>
+   <TD CLASS="infobar">
+   <SELECT NAME="ctl" VALUE=0 MULTIPLE>
+   @{FOREACH ca CALLLISTADDRESS}
+   <OPTION>@{ECHO $ca}
+   @{ENDEACH}
+   </SELECT>
+   </TD>
+   </TR>
+
+   <TR CLASS="infobody">
+   <TH CLASS="infobody">Send to Individual</TH>
+   <TD CLASS="infobar">
+   <SELECT NAME="cti" VALUE=0 MULTIPLE>
+   @{FOREACH ca PERSONADDRESS}
+   <OPTION>@{ECHO $ca}
+   @{ENDEACH}
+   </SELECT>
+   </TD>
+   </TR>
+
+   <TR CLASS="infobody">
+   <TH CLASS="infobody">Contact Email</TH>
+   <TD CLASS="infobar">
+   <INPUT TYPE=text NAME=ce VALUE="@{CLIPEMAIL}">
+   </TD>
+   </TR>
+
+   <TR CLASS="infobody">
+   <TH CLASS="infobody">Contact Phone</TH>
+   <TD CLASS="infobar">
+   <INPUT TYPE=text NAME=cp VALUE="@{CLIPPHONE}">
+   </TD>
+   </TR>
+
+   <TR CLASS="infobody">
+   <TD CLASS="infobar" COLSPAN=2>
+   <INPUT TYPE=submit NAME=ca VALUE=Send>
+   </TD>
+   </TR>
+   </TABLE>
+  </TD>
+  </TR>
+  </TABLE> 
+ </TD>
+ </TR>
+ </TABLE>
+ </FORM>
+ @{ELSE}
+ <TABLE CLASS="spacer">
+ <TR CLASS="spacer">
+ <TD CLASS="spacer">
+  <TABLE CLASS="infobody">
+  <TR CLASS="infobody">
+  <TH CLASS="infobody"
+  @{IF NUMBER $admin = 1}
+  COLSPAN=2
+  @{ENDIF}
+  >Select A Clipboard</TH>
+  </TR>
+
+  @{FOREACH c CLIPBOARD}
+  <TR CLASS="infobody">
+  <TD CLASS="infobar">
+   <A CLASS="table" HREF="@{URI cn=$c}">@{ECHO $c}</A>
+  </TD>
+  @{IF NUMBER $admin = 1}
+  <TD CLASS="infobar">
+   <FORM NAME="clipboard-action-@{ECHO $c}" METHOD="POST" ACTION="@{URITOP}">
+   @{URITAGS style=hidden}
+   <INPUT TYPE=HIDDEN NAME=cn VALUE="@{ECHO $c}">
+   <INPUT TYPE=submit NAME=ca VALUE=Delete>
+   </FORM> 
+  </TD>
+  @{ENDIF}
+  </TR>
+  @{ENDEACH}
+  @{IF NUMBER $admin = 1}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody" COLSPAN=2>Add A Clipboard</TH>
+  </TR>
+  <TR>
+  <FORM NAME="clipboard-action" METHOD="POST" ACTION="@{URITOP}">
+  <TD CLASS="infobar">
+   @{URITAGS style=hidden}
+   <INPUT TYPE=text NAME=cn>
+  </TD>
+  <TD CLASS="infobar">
+   <INPUT TYPE=submit NAME=ca VALUE=Add>
+  </TD>
+  </TR>
+  </FORM> 
+  @{ENDIF}
+  </TABLE>
+ </TD>
+ </TR>
+ </TABLE>
+ @{ENDIF}
+@{ENDIF}
+
+@{INCLUDE footer.html}
+</HTML>

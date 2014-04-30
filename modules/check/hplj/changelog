@@ -1,0 +1,23 @@
+----------------------------
+revision 0.5
+date: 2007/02/11 02:06:57;  author: benno;  state: Exp;  lines: +11 -5
+Add snmptimeout
+----------------------------
+revision 0.4
+date: 2006/10/12 03:34:33;  author: benno;  state: Exp;  lines: +7 -5
+Add snmpversion
+----------------------------
+revision 0.3
+date: 2003/05/04 21:18:09;  author: benno;  state: Exp;  lines: +2 -4
+Update headers
+----------------------------
+revision 0.2
+date: 2003/03/18 06:06:40;  author: selsky;  state: Exp;  lines: +36 -38
+Rename functions to match template
+Use consistent ordering of problem situations
+Eliminate unused variables
+----------------------------
+revision 0.1
+date: 2003/03/18 05:57:19;  author: selsky;  state: Exp;
+initial version from Mark Benvenuto
+=============================================================================

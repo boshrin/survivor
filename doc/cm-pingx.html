@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Pingx Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>pingx</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>pingx</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>pingx</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+
+  <P>
+
+  This module is <B>not installed by default</B>.  Details below.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module pingx {</B>
+       [<B>packets</B> &lt;number>]
+       [<B>throttle</B> &lt;number>]
+       [<B>maxwait</B> &lt;number>]
+       [<B>warnloss</B> &lt;number>]
+       [<B>probloss</B> &lt;number>]
+       [<B>warntime</B> &lt;number>]
+       [<B>probtime</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-packets"></A><B>packets</B></TD>
+ <TD CLASS=kwref>optional number greater than zero, default is 1</TD>
+ <TD CLASS=kwdef>
+   Number of packets to send to target host.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-throttle"></A><B>throttle</B></TD>
+ <TD CLASS=kwref>optional number greater than zero, default is 1</TD>
+ <TD CLASS=kwdef>
+   Number of packets to send before waiting for a reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-maxwait"></A><B>maxwait</B></TD>
+ <TD CLASS=kwref>optional number greater than zero, default is 1</TD>
+ <TD CLASS=kwdef>
+   Number of seconds to wait before assuming no reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warnloss"></A><B>warnloss</B></TD>
+ <TD CLASS=kwref>optional number between 1 and 101</TD>
+ <TD CLASS=kwdef>
+   Percentage of packets lost to generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probloss"></A><B>probloss</B></TD>
+ <TD CLASS=kwref>optional number between 1 and 101, default is 1</TD>
+ <TD CLASS=kwdef>
+   Percentage of packets lost to generate a problem.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warntime"></A><B>warntime</B></TD>
+ <TD CLASS=kwref>optional number greater than zero</TD>
+ <TD CLASS=kwdef>
+   Generate a warning if the average round trip time is at least
+   the specified number of milliseconds.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probtime"></A><B>probtime</B></TD>
+ <TD CLASS=kwref>optional number greater than zero</TD>
+ <TD CLASS=kwdef>
+   Generate a problem if the average round trip time is at least
+   the specified number of milliseconds.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>pingx</TT> module performs an ICMP echo reply query on the
+ host to be checked.  Because it must be installed setuid root to
+ generate these queries, the module is not installed by default.  To
+ install the module, type <TT>make install-manual</TT> in the
+ <TT>pingx</TT> directory of the SURVIVOR build.  The <A
+ HREF="cm-ping.html">ping</A> module is installed by default.
+
+ <P>
+
+ Setting the <TT>throttle</TT> argument higher will increase the
+ parallelization of the module, allowing more pings to be sent in a
+ shorter amount of time.  However, doing so may decrease the
+ reliability of the round trip time measurements.
+
+ <P>
+
+ Setting the <TT>maxwait</TT> argument higher will allow slower
+ responding hosts to not be marked down, however it may increase
+ the likelihood of the module timing out.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To ping hosts:
+     <PRE>
+     module pingx {}
+     </PRE>
+
+ <LI>To send 3 packets to each host, warning if the average response time
+     for the 3 packets is at least 10 milliseconds:
+     <PRE>
+     module pingx {
+       packets 3
+       warntime 10
+     }
+     </PRE>
+
+ <LI>To send 3 packets to each host, throttling after 50 are sent until
+     replies are received:
+     <PRE>
+     module pingx {
+       packets 3
+       throttle 50
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 21:15:35 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-maxwait">maxwait</A><BR>
+ <A CLASS="keywords" HREF="#kw-packets">packets</A><BR>
+ <A CLASS="keywords" HREF="#kw-probloss">probloss</A><BR>
+ <A CLASS="keywords" HREF="#kw-probtime">probtime</A><BR>
+ <A CLASS="keywords" HREF="#kw-throttle">throttle</A><BR>
+ <A CLASS="keywords" HREF="#kw-warnloss">warnloss</A><BR>
+ <A CLASS="keywords" HREF="#kw-warntime">warntime</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

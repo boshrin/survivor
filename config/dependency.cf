@@ -1,0 +1,57 @@
+# Sample dependency.cf
+
+# A maximum number of dependencies is set to prevent looping.  If unspecified,
+# it defaults to 10.  In this example, the number is reset to 5.
+
+maximum 5 dependencies
+
+# A check can use dependencies in two ways:
+#
+# (1) Dependent on another service for the host being checked, or another
+#     host in the same group..  In this case, a previous, outstanding failure
+#     of the other service will prevent this check from being executed.
+#
+# (2) Dependent on an arbitrary check for the host being checked or any
+#     other host.  In this case, the dependency check is executed before the
+#     dependent check.  If the dependency is successful, only then will the
+#     dependent execute.  This type of dependency is executed once per
+#     dependent check, not once per host.
+
+# In this example of a Type I dependency, everything checked on every host
+# will not run if there is an outstanding failure of ping for that host.
+
+depend {
+  all checks
+  for all hosts
+  on ping status
+}
+
+# In this next example of a Type I dependency, the check 'webservice'
+# (not defined in the sample check.cf) will not execute if there is
+# an outstanding failure of http on the host being checked.
+#
+# depend {
+#   checks { webservice }
+#   for all hosts
+#   on http status
+# }
+#
+# If 'webservice' was so critical that an alert should go out even
+# if an alert has already been transmitted for ping, the following
+# could be used instead of 'depend all on ping':
+#
+# depend {
+#   all checks except { webservice }
+#   for all hosts
+#   on ping status
+# }
+
+# In this example of a Type II dependency, a specific host (say, the
+# gateway serving the servers being checked) is ping'd before the
+# server being checked is ping'd.
+
+depend {
+  checks { ping }
+  for groups { mroom1 }
+  on ping@router.mroom1
+}

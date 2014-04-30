@@ -1,0 +1,162 @@
+#!/bin/sh
+#
+# Start or stop survivor.
+#
+# chkconfig: - 86 14
+# description: SURVIVOR scheduler
+#
+# Version: $Revision: 0.10 $
+# Date: $Date: 2007/03/29 12:15:17 $
+
+INSTUSER=@INST_USER@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+SS=@sbindir@/ss
+
+# Try to automatically determine the set of instances.  This may need
+# tweaking locally if, for example, the instance file is installed
+# elsewhere.
+ALLINSTANCES=`grep '^instance' /etc/survivor/instance.cf | awk '{ print $2 }'`
+INSTANCES=""
+
+# Fix memory problems for bash users
+ulimit -d unlimited
+
+# Make sure we get stuff as we expect it
+LD_LIBRARY_PATH=/usr/lib
+export LD_LIBRARY_PATH
+
+PATH=${PATH}:/usr/kerberos/bin
+export PATH
+
+# cd to a place where we can dump core
+cd /survivor/home
+
+# Determine what to do
+OP=$1
+if [ -n "$OP" ]; then
+    shift
+fi
+
+if [ $# -gt 0 ]; then
+    INSTANCES=$*
+else
+    INSTANCES=$ALLINSTANCES
+fi
+
+# Handy function
+
+isrunning() {
+    # Determine if scheduler is running
+    # $PIDFILE must be set to pid file
+    # $i must be set to instance
+    # Returns: 0 if running, 1 if not
+
+    if [ -r $PIDFILE ]; then
+	pid=`cat $PIDFILE`
+	psinfo=`ps -p $pid`
+	return $?
+    else
+	return 1
+    fi
+}
+
+case "$OP" in
+	'start')
+	        startok=0
+		for i in $INSTANCES
+		do
+		    echo "Starting survivor $i instance..."
+
+		    PIDFILE=/var/run/ss-${i}.pid
+
+		    # First, make sure process isn't running
+
+		    isrunning
+
+		    if [ $? -ne 0 ]; then
+			touch $PIDFILE
+			chown $INSTUSER $PIDFILE
+			su - $INSTUSER -c "$SS -k -s -i $i -p $PIDFILE" >> /var/log/survivor-${i}.log 2>&1
+			if [ $? -ne 0 ]; then
+			    echo "FAILED: Unable to start scheduler for instance $i"
+			else
+			    startok=1
+			fi
+		    else
+			echo "FAILED: Instance $i is already running"
+		    fi
+		done
+
+		if [ $startok -eq 1 ]; then
+		    # Check to make sure they're still running
+
+		    echo "Verifying startup, please wait..."
+		    sleep 20
+
+		    for i in $INSTANCES
+		    do
+		        PIDFILE=/var/run/ss-${i}.pid
+
+			isrunning
+
+			if [ $? -ne 0 ]; then
+			    echo "FAILED: Scheduler exited after startup for instance $i"
+			fi
+		    done
+		fi
+
+		echo "Done"
+		;;
+	 'stop')
+		for i in $INSTANCES
+		do
+		    echo "Stopping survivor $i instance..."
+		    
+		    PIDFILE=/var/run/ss-${i}.pid
+		    
+		    # First, make sure process is running
+
+		    isrunning
+
+		    if [ $? -eq 0 ]; then
+			kill -TERM `cat $PIDFILE`
+
+			# Loop while waiting for the process to exit
+
+			while isrunning
+			do
+			    echo -n .
+			    sleep 1
+			done
+		    else
+			echo "FAILED: Instance $i is not running"
+		    fi
+		done
+
+		echo Done
+		;;
+	'reload')
+		for i in $INSTANCES
+		do
+		    echo "Reloading survivor $i instance..."
+		    
+		    PIDFILE=/var/run/ss-${i}.pid
+		    
+		    # First, make sure process is running
+
+		    isrunning
+
+		    if [ $? -eq 0 ]; then
+			kill -HUP `cat $PIDFILE`
+		    else
+			echo "FAILED: Instance $i is not running"
+		    fi
+		done
+
+		echo Done
+		;;
+	      *)
+		echo "usage: $0 {start|stop|reload} [instance [...]]"
+		;;
+esac

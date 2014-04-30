@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Getenv WebAuth Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>getenv</TT> WebAuth Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>getenv</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>getenv</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="wam-about.html">webauth</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>authmodule getenv {</B>
+       [<B>groupvar</B> &lt;string>]
+       [<B>uservar</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-groupvar"></A><B>groupvar</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   The variable name from which to obtain the authenticated user's
+   group memberships.  The groups are expected to be in a space
+   separated list.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-uservar"></A><B>uservar</B></TD>
+ <TD CLASS=kwref>optional string, default is REMOTE_USER</TD>
+ <TD CLASS=kwdef>
+   The variable name from which to obtain the authenticated username.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>getenv</TT> module bases authentication on strings obtained
+ from environment variables.  This is useful with a webserver's native
+ authentication system, for example.
+
+ <P>
+
+ If the variable specified by <I>uservar</I> is not defined or is empty,
+ authentication will fail, otherwise authentication will be considered
+ successful.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To obtain the username authenticated by an Apache module:
+     <PRE>
+     authmodule getenv {}
+     </PRE>
+
+ <LI>To obtain groups from the variable <TT>AUTHZ</TT>:
+     <PRE>
+     authmodule getenv {
+       groupvar AUTHZ
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:54:02 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-groupvar">groupvar</A><BR>
+ <A CLASS="keywords" HREF="#kw-uservar">uservar</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

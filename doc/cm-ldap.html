@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Ldap Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>ldap</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>ldap</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>ldap</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module ldap {</B>
+       [<B>port</B> &lt;number>]
+       <B>filter</B> &lt;string>
+       [<B>extract</B> &lt;extraction>]
+       [<B>replyattribute</B> &lt;string>]
+       [<B>replyvalue</B> &lt;string>]
+       [<B>replytest</B> &lt;relation>]
+       [<B>searchbase</B> &lt;string>]
+       [<B>binddn</B> &lt;string>]
+       [<B>bindpassword</B> &lt;password>]
+       [<B>ssl</B> (<B>no</B> | <B>ldaps</B> | <B>starttls</B>)]
+       [<B>version</B> (<B>2</B> | <B>3</B>)]
+       [<B>response</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=perl-ldap"><TT>Net::LDAP</TT></A> See <A HREF="problems.html">known problems</A> for issues related to
+    this module
+   <LI>For monitoring LDAPS hosts, <A
+    HREF="http://search.cpan.org/search?dist=IO-Socket-SSL">
+    <TT>IO::Socket::SSL</TT></A> is required
+   <LI>For LDAPS hosts that do not support <I>starttls</I>, <A
+    HREF="http://search.cpan.org/search?dist=perl-ldap"><TT>Net::LDAPS</TT></A>
+    is also required.   
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-port"></A><B>port</B></TD>
+ <TD CLASS=kwref>optional number between 1 and 65535, default is 389</TD>
+ <TD CLASS=kwdef>
+   Port number on which LDAP server is listening.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-filter"></A><B>filter</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Search filter to use to elicit a response.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-extract"></A><B>extract</B></TD>
+ <TD CLASS=kwref>optional extraction</TD>
+ <TD CLASS=kwdef>
+   An extraction applied to the value obtained in the reply.
+   If <I>replytest</I> is also specified, the extraction will
+   be performed first.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-replyattribute"></A><B>replyattribute</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   An attribute that must be found in the reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-replyvalue"></A><B>replyvalue</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   A value that must be found in the reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-replytest"></A><B>replytest</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   A relation that must evaluate to true using the value obtained
+   in the reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-searchbase"></A><B>searchbase</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Search base to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-binddn"></A><B>binddn</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   DN to use to bind to the LDAP server.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-bindpassword"></A><B>bindpassword</B></TD>
+ <TD CLASS=kwref>optional password</TD>
+ <TD CLASS=kwdef>
+   When <I>binddn</I> is provided, the password to use to bind to the
+   LDAP server via plaintext.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-ssl"></A><B>ssl</B></TD>
+ <TD CLASS=kwref>optional string, one of 'no', 'ldaps', or 'starttls',
+   default is no</TD>
+ <TD CLASS=kwdef>
+   Use SSL for the connection.  <I>ldaps</I> and <I>starttls</I> are the
+   two available methods, the appropriate one is dependent on the server
+   being monitored.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-version"></A><B>version</B></TD>
+ <TD CLASS=kwref>optional number, one of '2' or '3', default is '2'</TD>
+ <TD CLASS=kwdef>
+   Specify which version of the LDAP protocol to use, the
+   appropriate one is dependent on the server being monitored.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-response"></A><B>response</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Exact string to be found as a line of output if a response is
+   expected.  <I>This argument is deprecated and is subject to
+   removal in a future release.  The same functionality can be
+   achieved with the replyattribute and replyvalue arguments.</I>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>ldap</TT> module performs an ldapsearch in order to determine
+ if the host being checked is responding to LDAP requests.  Wildcards
+ are not supported in the <TT>response</TT> string.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To look for a person with surname "smith":
+     <PRE>
+     module ldap {
+       filter         sn=smith
+       replyattribute objectclass
+       replyvalue     person
+     }
+     </PRE>
+
+ <LI>To look for a person with surname "jones" on an alternate port
+     requiring binding:
+     <PRE>
+     module ldap {
+       port           3389
+       filter         sn=jones
+       replyattribute objectclass
+       replyvalue     person
+       binddn         cn=test, dc=university, dc=edu
+       bindpassword   dumbpasswd
+     }
+     </PRE>
+
+ <LI>To retrieve a record containing the attributes
+
+     <PRE>
+     datakey: databasesize
+     datavalue: 1596 records
+     </PRE>
+
+     and verify that there are more than 1000 records present:
+    
+     <PRE>
+     module ldap {
+       filter         datakey=databasesize
+       replyattibute  datavalue
+       extract        column[0]
+       replytest      gt[1000]
+     }
+     </PRE>
+
+ <LI>To test where no results are expected:
+     <PRE>
+     module ldap {
+       filter sn=zwvwv
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:12:46 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-binddn">binddn</A><BR>
+ <A CLASS="keywords" HREF="#kw-bindpassword">bindpassword</A><BR>
+ <A CLASS="keywords" HREF="#kw-extract">extract</A><BR>
+ <A CLASS="keywords" HREF="#kw-filter">filter</A><BR>
+ <A CLASS="keywords" HREF="#kw-port">port</A><BR>
+ <A CLASS="keywords" HREF="#kw-replyattribute">replyattribute</A><BR>
+ <A CLASS="keywords" HREF="#kw-replytest">replytest</A><BR>
+ <A CLASS="keywords" HREF="#kw-replyvalue">replyvalue</A><BR>
+ <A CLASS="keywords" HREF="#kw-response">response</A><BR>
+ <A CLASS="keywords" HREF="#kw-searchbase">searchbase</A><BR>
+ <A CLASS="keywords" HREF="#kw-ssl">ssl</A><BR>
+ <A CLASS="keywords" HREF="#kw-version">version</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HEAD>
+<TITLE>survivor: Scheduler (ss)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Scheduler</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>ss</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>ss</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    ss [-DksSV] [-d &lt;debuglevel>] [-i &lt;instance>] [-I &lt;instcf>]
+       [-L logmethod] [-m &lt;moddir>] [-p &lt;pidfile>] [-t &lt;cthreads>]
+       [-T &lt;athreads>]
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>-D:</B> Specifies to not fork into the background.
+ <LI><B>-k:</B> Specifies to automatically restart on unexpected exit.
+ <LI><B>-s:</B> Generates timestamps for each line of debugging output.
+ <LI><B>-S:</B> Disable <A HREF="td-scheduling.html">smart scheduling</A>.
+ <LI><B>-V:</B> Outputs the package version information and exits.
+ <LI><B>debuglevel:</B> Output debugging at the specified level (if
+     enabled, see <TT>include/debug.H</TT> for level definitions).
+ <LI><B>instance:</B> The <A HREF=cf-instance.html>instance</A> to use
+ <LI><B>instcf:</B> The instance configuration file (default:
+     <TT>/etc/survivor/instance.cf</TT>).
+ <LI><B>logmethod</B>: The method for logging debugging and warning
+     information.  <TT>std</TT> is the default, and uses stderr.
+     <TT>syslog</TT> logs to the syslog <TT>user.debug</TT> facility.
+     <TT>syslog</TT> should be used with care, as some platforms may
+     not perform well under high levels of concurrent logging.
+     <TT>none</TT> disables all debugging and warning information.
+     Specifying this switch before the <TT>-d</TT> switch may prevent
+     initial debugging logs from being written to stderr.
+ <LI><B>moddir:</B> The location where modules may be found
+ <LI><B>pidfile:</B> The location where the pid of the scheduler is
+     written
+ <LI><B>cthreads:</B> The number of check threads (default: 15)
+ <LI><B>athreads:</B> The number of alert threads (default: 5)
+ </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Survivor Scheduler is a multi-threaded process that schedules and
+ executes Checks and Alerts.  All state is maintained on the file
+ system, not in memory, to permit other processes to easily access it
+ and to prevent data loss if the scheduler unexpectedly exits.  The
+ scheduler is designed to be started at system boot time.
+
+ <P>
+
+ The scheduler runs one <A HREF=cf-instance.html>Instance</A>.  Under
+ ordinary circumstances, this should be all that is required.
+ However, if multiple Instances are required, multiple schedulers can
+ be run on the same host, provided they are configured correctly.
+
+ <P>
+
+ The Check scheduler runs once per minute and determines which Checks
+ on which hosts have not been run in accordance with the configuration
+ files.  Any Check to be run is queued until it can be processed by
+ one of the Check worker threads.  The Check worker threads execute
+ the Checks and record the results in the state directory.
+
+ <P>
+
+ The Alert scheduler runs once per minute and determines which Checks
+ have generated errors that have not been transmitted in accordance
+ with the configuration files.  Any Alert to be transmitted is queued
+ until it can be processed by one of the Alert worker threads.  The
+ Alert worker threads execute the Alerts and record the results in the
+ state directory.  The Alert scheduler waits for a period of time
+ before commencing operation in order to give the Check scheduler a
+ chance to update the state.
+
+ <P>
+
+ State information is maintained for current hosts and services only,
+ and is automatically pruned by the scheduler.  History information is
+ maintained for all hosts and services, even those removed from the
+ configuration, and is never pruned by the scheduler.  (History
+ can be pruned by the <A HREF="sc.html">Command Interface</A>).
+
+ <P>
+
+ Sending the scheduler a <TT>SIGHUP</TT> will tell it to reread its
+ configuration files at the next appropriate moment.  Note that this
+ appropriate moment requires the completion of all outstanding Checks
+ (among other things).
+
+ <P>
+
+ <TT>SIGINT</TT>, <TT>SIGQUIT</TT>, or <TT>SIGTERM</TT> will tell the
+ scheduler to exit.
+
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <P>
+
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The scheduler is installed in <TT>$INSTDIR/sbin/ss</TT>.  The modules
+ it expects to run are installed under <TT>$INSTDIR/mod</TT>.
+
+ <P>
+
+ An <A HREF=cf-instance.html>Instance configuration</A> must be
+ created.  It is recommended that the default location of
+ <TT>/etc/survivor/instance.cf</TT> be used to prevent complications
+ with other utilities, such as the <A HREF=sw.html>Web Interface</A>.
+
+ <P>
+
+ See the instructions for <A HREF=building.html>building and
+ installing</A> for details on how to set up the configuration, state,
+ and history files required by the scheduler.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 16:53:14 $</I><BR>
+<I>$Revision: 0.12 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

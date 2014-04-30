@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Nadisk Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>nadisk</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>nadisk</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>nadisk</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module nadisk {</B>
+       [<B>community</B> &lt;string>]
+       <B>examine</B> &lt;flags>
+       [<B>warn</B> &lt;number>]
+       [<B>prob</B> &lt;number>]
+       [<B>diskcf</B> &lt;file>]
+       [<B>filesystem</B> &lt;directory>]
+       [<B>filesystem</B> ...]
+       [<B>snmpversion</B> (<B>1</B> | <B>2</B> | <B>2c</B> | <B>3</B>)]
+       [<B>snmptimeout</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-community"></A><B>community</B></TD>
+ <TD CLASS=kwref>optional string, default 'public'</TD>
+ <TD CLASS=kwdef>
+   Community name required by the SNMP daemon.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-examine"></A><B>examine</B></TD>
+ <TD CLASS=kwref>required flags, any of 'q', 'v', 's'</TD>
+ <TD CLASS=kwdef>
+   <TT>q</TT> to examine quota trees, <TT>v</TT> to examine regular
+   volumes, and <TT>s</TT> to examine .snapshot volumes.  One of
+   <TT>q</TT> and <TT>v</TT> must be specified.  <TT>v</TT> must be
+   specified in order to use <TT>s</TT>.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional number between 0 and 101, default is 101</TD>
+ <TD CLASS=kwdef>
+   Minimum in-use percentage that will generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob"></A><B>prob</B></TD>
+ <TD CLASS=kwref>optional number between 0 and 101, default is 101</TD>
+ <TD CLASS=kwdef>
+   Minimum in-use percentage that will generate a problem.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-diskcf"></A><B>diskcf</B></TD>
+ <TD CLASS=kwref>optional file</TD>
+ <TD CLASS=kwdef>
+   Control file containing filesystems and thresholds to use
+   (instead of <TT>warn</TT> and <TT>prob</TT>).  The file has the same
+   format (and indeed may be the same file) as the control file used
+   by the <A HREF="cm-disk.html"><TT>disk</TT></A> check module.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-filesystem"></A><B>filesystem</B></TD>
+ <TD CLASS=kwref>optional directory list</TD>
+ <TD CLASS=kwdef>
+   Filesystem(s) (not a regex) to be checked.  If no <I>filesystem</I>
+   is specified, then all filesystems will be checked.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmpversion"></A><B>snmpversion</B></TD>
+ <TD CLASS=kwref>optional string, one of '1', '2','2c', or '3', default
+  is '1'</TD>
+ <TD CLASS=kwdef>
+   SNMP protocol version to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmptimeout"></A><B>snmptimeout</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity, default
+  is '5'</TD>
+ <TD CLASS=kwdef>
+   SNMP query timeout, in seconds.  Note that multiple queries may be
+   issued within one check, so this should not be the same as the module
+   timeout.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>nadisk</TT> module determines how close to capacity volumes
+ and quota trees are on the Network Appliance server to be checked.
+ The module uses the Perl <TT>SNMP</TT> module to determine the
+ percentage of capacity in use for each volume and/or quota tree.
+
+ <P>
+
+ <B>Important</B>: All quota trees must be listed together
+ (sequentially) in the NetApp <TT>quotas</TT> file, preferably at the
+ beginning of the file.  For performance reasons, this module will
+ stop reading SNMP results after a quota tree entry is followed by a
+ non-quota tree entry (to prevent the slow parsing of thousands of
+ user quotas).
+
+ <P>
+
+ It may be useful to set <A
+ HREF="cf-check.html#kw-resulttext"><TT>result text
+ significant</TT></A> for <TT>nadisk</TT> checks.  This will clear an
+ existing acknowledgement when the summary text changes, for example
+ when a filesystem's usage changes, or a different filesystem begins to
+ fill up.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To examine quota trees and regular volumes, generating warnings at
+     80% and problems at 90%:
+     <PRE>
+     module nadisk {
+       community mycommunity
+       examine qv
+       warn 80
+       prob 90
+     }
+     </PRE>
+
+ <LI>To use a control file and examine quota trees and snapshot volumes:
+     <PRE>
+     module nadisk {
+       community mycommunity
+       examine vs
+       diskcf /etc/survivor/disk.cf
+     }
+     </PRE>
+     
+ <LI>To generate a warning when the quota tree <TT>/users</TT> reachs 90%
+     and a problem at 95%:
+     <PRE>
+     module nadisk {
+       community mycommunity
+       examine q
+       warn 90
+       prob 95
+       filesystem /users
+     }
+     </PRE>
+
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2007/02/11 02:09:00 $</I><BR>
+ <I>$Revision: 0.11 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-community">community</A><BR>
+ <A CLASS="keywords" HREF="#kw-diskcf">diskcf</A><BR>
+ <A CLASS="keywords" HREF="#kw-examine">examine</A><BR>
+ <A CLASS="keywords" HREF="#kw-filesystem">filesystem</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmptimeout">snmptimeout</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmpversion">snmpversion</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

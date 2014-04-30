@@ -1,0 +1,46 @@
+----------------------------
+revision 0.11
+date: 2003/01/29 01:18:27;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.10
+date: 2002/12/31 04:06:26;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.9
+date: 2002/12/10 08:51:55;  author: selsky;  state: Exp;  lines: +4 -4
+update for new list argument return type
+----------------------------
+revision 0.8
+date: 2002/11/11 09:08:39;  author: selsky;  state: Exp;  lines: +7 -3
+Make sure we can read system files
+----------------------------
+revision 0.7
+date: 2002/11/11 08:16:12;  author: selsky;  state: Exp;  lines: +52 -53
+Update for Survivor::Check
+Enforce running on localhost
+----------------------------
+revision 0.6
+date: 2002/08/14 10:03:31;  author: selsky;  state: Exp;  lines: +11 -99
+Use new Survivor module functions
+----------------------------
+revision 0.5
+date: 2002/07/29 20:19:59;  author: benno;  state: Exp;  lines: +14 -6
+don't assume all variables are read in commented lines
+----------------------------
+revision 0.4
+date: 2002/07/09 17:32:14;  author: selsky;  state: Exp;  lines: +8 -4
+things mounted "noauto" won't necessarily be mounted
+----------------------------
+revision 0.3
+date: 2002/05/28 19:37:02;  author: selsky;  state: Exp;  lines: +55 -55
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:59:14;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:53:28;  author: benno;  state: Exp;
+initial revision
+=============================================================================

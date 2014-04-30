@@ -1,0 +1,82 @@
+#! /usr/bin/perl -w
+
+# mon check module
+
+# Version: $Revision: 0.5 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/01/29 01:18:17 $
+
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Mon::Client;
+
+my %argfmt = ("username" => "optional string",
+	      "password" => "optional password",
+	      "port" => "optional number between(1,65535)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&MonValidate);
+
+if( (defined $sc->Arg("username") || defined $sc->Arg("password")) &&
+    !(defined $sc->Arg("username") && defined $sc->Arg("password")) ) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0,
+		   "Both username and password must be specified");
+}
+
+my $r = $sc->Exec( \&MonCheck);
+
+exit($r);
+
+sub MonValidate {
+    return(MODEXEC_OK, 0, "Mon OK");
+}
+
+sub MonCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $client = new Mon::Client( host => $host);
+
+    defined $sc->Arg("username") && $client->username($self->Arg("username"));
+    defined $sc->Arg("password") && $client->password($self->Arg("password"));
+    defined $sc->Arg("port") && $client->port($self->Arg("port"));
+
+    unless(defined $client->connect()) {
+	return(MODEXEC_PROBLEM, 0,
+	       'Unable to connect to service - ' . $client->error());
+    }
+
+    if(defined $client->username() && defined $client->password() &&
+       !defined $client->login()) {
+	$client->disconnect();
+	result(MODEXEC_PROBLEM, 0,
+	       'Unable to authenticate - ' . $client->error());
+    }
+
+    my($status,$details) = $client->list_state();
+
+    if($client->error()) {
+	$client->disconnect();
+	return(MODEXEC_PROBLEM, 0,
+	       'Unable to get state - ' . $client->error());
+    }
+
+    if(!$status) {
+	$client->disconnect();
+	return(MODEXEC_PROBLEM, 0,
+	       'Scheduler stopped since '. localtime $details);
+    }
+
+    $client->disconnect();
+    return(MODEXEC_OK, 1, 'Scheduler running');
+}

@@ -1,0 +1,295 @@
+#!/usr/bin/perl -w
+
+# process metric check module
+
+# Version: $Revision: 0.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2006/01/24 23:38:26 $
+#
+# Copyright (c) 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argformat = (# CPU Warning threshold
+		 'warncpu' => 'optional number between(1,inf)',
+		 # CPU Problem threshold
+		 'probcpu' => 'optional number between(1,inf)',
+		 # Virtual Memory Warning threshold
+		 'warnmem' => 'optional number between(1,inf)',
+		 # Virtual Memory Problem threshold
+		 'probmem' => 'optional number between(1,inf)',
+		 # Real Time Warning threshold
+		 'warntime' => 'optional number between(1,inf)',
+		 # Real Time Problem threshold
+		 'probtime' => 'optional number between(1,inf)',
+		 # How to join results together to determine failure
+		 'op' => 'optional string one(any,all) default(any)',
+		 # Names to look for
+		 'name' => 'string list',
+		 # Type of matching
+		 'matchtype' => 'optional flags any(a,i)',
+		 # Uid
+		 'uid' => 'optional relation',
+		 # Userid
+		 'userid' => 'optional relation');
+
+sub ProcessInfoValidate {
+    my ($self) = @_;
+
+    return(MODEXEC_OK, 0, 'ProcessInfo OK');
+}
+
+sub ProcessInfoCheck {
+    my ($self, $host) = @_;
+
+    my %ps;
+    my $psref;
+    my $matchtype = $self->Arg('matchtype') || '';
+    my $userref = $self->Arg('userid');
+    my $uidref = $self->Arg('uid');
+
+    if($self->IsBSDish() &&
+       (defined($self->Arg('warntime')) || defined($self->Arg('probtime'))))
+    {
+	$self->ExitError(MODEXEC_MISCONFIG, 0,
+			 '"warntime" and "probtime" are not supported on this platform');
+    }
+
+    if(!defined($self->Arg('warncpu')) && !defined($self->Arg('probcpu')) &&
+       !defined($self->Arg('warnmem')) && !defined($self->Arg('probmem')) &&
+       !defined($self->Arg('warntime')) && !defined($self->Arg('probtime')))
+    {
+	$self->ExitError(MODEXEC_MISCONFIG, 0, 'No tests specified');
+    }
+    
+    if(!defined($userref)) {
+	$psref = $self->ParsePS(0, $matchtype);
+    } else {
+	$psref = $self->ParsePS(1, $matchtype);
+    }
+
+    if(!defined $psref) {
+	$self->ExitError(MODEXEC_PROBLEM, 0, 'Failed to exec ps');
+    }
+    
+    %ps = %$psref;
+
+    # Create a list of pids that match the parameters we're looking for
+
+    my @pidlist = ();
+
+    foreach my $pid (keys %{$ps{"name"}}) {
+	my $pidmatch = 0;
+
+	# Must match a provided name
+	
+	foreach my $name ($self->Arg('name')) {
+	    if($ps{"name"}{$pid} =~ /$name/) {
+		$pidmatch++;
+		last;
+	    }
+	}
+
+	if($pidmatch && defined($uidref)) {
+	    # Must match provided uid
+
+	    my ($ur, $um) = $self->RelationCompare($uidref, $ps{"uid"}{$pid});
+
+	    if(!$ur) {
+		$pidmatch = 0;
+	    }
+	}
+	
+	if($pidmatch && defined($userref)) {
+	    # Must match provided username
+
+	    my ($ur, $um) = $self->RelationCompare($userref,
+						   $ps{"user"}{$pid});
+
+	    if(!$ur) {
+		$pidmatch = 0;
+	    }
+	}
+
+	if($pidmatch) {
+	    push(@pidlist, $pid);
+	}
+    }
+
+    # Now that we have a list of pids, run the tests
+
+    foreach my $pid (@pidlist) {
+	my $prob_cpu_matched = 0;
+	my $warn_cpu_matched = 0;
+	my $prob_mem_matched = 0;
+	my $warn_mem_matched = 0;
+	my $prob_time_matched = 0;
+	my $warn_time_matched = 0;
+	my $any_test_matched = 0;
+	my $err = "";
+
+	# Compare the CPU usage of this process, if requested
+		    
+	if(defined $self->Arg('probcpu')
+	   && $ps{"cpu"}{$pid} > $self->Arg('probcpu')) {
+	    $err .= "CPU for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) usage of " .
+		$ps{"cpu"}{$pid} .
+		" seconds exceeds " .
+		$self->Arg('probcpu') . ",";
+			
+	    $prob_cpu_matched++;
+	    $any_test_matched++;
+	}	
+	
+	if(!$prob_cpu_matched && defined $self->Arg('warncpu')
+	   && $ps{"cpu"}{$pid} > $self->Arg('warncpu')) {
+	    $err .= "CPU for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) usage of " .
+		$ps{"cpu"}{$pid} .
+		" seconds exceeds " .
+		$self->Arg('warncpu') . ",";
+			
+	    $warn_cpu_matched++;
+	    $any_test_matched++;
+	}
+
+	# Compare the memory usage of this process, if requested
+
+	if(defined $self->Arg('probmem')
+	   && $ps{"mem"}{$pid} > $self->Arg('probmem')) {
+	    $err .= "Memory for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) usage of " .
+		$ps{"mem"}{$pid} .
+		" KB exceeds " .
+		$self->Arg('probmem') . ",";
+	    
+	    $prob_mem_matched++;
+	    $any_test_matched++;
+	}	
+		    
+	if(!$prob_mem_matched && defined $self->Arg('warnmem')
+	   && $ps{"mem"}{$pid} > $self->Arg('warnmem')) {
+	    $err .= "Memory for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) usage of " .
+		$ps{"mem"}{$pid} .
+		" KB exceeds " .
+		$self->Arg('warnmem') . ",";
+			
+	    $warn_mem_matched++;
+	    $any_test_matched++;
+	}
+
+	# Compare the real time of this process, if requested
+		    
+	if(defined $self->Arg('probtime')
+	   && $ps{"time"}{$pid} > $self->Arg('probtime')) {
+	    $err .= "Time for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) of " .
+		$ps{"time"}{$pid} .
+		" seconds exceeds " .
+		$self->Arg('probtime') . ",";
+			
+	    $prob_time_matched++;
+	    $any_test_matched++;
+	}	
+		    
+	if(!$prob_time_matched && defined $self->Arg('warntime')
+	   && $ps{"time"}{$pid} > $self->Arg('warntime')) {
+	    $err .= "Time for process " .
+		$ps{"name"}{$pid} .
+		" ($pid) of " .
+		$ps{"time"}{$pid} .
+		" seconds exceeds " .
+		$self->Arg('warntime') . ",";
+			
+	    $warn_time_matched++;
+	    $any_test_matched++;
+	}
+
+	# Finally, assemble results
+	# Compose return code according to op
+	
+	my $crc = MODEXEC_OK;
+
+	if($self->Arg('op') eq 'any')
+	{
+	    if((defined($self->Arg('probcpu')) && $prob_cpu_matched) ||
+	       (defined($self->Arg('probmem')) && $prob_mem_matched) ||
+	       (defined($self->Arg('probtime')) && $prob_time_matched))
+	    {
+		$crc = MODEXEC_PROBLEM;
+	    }
+	    elsif((defined($self->Arg('warncpu')) && $warn_cpu_matched) ||
+		  (defined($self->Arg('warnmem')) && $warn_mem_matched) ||
+		  (defined($self->Arg('warntime')) && $warn_time_matched))
+	    {
+		$crc = MODEXEC_WARNING;
+	    }
+	}
+	else
+	{
+	    # All
+	    
+	    $crc = MODEXEC_PROBLEM;
+
+	    if((defined($self->Arg('warncpu')) && $warn_cpu_matched) ||
+	       (defined($self->Arg('warnmem')) && $warn_mem_matched) ||
+	       (defined($self->Arg('warntime')) && $warn_time_matched))
+	    {
+		$crc = MODEXEC_WARNING;
+	    }
+	    
+	    if(((defined($self->Arg('warncpu')) ||
+		 defined($self->Arg('probcpu')))
+		&& !$warn_cpu_matched && !$prob_cpu_matched)
+	       ||
+	       ((defined($self->Arg('warnmem')) ||
+		 defined($self->Arg('probmem')))
+		&& !$warn_mem_matched && !$prob_mem_matched)
+	       ||
+	       ((defined($self->Arg('warntime')) ||
+		 defined($self->Arg('probtime')))
+		&& !$warn_time_matched && !$prob_time_matched))
+	    {
+		$crc = MODEXEC_OK;
+	    }
+	}
+
+	if($crc != MODEXEC_OK)
+	{
+	    # Adding OK just creates noise
+	    chop($err);
+	    $self->AccResultAdd($host, $crc, $err);
+	}
+    }
+
+    my($rc, $sc, $tx) = $self->AccResultGet($host, scalar(@pidlist));
+
+    if($rc == MODEXEC_OK)
+    {
+	$tx = "No matching processes found";
+    }
+    
+    return($rc, $sc, $tx);
+}
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argformat, \&ProcessInfoValidate);
+
+my $r = $sc->Exec(\&ProcessInfoCheck);
+
+exit($r);

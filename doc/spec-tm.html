@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Transport Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Transport Module Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>Transport modules <B>must</B> be reentrant.  That is, if a transport
+     module is run more than once simultaneously, all instances
+     <B>must</B> run to completion without interference.
+     <P>
+
+ <LI>Transport modules <B>must not</B> change their process group by any
+     means, including via <TT>setsid()</TT>, <TT>setpgid()</TT>,
+     <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Transport modules <B>must</B> handle their own parallelization.
+     If a module is passed more than one host name to connect to, it is up
+     to the module to determine the best way to handle it.
+     <P>
+    
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/transport/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>transport/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/transport</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+
+        The <TT>install-remote</TT> directive <B>should</B> be the same
+        as <TT>install</TT>, except where it does not make sense for
+        the module to be installed as part of a remote distribution.
+        (Transport modules typically do not need to be installed remotely.)
+        <P>
+       
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/tm-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+    
+ <LI>Transport modules <B>must</B> accept the following arguments:
+
+     <UL>
+     <LI><B>-v</B><BR>
+         A flag indicating the module should validate its configuration.
+	 The module must test for any dependencies (executables,
+	 libraries, modules, configuration files, etc) required for
+	 normal successful execution.  If valid, exit with MODEXEC_OK
+	 (using scalar value 0 and the string "<I>Module</I> OK" as
+	 the comment, where <I>Module</I> is the name of the module),
+	 otherwise exit with MODEXEC_PROBLEM, following the output
+	 format specification described below.
+	 <P>
+     </UL>
+
+ <LI>Transport modules receive the rest of their data via a
+     <A HREF="survivor.dtd">SurvivorTransportData</A> document, where
+     <P>
+
+     <UL>
+     <LI><B>Host</B><BR>
+         Host to perform the check on.  Absence of this argument
+         <B>should</B> cause the transport module to exit immediately with
+         an appropriate return code.
+	 <P>
+
+     <LI><B>Timeout</B><BR>
+         The timeout for this module.  After <TT>timeout</TT> seconds,
+         the transport module may be gracelessly terminated.  The
+         transport module <B>may</B> use this timeout value to exit
+         gracefully before time expires.  If this option is not
+         provided, the module <B>may</B> act as if there is no
+         timeout.
+	 <P>
+	
+    <LI><B>ModuleOption</B><BR>
+    	 The names and values of the arguments provided in <A
+	 HREF=cf-check.html><TT>check.cf</TT></A>.  This element
+	 <B>should</B> conform to the <A
+	 HREF="spec-xmlarg.html">Module XML Argument
+	 Specification</A>.
+	 <P>
+
+    <LI><B>RemoteModule</B><BR>
+         <UL>
+	 <LI><B>Module</B><BR>
+	     The remote module to execute, as specified in the
+	     configuration files.
+	     <P>
+
+	 <LI><B>ModType</B><BR>
+	     The type of remote module, as supported by the
+	     <A HREF="sr.html">remote gateway</A>.  This argument
+	     is provided automatically by the system.
+	     <P>
+
+	 <LI><B>ModuleOption</B><BR>
+	     The names and values of the remote module arguments
+	     provided in <A HREF=cf-check.html><TT>check.cf</TT></A>
+	     or <A HREF=cf-dependency.html><TT>dependency.cf</TT></A>.
+	     This element <B>should</B> conform to the <A
+	     HREF="spec-xmlarg.html">Module XML Argument
+	     Specification</A>.
+	     <P>	 
+	 </UL>
+	 <P>
+     </UL>
+    
+ <LI>Transport modules <B>should not</B> write output files.
+     <P>
+    
+ <LI>Transport modules <B>must</B> generate output compliant with the
+     appropriate specification for the type of module being executed
+     remotely.
+     <P>
+    
+ <LI>Transport modules <B>must</B> exit with a return code compliant
+     with the appropriate specification for the type of module being
+     executed remotely.
+     <P>
+ </OL>
+
+<HR>
+<I>$Date: 2006/11/20 00:08:46 $</I><BR>
+<I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

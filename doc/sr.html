@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HEAD>
+<TITLE>survivor: Remote Daemon (sr)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Remote Daemon</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>sr</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+  <UL>
+  <LI><A HREF=#plaintext>For Use With Plaintext Transport Module</A>
+  <LI><A HREF=#tunnel>For Use With Tunnel Transport Module</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>sr</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    sr [-lL] [-C &lt;checkmods>] [-F &lt;fixmods>] [-h &lt;hostlist>]
+       -m &lt;moddir> [-u &lt;user>]
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>-l:</B> Enables syslogging of connections, to the <TT>daemon.info</TT>
+     facility
+ <LI><B>-L:</B> Enables debugging via syslog, to the <TT>daemon.info</TT>
+     facility
+ <LI><B>checkmods:</B> Permits the comma separated list of Check modules to
+     run with superuser privileges (see <TT>-u user</TT>)
+ <LI><B>fixmods:</B> Permits the comma separated list of Fix modules to
+     run with superuser privileges (see <TT>-u user</TT>)
+ <LI><B>hostlist:</B> Comma separated list of hosts permitted to connect
+ <LI><B>moddir:</B> The location where modules may be found
+ <LI><B>user:</B> If run as root, become this user before executing
+     unprivileged modules
+ </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Survivor Remote Daemon is a utility designed to execute Check and
+ Fix modules directly on monitored hosts.  It is designed to be used
+ in conjunction with <A HREF=tm-about.html>transport modules</A>.
+
+ <P>
+
+ The <TT>sr</TT> protocol is described <A HREF=spec-sr.html>here</A>.
+ 
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <P>
+ 
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The remote daemon is installed in <TT>$INSTDIR/sbin/sr</TT>.  The
+ modules it expects to run are installed under <TT>$INSTDIR/mod</TT>.
+ Both of these must be installed on any host that will use remote
+ Checks.  No special configuration files are necessary.  An
+ installation suitable for these hosts can be made as follows:
+ 
+  <PRE>
+  # cd <I>survivor build directory</I>
+  # make install-remote
+  </PRE>
+
+ This will install a subset of the standard installation.
+ Only scripted remote modules will be installed.
+
+ <P>
+
+ <TT>sr</TT> can be accessed using two supplied methods.  Both methods
+ may be used concurrently, and additional methods may be <A
+ HREF=spec-tm.html>added</A>.
+
+ <A ID="plaintext"></A>
+ <H3>For Use With Plaintext Transport Module</H3>
+ 
+ In this method, the <A HREF=tm-plaintext.html><TT>plaintext</TT></A>
+ module establishes a TCP connection directly to the remote host,
+ which runs <TT>sr</TT> via inetd.  This method is somewhat easier to
+ set up and requires less overhead in system resources, but offers
+ somewhat weaker security.
+ 
+ <P>
+
+ After the daemon and module directories are in place, add an entry to
+ <TT>/etc/services</TT> for <TT>sr</TT>.  Any service name and port
+ number may be used (although the <TT>plaintext</TT> module uses the
+ name <TT>sr</TT> by default), the following is only a suggestion:
+
+ <PRE>
+ sr              4891/tcp        # Survivor remote daemon
+ </PRE>
+
+ It is strongly recommended that access to this service be restricted.
+ This can be accomplished by wrapping the service with TCP Wrappers,
+ or by providing a hostlist on the argument line.  If TCP Wrappers are
+ installed, the following line is suggested for
+ <TT>/etc/hosts.allow</TT>:
+
+ <PRE>
+ sr: ALL@ALL EXCEPT <I>scheduler-host.site.org</I> : DENY
+ </PRE>
+
+ Finally, add an entry to <TT>/etc/inetd.conf</TT>.  The sample
+ directories given below should be replaced with whatever the
+ installed locations actually are.
+
+ <P>
+
+ The user with the minimum amount of privileges required to execute
+ the appropriate checks successfully should be used.  However, it is
+ also possible to run as root, and tell <TT>sr</TT> to drop privileges
+ when not needed.
+
+ <P>
+
+ With TCP wrappers, always running as user <I>nobody</I>:
+
+ <PRE>
+ sr      stream  tcp     nowait  nobody \
+ /opt/local/sbin/tcpd /opt/survivor/sbin/sr -m /opt/survivor/mod
+ </PRE>
+
+ Or without TCP wrappers, also running as user <I>nobody</I>:
+
+ <PRE>
+ sr      stream  tcp     nowait  nobody \
+ /opt/survivor/sbin/sr sr -l -m /opt/survivor/mod -h scheduler-host.site.org
+ </PRE>
+
+ Or without TCP wrappers, running as <I>root</I>, but dropping to
+ <I>nobody</I> for any module other than <I>mailq</I> and
+ <I>ptys</I>:
+
+ <PRE>
+ sr      stream  tcp     nowait  root \
+ /opt/survivor/sbin/sr sr -l -m /opt/survivor/mod \
+ -h scheduler-host.site.org,test.domain.org -u nobody -C mailq,ptys
+ </PRE>
+
+ A test by hand should look something like this:
+
+ <PRE>
+ scheduler-host% <B>telnet clienthost 4891</B>
+ Trying 127.0.0.1...
+ Connected to clienthost.
+ Escape character is '^]'.
+
+ <B>version</B>
+ OK v2
+ <B>check ping</B>
+ OK send SurvivorCheckData
+ <B>BEGIN DATA
+ &lt;?xml version="1.0" encoding="iso-8859-1"?>
+  &lt;SurvivorCheckData Version="1.0">
+   &lt;Host>localhost&lt;/Host>
+   &lt;Timeout>180&lt;/Timeout>
+  &lt;/SurvivorCheckData>
+ END DATA</B>
+ BEGIN RESPONSE
+ &lt;?xml version="1.0" encoding="iso-8859-1"?>
+ &lt;SurvivorCheckResult Version="1.0">
+  &lt;Host>localhost&lt;/Host>
+  &lt;ReturnCode>0&lt;/ReturnCode>
+  &lt;Scalar>1&lt;/Scalar>
+  &lt;Comment>Host up&lt;/Comment>&lt;/SurvivorCheckResult>
+ END RESPONSE
+ <B>exit</B>
+ OK Goodbye
+ Connection closed by foreign host.
+ </PRE>
+
+ The <A HREF=tm-plaintext.html><TT>plaintext</TT></A> transport module may
+ now be <A HREF=cf.html>configured</A>.
+ 
+ <P>
+    
+ <I>Note</I>: Some versions of inetd restrict the number of arguments
+ that may be passed.  For example, on Solaris 2.7 and earlier, this
+ limit is five arguments, meaning the <TT>-u</TT> and <TT>-C</TT>
+ options in the third example would not be passed.  As a workaround,
+ <TT>sr</TT> will accept semicolons instead of spaces as argument
+ separators.  For example:
+
+ <PRE>
+ sr      stream  tcp     nowait  root    /opt/survivor/sbin/sr sr -l;\
+ -m;/opt/survivor/mod;-h;scheduler-host.site.org,test.domain.org;-u;nobody;\
+ -C;mailq,ptys
+ </PRE>
+
+ <P>
+    
+ <A ID="tunnel"></A>
+ <H3>For Use With Tunnel Transport Module</H3>
+ 
+ In this method, the <A HREF=tm-tunnel.html><TT>tunnel</TT></A> module
+ executes the requested command/transport (ssh or kerberized rsh are
+ recommended) to run <TT>sr</TT> on the remote host.  This method is
+ somewhat more difficult to set up and requires greater system
+ resources, but offers better security.
+
+ <P>
+
+ In order for this method to work, the <TT>tunnel</TT> module must be
+ able to establish a connection to the remote host without receiving
+ any messages and without needing to answer any prompts (eg: to type a
+ password or passphrase).  The specific details of how to do this are
+ beyond the scope of this document, as they vary by method of
+ transport used.  However, the functionality required is the
+ equivalent of that provided by a <TT>.rhosts</TT> file.
+
+ <P>
+
+ This automatic login can be provided via several methods.  Via ssh,
+ files such as <TT>.shosts</TT> or authorized keys can be used.  Via
+ Kerberized rsh, files such as <TT>.klogin</TT> or <TT>.k5login</TT>
+ can be used.
+
+ <P>
+    
+ The <TT>tunnel</TT> module does not need to run as the same user as
+ <TT>sr</TT>.  Any login authorized by the transport will work.
+
+ <P>
+
+ To test automatic logins by hand, use the following format:
+
+ <PRE>
+ $command $host $rinstdir/sbin/sr -m $rinstdir/mod
+ </PRE>
+
+ For example:
+
+ <PRE>
+ scheduler-host% <B>/usr/bin/ssh -l nobody clienthost \
+ /opt/survivor-current/sbin/sr -m /opt/survivor-current/mod</B>
+
+ <B>version</B>
+ OK v2
+ <B>check ping</B>
+ OK send SurvivorCheckData
+ <B>BEGIN DATA
+ &lt;?xml version="1.0" encoding="iso-8859-1"?>
+  &lt;SurvivorCheckData Version="1.0">
+   &lt;Host>localhost&lt;/Host>
+   &lt;Timeout>180&lt;/Timeout>
+  &lt;/SurvivorCheckData>
+ END DATA</B>
+ BEGIN RESPONSE
+ &lt;?xml version="1.0" encoding="iso-8859-1"?>
+ &lt;SurvivorCheckResult Version="1.0">
+  &lt;Host>localhost&lt;/Host>
+  &lt;ReturnCode>0&lt;/ReturnCode>
+  &lt;Scalar>1&lt;/Scalar>
+  &lt;Comment>Host up&lt;/Comment>&lt;/SurvivorCheckResult>
+ END RESPONSE
+ <B>exit</B>
+ OK Goodbye
+ </PRE>
+
+ The <A HREF=tm-tunnel.html><TT>tunnel</TT></A> transport module may
+ now be <A HREF=cf.html>configured</A>.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 17:29:50 $</I><BR>
+<I>$Revision: 0.13 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

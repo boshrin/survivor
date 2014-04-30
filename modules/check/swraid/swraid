@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+# Linux software raid check module
+
+# Version: $Revision: 1.1 $
+# Author: David Filion, based on the check_rad nagios module by S Shipway,
+#  University of Auckland
+# Date: $Date: 2007/03/29 12:23:36 $
+
+# License restrictions apply, see doc/license.html for details.
+# Nagios is released under GPL.
+
+# Parameters:
+#	ignore	=>	List of raid devices to ignore.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("ignore" => "optional string list"); # List of raids to ignore;
+my $sc = new Survivor::Check();
+my @ignore;
+
+$sc->GetOpt(\%argfmt, \&Validate);
+
+my $rc = $sc->Exec( \&Check);
+
+exit($rc);
+
+
+sub Validate {
+    return(MODEXEC_OK, 0, "Load OK");
+}
+
+sub Check {
+    my $self = shift;
+    my $host = shift;
+	my ($l,$s,$n,$f, $message);
+	my $status = MODEXEC_OK;
+
+	foreach my $e ($self->Arg('ignore')) {
+		my($a,$b) = split( '=', $e, 2);
+		push @ignore, $a;
+    }
+
+
+	if(! -f "/proc/mdstat" ) {
+		return(MODEXEC_MISCONFIG, 0,'/proc/mdstat not found');
+	}
+
+	open MDSTAT,"</proc/mdstat"
+		or return(MODEXEC_MISCONFIG, 0,'Failed to open /proc/mdstat');
+
+	while( $l = <MDSTAT> ) {
+		if( $l =~ /^(\S+)\s+:/ ) { $n = $1; $f = ''; next; }
+		if( $l =~ /(\S+)\[\d+\]\(F\)/ ) { $f = $1; next; }
+		if( $l =~ /\s*.*\[([U_]+)\]/ ) {
+			$s = $1;
+			next if(!valid($n));
+			if($s =~ /_/ ) {
+				$status = MODEXEC_PROBLEM;
+				$message .= "md:$n:$f:$s ";
+			} else {
+				$message .= "md:$n:$s ";
+			}
+		}
+	}
+	close MDSTAT;
+	
+	if (! $message) {
+		$message = "No devices were checked. Are they being ignored?";
+	}
+	
+	return($status,0,$message);
+}
+
+# return true if parameter is not in ignore list
+sub valid($) {
+	my($v) = $_[0];
+	$v = lc $v;
+	foreach ( @ignore ) { return 0 if((lc $_) eq $v); }
+	return 1;
+}

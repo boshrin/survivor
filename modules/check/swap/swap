@@ -1,0 +1,145 @@
+#!/usr/bin/perl -w
+
+# swap check module
+
+# Version: $Revision: 0.11 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2005/08/17 01:55:29 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("warn" => "optional number between(0,101) default(101)",
+              "prob" => "optional number between(0,101) default(101)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&SwapValidate);
+
+my $r = $sc->Exec(\&SwapCheck);
+
+exit($r);
+
+sub SwapValidate {
+    return(MODEXEC_OK, 0, "Swap OK");
+}
+
+sub SwapCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $SWAP = $self->Which('swap');
+    my $PSTAT = $self->Which('pstat');
+    my $FREE = $self->Which('free');
+
+    my $rc = MODEXEC_OK;
+    my $err = '';
+    my $inuse = 0;      # KB
+    my $available = 0;  # KB
+
+    if(defined $SWAP) {
+	# Use swap -s
+
+	open(ANSWER, "$SWAP -s 2>&1 |");
+
+	my $x = <ANSWER>;
+
+	if(!defined $x || $x !~ /total/) {
+	    # Assume error
+	    
+	    $rc = MODEXEC_PROBLEM;
+	    $err = $x || "No output from $SWAP";
+	} else {
+	    chomp($x);
+
+	    my ($used, $avail) = (split(/ /, $x, 12))[8,10];
+	    
+	    $used =~ s/k//;
+	    $avail =~ s/k//;
+	    
+	    $inuse = $used;
+	    $available = $avail;
+	}
+	
+	close(ANSWER);
+    } elsif(defined $PSTAT) {
+	# Use pstat -T
+
+	open(ANSWER, "$PSTAT -T 2>&1 |");
+
+	my $last = '';
+
+	while(<ANSWER>) {
+	    chomp;
+
+	    my $j;
+	    if(/swap/) {
+		($a, $j) = split(/ /);
+		($inuse, $available) = split('/', $a, 2);
+	    } else {
+		$last = $_;
+	    }
+	}
+
+	if($available == 0) {
+	    # We didn't find a useful answer
+	    
+	    $rc = MODEXEC_PROBLEM;
+	    $err = $last;
+	}
+    
+	close(ANSWER);
+    } elsif(defined $FREE) {
+	# Use free -t
+
+	open(ANSWER, "$FREE -t 2>&1 |");
+
+	my $last = '';
+    
+	while(<ANSWER>) {
+	    chomp;
+	
+	    my ($j,$total);
+	    if(/^Swap:/) {
+		($j, $total, $inuse, $available) = split;
+	    } else {
+		$last = $_;
+	    }
+	}
+
+	if($available == 0) {
+	    # We didn't find a useful answer
+
+	    $rc = MODEXEC_PROBLEM;
+	    $err = $last;
+	}
+    
+	close(ANSWER);
+    } else {
+	return(MODEXEC_MISCONFIG, 0,
+	       'swap, pstat, or free executable not found');
+    }
+
+    if($available > 0) {
+	my $percent = sprintf("%d", (100 * $inuse)/($inuse + $available));
+	my $info = "$inuse kb in use, $available kb available, $percent percent full";
+
+	if($percent >= $self->Arg('prob')) {
+	    $rc = MODEXEC_PROBLEM;
+	} elsif($percent >= $self->Arg('warn')) {
+	    $rc = MODEXEC_WARNING;
+	}
+
+	return($rc, $percent, $info);
+    } else {
+	return($rc, 0, $err);
+    }
+}

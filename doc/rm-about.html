@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: About Report Modules</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: About Report Modules</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>What Report Modules Do</A>
+ <LI><A HREF=#modtypes>Module Types</A>
+ <LI><A HREF=#moddata>Module Data</A>
+ <LI><A HREF=#custom>Adding Custom Modules</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ What Report Modules Do
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Report Modules process history records on demand in order to provide
+ trend analysis or other similar operations.
+
+ <P>
+ 
+ <A ID="modtypes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Types
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ Report Modules may be compiled or scripted.
+
+ <P>
+ 
+ <A ID="moddata"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Data
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Modules are provided an XML document containing a <A
+ HREF=survivor.dtd>SurvivorReportRequest</A> element, which may
+ include configuration information obtained from <A
+ HREF=cf-instance.html><TT>instance.cf</TT></A>.
+
+ <P>
+
+ Modules generate output suitable to their purpose and the style
+ requested according to the requesting interface (eg: the <A
+ HREF="sc.html">Command Line</A> or <A HREF="sw.html">Web</A>
+ interface).
+
+ <P>
+  
+ <A ID="custom"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Adding Custom Modules
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All Report Modules must conform to the <A HREF=spec-rm.html>Report
+ Module Specification</A>, otherwise they may not interact correctly
+ with the package components.
+
+ <P>
+
+ Routines useful for building Report Modules in Perl are provided in
+ <TT>Survivor.pm</TT> and <TT>Survivor::Report.pm</TT>.  As a starting
+ point, see the existing modules in <TT>src/modules/report</TT>.
+
+ <P>
+
+ For information on these modules, run
+
+ <PRE>
+     % perldoc src/modules/common/Survivor.pm
+     % perldoc src/modules/common/Survivor/Report.pm
+ </PRE>
+
+ Other languages may be used, but no routines are provided with this
+ package.
+
+ <P>
+ 
+ For assistance in testing Report Modules, the <A
+ HREF="util-xmlmaker.html">XML Maker utility</A> may be useful.
+
+ <P>
+
+ <B>Important</B>: Please see the <A HREF=license.html>license</A>
+ for this package to see if custom modules are subject to the same
+ license.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 22:49:01 $</I><BR>
+<I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

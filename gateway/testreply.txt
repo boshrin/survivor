@@ -1,0 +1,19 @@
+Return-Path: <TwoWay.1234567890@messaging.nextel.moc>
+Received: from atlntap2.nextel.com (atlntap2.adc.nexteldata.net [170.206.225.46])
+	by columbia.edu (8.9.3/8.9.3) with SMTP id LAA19214
+	for <nobody@columbia.edu>; Mon, 6 Aug 2001 11:01:23 -0400 (EDT)
+From: TwoWay.1234567890@messaging.nextel.moc
+Message-Id: <200108061501.LAA19214@columbia.edu>
+X-AirNote: 1
+Date: Mon, 06 Aug 2001 11:01:06 -0400
+To: nobody@columbia.edu
+Subject: RE: ALERT: test1@yasu
+
+Escalate
+
+In Reply To Your Message
+
+Connection refused
+11:00:21 08/06/2001
+Token=R811060716
+Instance=sample

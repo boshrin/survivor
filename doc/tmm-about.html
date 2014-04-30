@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: About Transmit Modules</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: About Transmit Modules</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>What Transmit Modules Do</A>
+ <LI><A HREF=#modtypes>Module Types</A>
+ <LI><A HREF=#moddata>Module Data</A>
+ <LI><A HREF=#custom>Adding Custom Modules</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ What Transmit Modules Do
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Transmit Modules are used as part of the alert transmission mechanism.
+ Data relevant for an alert is assembled and then passed to a <A
+ HREF="fmm-about.html">Format Module</A>, which converts it according
+ to what the Module does (eg: making it suitable for a pager, or
+ incorporating a help file).  The resulting formatted alert data is
+ then passed to a Transmit Module, which is responsible for the actual
+ data transmission.
+
+ <P>
+
+ <A ID="modtypes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Types
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Like <A HREF=cm-about.html>Check Modules</A>, Transmit Modules may be
+ either compiled or scripted, but unlike Check Modules, Transmit Modules
+ only run on the scheduler host.
+
+ <P>
+
+ <A ID="moddata"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Data
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Transmit Modules take as input on stdin an XML document containing a
+ <TT>SurvivorFormattedAlertData</TT> element, as described in the
+ <A HREF="survivor.dtd">Survivor DTD</A>.
+
+ <P>
+
+ The module simply exits with an appropriate return code to indicate
+ success or failure.
+
+ <P>
+  
+ <A ID="custom"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Adding Custom Modules
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All Transmit Modules must conform to the <A HREF=spec-tmm.html>Transmit
+ Module Specification</A>, otherwise they may not interact correctly
+ with the scheduler.
+
+ <P>
+ 
+ Routines useful for building Transmit Modules in Perl are provided in
+ <TT>Survivor.pm</TT> and <TT>Survivor::Transmit.pm</TT>.  As a starting
+ point, see the sample test module in <TT>src/modules/transmit/test</TT>.
+
+ <P>
+
+ For information on these modules, run
+
+ <PRE>
+     % perldoc src/modules/common/Survivor.pm
+     % perldoc src/modules/common/Survivor/Transmit.pm
+ </PRE>
+
+ Other languages may be used, but no routines are provided with this
+ package.
+
+ <P>
+
+ For assistance in testing Transmit Modules, the <A
+ HREF="util-xmlmaker.html">XML Maker utility</A> may be useful.
+
+ <P>
+
+ <B>Important</B>: Please see the <A HREF=license.html>license</A>
+ for this package to see if custom modules are subject to the same
+ license.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 22:37:03 $</I><BR>
+<I>$Revision: 0.5 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

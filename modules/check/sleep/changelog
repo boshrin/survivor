@@ -1,0 +1,33 @@
+----------------------------
+revision 0.8
+date: 2006/01/23 02:15:59;  author: benno;  state: Exp;  lines: +5 -6
+Call sleep in the right place
+----------------------------
+revision 0.7
+date: 2003/01/29 01:27:28;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:09:59;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.5
+date: 2002/12/22 18:58:19;  author: selsky;  state: Exp;  lines: +5 -4
+Revert to constant sleep time
+----------------------------
+revision 0.4
+date: 2002/12/19 06:31:18;  author: selsky;  state: Exp;  lines: +21 -26
+update for Survivor::Check
+----------------------------
+revision 0.3
+date: 2002/05/26 23:12:40;  author: selsky;  state: Exp;  lines: +20 -12
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 21:05:46;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 21:49:49;  author: benno;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,85 @@
+----------------------------
+revision 0.20
+date: 2005/10/07 22:03:39;  author: benno;  state: Exp;  lines: +98 -41
+Add followredirect, matchcode, matchheader, errorheader
+----------------------------
+revision 0.19
+date: 2003/03/10 05:31:36;  author: selsky;  state: Exp;  lines: +6 -4
+Only add the query if it's needed
+----------------------------
+revision 0.18
+date: 2003/02/23 15:33:44;  author: selsky;  state: Exp;  lines: +15 -12
+disable threading when using https
+----------------------------
+revision 0.17
+date: 2003/02/09 00:05:35;  author: selsky;  state: Exp;  lines: +5 -2
+Make sure 'path' begins with a '/'
+----------------------------
+revision 0.16
+date: 2003/01/29 01:15:33;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.15
+date: 2002/12/31 04:04:12;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.14
+date: 2002/12/10 08:51:55;  author: selsky;  state: Exp;  lines: +4 -5
+update for new list argument return type
+----------------------------
+revision 0.13
+date: 2002/12/02 09:13:34;  author: selsky;  state: Exp;  lines: +4 -3
+Get queries working again
+----------------------------
+revision 0.12
+date: 2002/12/02 08:32:12;  author: selsky;  state: Exp;  lines: +9 -4
+Make sure both username and password are specified
+Add some comments about following POST requests
+----------------------------
+revision 0.11
+date: 2002/12/02 07:58:27;  author: selsky;  state: Exp;  lines: +34 -27
+Remove POST support since it doesn't work yet anyway.
+Split up how the url is specified, to hopefully make it simpler
+----------------------------
+revision 0.10
+date: 2002/11/06 19:35:33;  author: selsky;  state: Exp;  lines: +70 -89
+Convert to Survivor::Check
+Add support for sending additional HTTP headers
+Initial support for additional methods, authenticated requests
+----------------------------
+revision 0.9
+date: 2002/09/01 02:13:53;  author: selsky;  state: Exp;  lines: +6 -3
+check for $timeout defined
+----------------------------
+revision 0.8
+date: 2002/08/16 19:31:58;  author: benno;  state: Exp;  lines: +7 -4
+fix typos in comments
+----------------------------
+revision 0.7
+date: 2002/08/14 06:57:33;  author: selsky;  state: Exp;  lines: +6 -3
+Better error checking on acceptable timeout values
+----------------------------
+revision 0.6
+date: 2002/08/13 22:20:24;  author: selsky;  state: Exp;  lines: +6 -3
+fixed typo.  maybe we should be using 'use strict'...
+----------------------------
+revision 0.5
+date: 2002/08/13 22:17:29;  author: selsky;  state: Exp;  lines: +10 -4
+use URI module to replace hosts
+----------------------------
+revision 0.4
+date: 2002/08/13 17:27:28;  author: benno;  state: Exp;  lines: +7 -4
+fix hostname replacement
+----------------------------
+revision 0.3
+date: 2002/05/27 20:16:12;  author: selsky;  state: Exp;  lines: +40 -37
+initial port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:58:21;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:48:27;  author: benno;  state: Exp;
+initial revision
+=============================================================================

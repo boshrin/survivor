@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Test Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>test</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>test</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>test</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module test {</B>
+       <B>exitcode</B> &lt;number>
+       [<B>exittext</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-exitcode"></A><B>exitcode</B></TD>
+ <TD CLASS=kwref>number between 0 and 1000</TD>
+ <TD CLASS=kwdef>
+   Value to exit with upon execution of check.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-exittext"></A><B>exittext</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Text to place in comment field.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>test</TT> module simply exits with the value of the provided
+ argument.  Note this must be an actual number, aliases
+ (<TT>MODEXEC_OK</TT>) are not understood by the module.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To have the test module exit with code 3 (<TT>MODEXEC_NOTICE</TT>):
+     <PRE>
+     module test {
+       exitcode 3
+     }
+     </PRE>
+
+ <LI>To have the test module exit with code 1 (<TT>MODEXEC_PROBLEM</TT>)
+     and specific comment text:
+     <PRE>
+     module test {
+       exitcode 1
+       exittext This is always a problem for me
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:05:04 $</I><BR>
+ <I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-exitcode">exitcode</A><BR>
+ <A CLASS="keywords" HREF="#kw-exittext">exittext</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

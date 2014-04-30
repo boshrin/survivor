@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=Build Report}
+@{SET norefresh=true}
+@{INCLUDE header.html}
+
+<!-- report.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI hc= vt= file=}">@{ECHO $instance}</A>
+ > Build Report
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+<I>Report generation is resource intensive.  Reports may take time
+to render.</I>
+<P>
+
+@{SET exec=@[AUTHLEVEL exec]}
+@{IF NUMBER $exec = 1}
+ <FORM NAME="report-request" METHOD="get" ACTION="@{URITOP}">
+ <INPUT TYPE="hidden" NAME="i" VALUE="@{INSTANCE}">
+ <INPUT TYPE="hidden" NAME="back" VALUE="@{URI}">
+ <TABLE CLASS="infobody">
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Report Module</TH>
+  <TD>
+   <SELECT NAME="rm">
+   @{FOREACH SORT ASCIN m INSTALLEDMODULES report}
+   <OPTION>@{ECHO $m}
+   @{ENDEACH}
+   </SELECT>
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Hosts</TH>
+  <TD>
+   <I>Select at least one host or hostclass.</I><BR>
+   
+   <SELECT NAME="h" MULTIPLE>
+   @{FOREACH SORT ASCIN h HOST}
+   <OPTION>@{ECHO $h}
+   @{ENDEACH}
+   </SELECT>
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">HostClasses</TH>
+  <TD>
+   <I>Select at least one host or hostclass.</I><BR>
+   
+   <SELECT NAME="hc" MULTIPLE>
+   @{FOREACH SORT ASCIN hc HOSTCLASS}
+   <OPTION>@{ECHO $hc}
+   @{ENDEACH}
+   </SELECT>
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Services</TH>
+  <TD>
+   <I>Select at least one service.</I><BR>
+   
+   <SELECT NAME="s" MULTIPLE>
+   @{FOREACH SORT ASCIN s SERVICE}
+   <OPTION>@{ECHO $s}
+   @{ENDEACH}
+   </SELECT>
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">From</TH>
+  <TD>
+   <SELECT NAME="tmf">
+   @{SET month=@[TIME offset=-86000 field=mon]}
+   <OPTION VALUE="01" @{IF NUMBER $month = 1}SELECTED@{ENDIF}>Jan
+   <OPTION VALUE="02" @{IF NUMBER $month = 2}SELECTED@{ENDIF}>Feb
+   <OPTION VALUE="03" @{IF NUMBER $month = 3}SELECTED@{ENDIF}>Mar
+   <OPTION VALUE="04" @{IF NUMBER $month = 4}SELECTED@{ENDIF}>Apr
+   <OPTION VALUE="05" @{IF NUMBER $month = 5}SELECTED@{ENDIF}>May
+   <OPTION VALUE="06" @{IF NUMBER $month = 6}SELECTED@{ENDIF}>Jun
+   <OPTION VALUE="07" @{IF NUMBER $month = 7}SELECTED@{ENDIF}>Jul
+   <OPTION VALUE="08" @{IF NUMBER $month = 8}SELECTED@{ENDIF}>Aug
+   <OPTION VALUE="09" @{IF NUMBER $month = 9}SELECTED@{ENDIF}>Sep
+   <OPTION VALUE="10" @{IF NUMBER $month = 10}SELECTED@{ENDIF}>Oct
+   <OPTION VALUE="11" @{IF NUMBER $month = 11}SELECTED@{ENDIF}>Nov
+   <OPTION VALUE="12" @{IF NUMBER $month = 12}SELECTED@{ENDIF}>Dec
+   </SELECT>
+   <INPUT TYPE="text" NAME="tdf" SIZE=2 VALUE="@{TIME offset=-86000 field=mday}">
+   <INPUT TYPE="text" NAME="tyf" SIZE=4 VALUE="@{TIME offset=-86000 field=year}">
+   <INPUT TYPE="text" NAME="thf" SIZE=2 VALUE="@{TIME field=hour}">:
+   <INPUT TYPE="text" NAME="tnf" SIZE=2 VALUE="@{TIME field=min}">
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Until</TH>
+  <TD>
+   <SELECT NAME="tmu">
+   @{SET month=@[TIME field=mon]}
+   <OPTION VALUE="01" @{IF NUMBER $month = 1}SELECTED@{ENDIF}>Jan
+   <OPTION VALUE="02" @{IF NUMBER $month = 2}SELECTED@{ENDIF}>Feb
+   <OPTION VALUE="03" @{IF NUMBER $month = 3}SELECTED@{ENDIF}>Mar
+   <OPTION VALUE="04" @{IF NUMBER $month = 4}SELECTED@{ENDIF}>Apr
+   <OPTION VALUE="05" @{IF NUMBER $month = 5}SELECTED@{ENDIF}>May
+   <OPTION VALUE="06" @{IF NUMBER $month = 6}SELECTED@{ENDIF}>Jun
+   <OPTION VALUE="07" @{IF NUMBER $month = 7}SELECTED@{ENDIF}>Jul
+   <OPTION VALUE="08" @{IF NUMBER $month = 8}SELECTED@{ENDIF}>Aug
+   <OPTION VALUE="09" @{IF NUMBER $month = 9}SELECTED@{ENDIF}>Sep
+   <OPTION VALUE="10" @{IF NUMBER $month = 10}SELECTED@{ENDIF}>Oct
+   <OPTION VALUE="11" @{IF NUMBER $month = 11}SELECTED@{ENDIF}>Nov
+   <OPTION VALUE="12" @{IF NUMBER $month = 12}SELECTED@{ENDIF}>Dec
+   </SELECT>
+   <INPUT TYPE="text" NAME="tdu" SIZE=2 VALUE="@{TIME field=mday}">
+   <INPUT TYPE="text" NAME="tyu" SIZE=4 VALUE="@{TIME field=year}">
+   <INPUT TYPE="text" NAME="thu" SIZE=2 VALUE="@{TIME field=hour}">:
+   <INPUT TYPE="text" NAME="tnu" SIZE=2 VALUE="@{TIME field=min}">
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Data</TH>
+  <TD>
+   <I>Select at least one history type.</I><BR>
+   
+   <SELECT NAME="which" MULTIPLE>
+   <OPTION>alert
+   <OPTION SELECTED>check
+   <OPTION>command
+   <OPTION>fix
+   </SELECT>
+  </TD>
+  </TR>
+ 
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Order</TH>
+  <TD>
+   <INPUT TYPE="checkbox" NAME="reverse" CHECKED>
+   <FONT CLASS="mono">Process most recent history first</FONT>
+  </TD>
+  </TR>
+ 
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">Output Style</TH>
+  <TD>
+   <SELECT NAME="style">
+   <OPTION>html
+   <OPTION>text
+   </SELECT>
+  </TD>
+  </TR>
+ 
+  <TR CLASS="infobody">
+  <TH CLASS="infobody"></TH>
+  <TD>
+   <INPUT TYPE="submit" VALUE="Generate Report">
+  </TD>
+  </TR>
+ </TABLE>
+ </FORM>
+@{ENDIF}
+</TD>
+</TR>
+</TABLE>
+@{INCLUDE footer.html}
+</HTML>

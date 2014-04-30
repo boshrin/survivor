@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Cksum Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>cksum</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>cksum</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+   <UL>
+   <LI><A HREF="#withcf">Using A Configuration File</A>
+   <LI><A HREF="#withoutcf">Without A Configuration File</A>
+   </UL>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>cksum</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module cksum {</B>
+       [<B>cksumcf</B> &lt;file>]
+       [<B>file</B> &lt;file>]
+       [<B>sum</B> &lt;string>]
+       [<B>sumutil</B> &lt;string>]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-cksumcf"></A><B>cksumcf</B></TD>
+ <TD CLASS=kwref>optional file</TD>
+ <TD CLASS=kwdef>
+   A configuration file containing checksums to compare against.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-file"></A><B>file</B></TD>
+ <TD CLASS=kwref>optional file</TD>
+ <TD CLASS=kwdef>
+   File to checksum.  If <TT>cksumcf</TT> is not specified, this
+   argument is required.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-sum"></A><B>sum</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Expected checksum.  If <TT>cksumcf</TT> is not specified, this
+   argument is required.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-sumutil"></A><B>sumutil</B></TD>
+ <TD CLASS=kwref>optional string, default is "cksum"</TD>
+ <TD CLASS=kwdef>
+   Utility to use to generate checksums.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>cksum</TT> module uses <TT>cksum</TT> or another utility
+ specified by the <TT>sumutil</TT> argument (as either an executable
+ in the default path or an explicit path) to determine if files have
+ been modified.  Although this module may be helpful for monitoring
+ against malicious modifications, it is not designed for such a
+ purpose and as such is not intended to be a complete solution for
+ that problem.  The module is more intended for detecting accidental
+ or other modifications without malicious intent.
+
+ <P>
+
+ <B>Important</B>: The <A HREF="sr.html">Remote Daemon</A> must run
+ with sufficient privileges to read the files to be summed.
+
+ <A ID="withcf"></A>
+ <H4>Using A Configuration File</H4>
+
+ A configuration file must exist on each host to be monitored.
+ The contents of the file are lines of the form returned by the
+ <TT>cksum</TT> utility:
+
+ <PRE>
+      sum octets filename
+ </PRE>
+
+ For example:
+
+ <PRE>
+      3663153827 234316 /usr/bin/foo
+ </PRE>
+
+ If the sum utility is set to <TT>md5sum</TT> (which is not installed
+ by default on all operating systems), the contents of the file are
+ lines of the form returned by <TT>md5sum</TT> instead:
+
+ <PRE>
+      sum filename
+ </PRE>
+
+ For example:
+
+ <PRE>
+      3996cdfb9e03285325a73bfd440352d9 /usr/bin/foo
+ </PRE>
+
+ <P>
+
+ The configuration files can be generated using <TT>find</TT>.
+ For example:
+
+ <PRE>
+      # find /usr/bin /usr/sbin -exec cksum {} \; > /etc/survivor/cksum.cf
+ </PRE>
+
+ <P>
+
+ The module will compare the current sum of each filename listed
+ against the sum listed.  If a file does not exist, is not readable, or
+ if the sums of the file do not match, <TT>MODEXEC_PROBLEM</TT> will be
+ returned.
+
+ <A ID="withoutcf"></A>
+ <H4>Without A Configuration File</H4>
+ 
+ If no configuration file is specified, only one file can be
+ checksummed per check stanza.  In this case, the arguments to the
+ Check are simply the file to be examined and the expected sum.  For
+ <TT>md5sum</TT>, the sum takes the format of the hash, for other
+ utilities the sum takes the format of the hash, a space, and the
+ octet count.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To monitor a host with <TT>cksum.cf</TT> in a non-standard location:
+
+    <PRE>
+    check cksum {
+      module cksum {
+        cksumcf /var/cache/sums.out
+      }
+      via remote
+    }
+    </PRE>
+
+ <LI>To use <TT>md5sum</TT> instead of <TT>cksum</TT>:
+
+    <PRE>
+    check cksum {
+      module cksum {
+        sumutil md5sum
+      }
+      via remote
+    }
+    </PRE>
+
+ <LI>To only monitor <TT>/usr/bin/foo</TT> (and not use a configuration file):
+
+    <PRE>
+    check foosum {
+      module foosum {
+        file /usr/bin/foo
+	sum  3663153827 234316
+      }
+      via remote
+    }
+    </PRE>
+
+ <LI>As for the previous example, but using <TT>md5sum</TT> instead:
+
+    <PRE>
+    check foomd5sum {
+      module foosum {
+        file    /usr/bin/foo
+	sum     3996cdfb9e03285325a73bfd440352d9
+	sumutil /usr/bin/md5sum
+      }
+      via remote
+    }
+    </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 18:31:21 $</I><BR>
+ <I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-cksumcf">cksumcf</A><BR>
+ <A CLASS="keywords" HREF="#kw-file">file</A><BR>
+ <A CLASS="keywords" HREF="#kw-sum">sum</A><BR>
+ <A CLASS="keywords" HREF="#kw-sumutil">sumutil</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

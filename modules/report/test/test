@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+
+# test report module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2005/11/05 03:14:27 $
+#
+# Copyright (c) 2004 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Report;
+
+# Create a new Report object.
+
+my $sw = new Survivor::Report();
+
+my $pok = $sw->ParseReportRequest();
+
+if($pok == MODEXEC_OK) {
+    if($sw->Style() eq "html")
+    {
+	print ("<HTML><PRE>\n");
+    }
+
+    if($sw->Style() ne "check")
+    {
+	print "Style: " . $sw->Style() . "\n";
+	print "TmpDir: " . $sw->TmpDir() . "\n";
+	
+	if(defined $sw->TmpURIPrefix()) {
+	    print "TmpURIPrefix: " . $sw->TmpURIPrefix() . "\n";
+	}
+    }
+
+    my @dataset = $sw->DataSet();
+
+    foreach my $d (@dataset)
+    {
+	if($sw->Style() eq "check")
+	{
+	    print ${%$d}{"service"} . " " . ${%$d}{"host"};
+
+	    print " " . scalar(@{${%$d}{"alertdata"}});
+	    print " " . scalar(@{${%$d}{"checkdata"}});
+	    print " " . scalar(@{${%$d}{"commanddata"}});
+	    print " " . scalar(@{${%$d}{"fixdata"}});
+	    
+	    print "\n";
+	}
+	else
+	{
+	    print "Host: " . ${%$d}{"host"} . "\n";
+	    print "Service: " . ${%$d}{"service"} . "\n";
+
+	    print "Alert records: " . scalar(@{${%$d}{"alertdata"}}) . "\n";
+	    print "Check records: " . scalar(@{${%$d}{"checkdata"}}) . "\n";
+	    print "Command records: " . scalar(@{${%$d}{"commanddata"}}) .
+		"\n";
+	    print "Fix records: " . scalar(@{${%$d}{"fixdata"}}) . "\n";
+	}
+    }
+    
+    if($sw->Style() eq "html")
+    {
+	print ("</PRE></HTML>\n");
+    }
+} else {
+    print "Error: $pok\n";
+}
+
+exit MODEXEC_OK;

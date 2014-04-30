@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Technical Document: Locking</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR Technical Document: Locking</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About This Document</A>
+ <LI><A HREF=#locking>Locking</A>
+  <UL>
+  <LI><A HREF=#state>State Locking</A>
+  <LI><A HREF=#history>History Locking</A>
+  <LI><A HREF=#scheduler>Scheduler Locking</A>
+  <LI><A HREF=#fix>Fix Locking</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About This Document
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ This document contains details of the SURVIVOR implementation.
+ It contains no information necessary for the operation of the
+ systems monitor that is not available in the general sections of
+ this manual.
+
+ <P>
+ 
+ <A ID="locking"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Locking
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The SURVIVOR scheduler (<A HREF=ss.html><TT>ss</TT></A>) is written
+ as a multi-threaded application in order to faciliate the concurrent
+ execution of the various modules within the system.  In addition,
+ other parts of the package, notably the user interfaces, including
+ <A HREF=sc.html><TT>sc</TT></A>, <A HREF=sg.html><TT>sg</TT></A>, and
+ <A HREF=sw.html><TT>sw</TT></A>, can operate concurrently with the
+ scheduler.
+
+ <P>
+
+ Given all these competing entities demanding access to the resources
+ of the system, including the state storage, locking must be implemented
+ in order to prevent corrupt or inaccurate data.  This document describes
+ the locking implemented by SURVIVOR.
+
+ <A ID="state"></A>
+ <H3>State Locking</H3>
+
+ The most critical resource is the state hierarchy.  Host state,
+ service state, and calllist state are protected by lockfiles
+ controlled by <TT>lockf()</TT>.  This ensures different components of
+ the system do not read partial or incorrect information or perform
+ simultaneous writes to the state files.
+
+ <P>
+
+ When state is updated, the mtime of the lockfile protecting that
+ state is also updated.  This is because the scheduler may cache state
+ information to reduce disk access, and by checking the modification
+ time on the file can determine whether or not it is necessary to
+ perform the additional disk operations necessary to read state from
+ disk.  Note that in the current implementation only check state is
+ cached.  Since the same lockfile protects both check and alert state,
+ when alert state is also cached updating either check or alert state
+ will invalidate the cache of both for the service@host in question.
+ (This could be addressed by using atime vs mtime, or by creating a
+ new file to be stat'd.)
+
+ <P>
+
+ See the <A HREF="history">History Locking</A> section immediately
+ following for important additional information.
+
+ <A ID="history"></A>
+ <H3>History Locking</H3>
+
+ History files are locked since concurrent updates are possible
+ (although rare).  The locking mechanism is similar to state locking,
+ but using a different filename and without the mtime updates.
+
+ <P>
+
+ If a service needs to lock both state and history simultaneously,
+ the correct order for doing so is
+
+ <OL>
+ <LI>Lock state
+ <LI>Lock history
+ <LI>Unlock history
+ <LI>Unlock state
+ </OL>
+
+ <A ID="scheduler"></A>
+ <H3>Scheduler Locking</H3>
+
+ Within the scheduler process, multiple threads of execution may
+ require access to scheduler resources.  Of greatest interest from a
+ practical standpoint is the read/write lock protecting the global
+ Configuration object.  When any thread requires configuration
+ information, a read lock is obtained.  If a new configuration becomes
+ available (say, via <TT>SIGHUP</TT>), a write lock is requested, and
+ will only be granted upon the release of all outstanding read locks.
+ Execution of a check currently requires a read lock, and so any
+ <TT>SIGHUP</TT> received will be deferred until the check has completed.
+
+ <P>
+
+ Additionally, access to the internal alert and check processing queues
+ and timer array are controlled.  Call list state is controlled globally,
+ and cached state data is protected on a per-data basis.
+
+ <A ID="fix"></A>
+ <H3>Fix Locking</H3>
+
+ Fix locking is required to prevent undesirable concurrent execution
+ of fix modules.  When a fix is scheduled for a given service@host, by
+ default no other fix may run for the same service@host.  According to
+ the configuration, fixes may also lock out an entire service or an
+ entire host instead.  Locks are implemented as symbolic links with
+ expiration times to prevent a failed fix module from indefinitely
+ blocking other fix attempts.
+
+ <HR>
+ <I>$Date: 2006/11/20 02:48:45 $</I><BR>
+ <I>$Revision: 0.4 $</I>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

@@ -1,0 +1,83 @@
+#!/usr/bin/perl -w
+
+# availability report module
+#
+# Version: $Revision: 0.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2006/01/24 23:43:41 $
+#
+# Copyright (c) 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Report;
+
+# Create a new Report object.
+
+my $sw = new Survivor::Report();
+
+my $pok = $sw->ParseReportRequest();
+
+if($pok == MODEXEC_OK) {
+    if($sw->Style() eq "html")
+    {
+	print ("<HTML><PRE>\n");
+	print ("<H1>Response Time Report</H1>\n");
+    }
+    elsif($sw->Style() eq "text")
+    {
+	print ("Response Time Report\n\n");
+    }
+
+    my @dataset = $sw->DataSet();
+    
+    foreach my $d (@dataset)
+    {
+	my $total = 0;
+	my $seen = 0;
+	my $missing = 0;
+
+	foreach my $cr (@{${%$d}{"checkdata"}}) {
+	    $seen++;
+
+	    if(defined ${%$cr}{"duration"}) {
+		$total += ${%$cr}{"duration"};
+	    } else {
+		$missing++;
+	    }
+	}
+
+	if($seen - $missing > 0)
+	{
+	    my $avg = $total / ($seen - $missing);
+	    	    
+	    if($sw->Style() eq "check") {
+		print ${%$d}{"service"} . " " . ${%$d}{"host"} . " ";
+		print $avg . "\n";
+	    } else {
+		print ${%$d}{"service"} . "@" . ${%$d}{"host"} . ": ";
+		print $avg . "ms\n";
+	    }
+	}
+	else
+	{
+	    if($sw->Style() ne "check") {
+		print "No duration information available.\n";
+	    }
+	}
+    }
+    
+    if($sw->Style() eq "html")
+    {
+	print ("</PRE></HTML>\n");
+    }
+} else {
+    print "Error: $pok\n";
+}
+
+exit MODEXEC_OK;

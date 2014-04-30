@@ -1,0 +1,91 @@
+#!/usr/bin/perl -w
+
+# krb5 check module
+
+# Version: $Revision: 0.7 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2004/03/24 16:50:04 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argformat = (# Test principal
+		 "principal" => "string",
+		 # keytab
+		 "keytab" => "file",
+		 # Configuration directory
+		 "cfdir" =>
+		 "optional directory default(/etc/survivor/krb5)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argformat, \&Krb5Validate);
+
+my $KINIT = $sc->Which('kinit');
+my $KDESTROY = $sc->Which('kdestroy');
+
+if(!defined $KINIT || !defined $KDESTROY) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0,
+		   'kinit or kdestroy executable not found');
+}
+
+# Don't use threads because we use getenv to set the configuration
+# file to use
+
+$sc->UseThreads(0);
+
+my $r = $sc->Exec(\&Krb5Check);
+
+exit($r);
+
+sub Krb5Validate {
+    my ($self) = @_;
+
+    return(MODEXEC_OK, 0, "Krb5 OK");
+}
+
+sub Krb5Check {
+    my ($self, $host) = @_;
+    
+    # Set a configuration file containing the KDC to verify
+    my $cf = $self->Arg("cfdir").'/krb5.'.$host.'.conf';
+
+    if(-r $cf) {
+	$ENV{'KRB5_CONFIG'} = $cf;
+
+	my $cmd = $KINIT . " -k -c /tmp/check.krb5." . $host . " -t " .
+	    $self->Arg("keytab") . " " . $self->Arg("principal") . " 2>&1";
+		    
+	open(ANSWER, "$cmd |");
+	
+	my $x = <ANSWER>;  # This should be empty if we succeeded
+	my $r = MODEXEC_OK;
+	my $s = 1;
+	
+	if(defined $x) {
+	    chomp($x);
+	    $r = MODEXEC_PROBLEM;
+	    $s = 0;
+	} else {
+	    $x = "OK";
+
+	    # Destroy ticket
+	    open(JUNK, "$KDESTROY -c /tmp/check.krb5.$host 2>&1 |");
+	    close(JUNK);
+	}
+	
+	close(ANSWER);
+
+	return($r, $s, $x);
+    } else {
+	return(MODEXEC_MISCONFIG, 0, "Unable to read $cf");
+    }
+}

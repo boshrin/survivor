@@ -1,0 +1,260 @@
+#!/usr/bin/perl -w
+
+# snmp module
+
+# Version: $Revision: 0.19 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2007/02/11 02:08:13 $
+#
+# Copyright (c) 2002 - 2007
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use SNMP;
+
+my %argfmt = ("community" => "optional string default(public)",
+	      "oid" => "string",
+	      "warnmatch" => "optional relation",
+	      "probmatch" => "optional relation",
+	      "match" => "optional relation",
+	      "warncount" => "optional relation",
+	      "probcount" => "optional relation",
+	      "mib" => "optional file",
+	      "snmpversion" => "optional string one(1,2,2c,3) default(1)",
+	      'snmptimeout' => "optional number between(1,inf) default(5)");
+
+my($community,$oid);
+
+my $sc = new Survivor::Check();
+
+# Disable threading pending threadsafe SNMP.
+$sc->UseThreads(0);
+
+$sc->GetOpt(\%argfmt, \&SnmpValidate);
+
+$community = $sc->Arg("community");
+$oid = $sc->Arg("oid");
+
+unless(defined $sc->Arg("match")
+       || defined $sc->Arg("warnmatch")
+       || defined $sc->Arg("probmatch")) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0,
+		   'Must specify match, warnmatch or probmatch');
+}
+
+# load mib if necessary
+# XXX mib parsing errors go to STDERR - SNMP module bug?
+if(defined $sc->Arg("mib")) {
+    &SNMP::initMib(); # load system mibs which this mib depends on
+    &SNMP::addMibFiles($sc->Arg("mib")) or
+	$sc->ExitError(MODEXEC_MISCONFIG, 0, "addMibFiles() failed for ".$sc->Arg("mib"));
+}
+
+# make sure oid is numeric
+$oid =~ s/^enterprises\./.1.3.6.1.4.1./; # confuses translateObj() otherwise
+if( $oid =~ /[^\d\.]/ ) {
+    $oid = &SNMP::translateObj($oid) ||
+	$sc->ExitError(MODEXEC_MISCONFIG, 0, "Cannot resolve oid $oid");
+}
+$oid !~ /^\./ and $oid = '.1.3.6.1.2.1.'.$oid; # assume MIB-2, like snmpwalk
+# XXX if OID is just .1.3.6.1.2.1 then probably failed the translateObj()
+
+# Calculate timeout in microseconds
+
+my $snmptimeout = $sc->Arg('snmptimeout') * 1000000;
+
+my $r = $sc->Exec( \&SnmpCheck);
+
+exit($r);
+
+sub SnmpValidate {
+    return(MODEXEC_OK, 0, "Snmp OK");
+}
+
+sub SnmpCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $lines = 0;   # Lines read in answer
+    my $found = 0;   # Lines read not matching warn or prob
+    my $matchcnt = 0; # Lines matching match
+    my $rc = MODEXEC_OK;
+    my $warnerr = '';
+    my $proberr = '';
+    my $err = '';
+    my $vals = '';   # Values returned, for inclusion in OK string
+    
+    my $sess = new SNMP::Session( DestHost => $host,
+				  Community => $community,
+				  UseLongNames => 1,
+				  UseNumeric => 1,
+				  Version => $sc->Arg("snmpversion"),
+				  Timeout => $snmptimeout );
+
+    if(!defined $sess) {
+	return(MODEXEC_PROBLEM, 0,
+	       'Unable to resolve hostname or connect to host or version incorrect');
+    }
+
+    my $vb = new SNMP::Varbind([$oid]);
+
+    # Did we get anything at all?
+    my $hasResults;
+
+    # Get first tuple
+    $sess->get($vb);
+
+    # Loop through OID tree
+    while(1) {
+	# Did we actually get anything?  Maybe OID has children which
+	# contain data... Or maybe host isn't responding.
+	if( defined $vb->val() && $vb->val() ne '' ) {
+	    $hasResults = 1;
+
+	    # Check that current OID has the same prefix as the OID we
+	    # requested, otherwise break out
+	    last if( $vb->name() !~ /^$oid/ );
+
+	    # We got a useful line
+	    $lines++;
+	
+	    # do some analysis
+
+	    # First see if we match the match
+	    
+	    if(defined $self->Arg("match")) {
+		my ($xrc, $xmsg) = $self->RelationCompare($self->Arg("match"),
+							  $vb->val());
+
+		if($xrc) {
+		    $matchcnt++;
+		}
+	    }
+
+	    # Next compare against warnmatch and probmatch
+	    
+	    my($vrc, $verr) = &check_match($self, $vb->val());
+	    $vals .= $vb->val().',';
+	
+	    # If more than one line matches and no match restriction was set,
+	    # each matching line must meet the specified requirements.
+	    if($vrc == MODEXEC_WARNING) {
+		if($rc != MODEXEC_PROBLEM) {
+		    $rc = MODEXEC_WARNING;
+		}		
+		$warnerr .= $verr.',';
+	    } elsif($vrc == MODEXEC_PROBLEM) {
+		$rc = MODEXEC_PROBLEM;
+		$proberr .= $verr.',';
+	    } else {
+		$found++;
+	    }
+	}
+	# try to get the next tuple
+	last unless defined $sess->getnext($vb);
+    }
+
+    if(!defined $hasResults) {
+	return(MODEXEC_PROBLEM, 0, 'No response');
+    }
+
+    # We check the positive counts here.  If probcount or warncount wasn't
+    # set, the implied relation is gt[0].
+
+    if(defined $self->Arg('match'))
+    {
+	if(defined $self->Arg('probcount'))
+	{
+	    my($xrc, $xmsg) = $self->RelationCompare($self->Arg('probcount'),
+						     $matchcnt);
+	    
+	    if($xrc)
+	    {
+		$rc = MODEXEC_PROBLEM;
+		$proberr .= $xmsg.',';
+	    }
+	}
+
+	if(defined $self->Arg('warncount'))
+	{
+	    my($xrc, $xmsg) = $self->RelationCompare($self->Arg('warncount'),
+						     $matchcnt);
+
+	    if($xrc && ($rc != MODEXEC_PROBLEM))
+	    {
+		$rc = MODEXEC_WARNING;
+		$warnerr .= $xmsg.',';
+	    }
+	}
+    }
+    
+    # This should really use the AccResult* routines
+    
+    if($rc != MODEXEC_OK) {
+	# Generate error text
+	    
+	if($proberr ne '') {
+	    chop($proberr);
+
+	    # Only prepend HEADER if more than one is present
+	    if($warnerr ne '') {
+		$err .= "PROBLEM: $proberr;";
+	    } else {
+		$err .= "$proberr;";
+	    }
+	}
+	if($warnerr ne '') {
+	    chop($warnerr);
+
+	    # Only prepend HEADER if more than one is present
+	    if($proberr ne '') {
+		$err .= "WARNING: $warnerr;";
+	    } else {
+		$err .= "$warnerr;";
+	    }
+	}
+
+	chop($err);
+    } else {
+	chop($vals);
+	$err = $vals;
+    }
+	
+    # Not matching any lines is a misconfiguration if no match restriction
+    # was set.
+    
+    if(($lines) == 0) {
+	return(MODEXEC_MISCONFIG, 0, "No lines found matching $oid");
+    } else {
+	return($rc, $found, $err);
+    }
+}
+
+# Arguments: ref. Survivor::Check, value to compare
+sub check_match {
+    my($self,$v) = @_;
+
+    my($rc,$msg);
+
+    # First, see if it is a problem
+    if (defined $self->Arg('probmatch')) {
+	($rc,$msg) = $self->RelationCompare($self->Arg('probmatch'), $v);
+	
+	return(MODEXEC_PROBLEM, $msg) if ($rc);
+    }
+    # Next, see if it is a warning
+    if (defined $self->Arg('warnmatch')) {
+	($rc,$msg) = $self->RelationCompare($self->Arg('warnmatch'), $v);
+
+	return(MODEXEC_WARNING, $msg) if ($rc);
+    }
+
+    return(MODEXEC_OK);
+}

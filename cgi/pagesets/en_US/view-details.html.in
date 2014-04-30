@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=View Details}
+@{INCLUDE header.html}
+
+<!-- view-details.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ @{IF DEFINED FLAG back}
+ &lt;&lt; <A CLASS="navspacer" HREF="@{FLAG back}">Back</A> |
+ @{ENDIF}
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI h= s= vt= file=}">@{ECHO $instance}</A>
+ > View Details
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ @{SET h=@[FLAG h]}
+ @{SET s=@[FLAG s]}
+ @{SET rc=@[CHECKSTATUS type=rc service=$s host=$h]}
+ <TABLE CLASS="infobody">
+ <TR CLASS="infobody">
+ <TH CLASS="infobody" COLSPAN=2>@{ECHO $s}@@{ECHO $h}</TH>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Last Result</TH>
+ @{SET instances=@[CHECKSTATUS type=instances service=$s host=$h]}
+ <TD CLASS="rc@{ECHO $rc}">@{RCTEXT $rc} (
+ @{IF NUMBER $instances = 1}
+ 1 instance
+ @{ELSE}
+ @{ECHO $instances} instances
+ @{ENDIF}
+ )</TD>
+ </TR>
+ 
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Comment</TH>
+ <TD>@{CHECKSTATUS type=comment service=$s host=$h}</TD>
+ </TR>
+ 
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Execution Duration</TH>
+ <TD>
+ @{CHECKSTATUS type=duration service=$s host=$h} ms
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Last Check</TH>
+ <TD>@{CHECKSTATUS type=last service=$s host=$h}</TD>
+ </TR>
+ 
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">First Check (This Result)</TH>
+ <TD>@{CHECKSTATUS type=first service=$s host=$h}</TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Approximate Next Check</TH>
+ <TD>@{CHECKSTATUS type=next service=$s host=$h}</TD>
+ </TR>
+ 
+ @{SET inh=@[ALERTSTATUS type=inhibited service=$s host=$h]}
+ @{IF STRING NOTEMPTY $inh}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Inhibited By</TH>
+  <TD>@{ECHO $inh}: @{ALERTSTATUS type=inhibitedfor service=$s host=$h}</TD>
+  </TR>
+ @{ENDIF}
+
+ @{IF NUMBER $rc > 0}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Last Alert</TH>
+  <TD>@{ALERTSTATUS type=last service=$s host=$h}</TD>
+  </TR>
+
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Last Notified</TH>
+  <TD>@{ALERTSTATUS type=lastnotify service=$s host=$h}</TD>
+  </TR>
+
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Alerts Generated</TH>
+  <TD>@{ALERTSTATUS type=alerts service=$s host=$h}</TD>
+  </TR>
+
+  @{SET ack=@[ALERTSTATUS type=acknowledged service=$s host=$h]}
+  @{IF STRING NOTEMPTY $ack}
+   <TR CLASS="infobody">
+   <TH CLASS="infobody2">Acknowledged By</TH>
+   <TD>@{ECHO $ack}:
+    @{ALERTSTATUS type=acknowledgedfor service=$s host=$h}</TD>
+   </TR>
+  @{ENDIF}
+
+  @{SET mesc=@[ALERTSTATUS type=manualescalated service=$s host=$h]}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Manually Escalated</TH>
+  <TD>
+  @{IF NUMBER $mesc > 0}
+  To @{ECHO $mesc}
+  @{ELSE}
+  No
+  @{ENDIF}
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">First Alert</TH>
+  <TD>@{ALERTSTATUS type=first service=$s host=$h}</TD>
+  </TR>
+ @{ENDIF}
+
+ @{SET fixes=@[FIXSTATUS type=attempts service=$s host=$h]}
+ @{IF NUMBER $fixes > 0}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Last Fix Attempt</TH>
+  <TD>@{FIXSTATUS type=last service=$s host=$h}</TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Attempted By</TH>
+  <TD>@{FIXSTATUS type=who service=$s host=$h}</TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Fix Result</TH>
+  @{SET frc=@[FIXSTATUS type=rc service=$s host=$h]}
+  <TD CLASS="rc@{ECHO $rc}">
+   @{RCTEXT $rc}: @{FIXSTATUS type=comment service=$s host=$h}
+  </TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">Fix Attempts</TH>
+  <TD>@{ECHO $fixes}</TD>
+  </TR>
+  
+  <TR CLASS="infobody">
+  <TH CLASS="infobody2">First Fix Attempt</TH>
+  <TD>@{FIXSTATUS type=first service=$s host=$h}</TD>
+  </TR>
+ @{ENDIF}
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">HostClass</TH>
+ <TD>@{HOSTCLASS $h}</TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Check Schedule</TH>
+ <TD>@{CHECKSCHEDULE service=$s host=$h}</TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">AlertPlan</TH>
+ <TD>@{ALERTPLAN service=$s host=$h}</TD>
+ </TR>
+
+ @{SET rw=@[AUTHLEVEL rw]}
+ @{SET cb=@[AUTHLEVEL clipboard]}
+ @{IF NUMBER $rw = 1}
+ <TR CLASS="infobody">
+ <TD COLSPAN=2>
+ <PRE>
+ @{HELPFILE $s}
+ </PRE>
+ </TD>
+ </TR>
+ 
+ <TR CLASS="infobody">
+ <TD COLSPAN=2>
+ <FORM NAME="detail-action" METHOD="get" ACTION="@{URITOP}">
+ @{URITAGS style=hidden omit=h,s}
+ <INPUT TYPE=hidden NAME=sh VALUE="@{ECHO $s}@@{ECHO $h}">
+ <INPUT TYPE=hidden NAME=ret VALUE="@{URI}">
+ <INPUT TYPE=text NAME=cmt VALUE="(no reason given)" SIZE=40>
+ @{IF STRING EMPTY $ack}
+ <INPUT TYPE=submit NAME=a VALUE=Acknowledge>
+ @{ELSE}
+ <INPUT TYPE=submit NAME=a VALUE=Unacknowledge>
+ @{ENDIF}
+ <INPUT TYPE=submit NAME=a VALUE=Escalate>
+ @{IF STRING EMPTY $inh}
+ <INPUT TYPE=submit NAME=a VALUE=Inhibit>
+ @{ELSE}
+ <INPUT TYPE=submit NAME=a VALUE=Uninhibit>
+ @{ENDIF}
+ <INPUT TYPE=submit NAME=a VALUE=Reschedule>
+ </FORM>
+ @{IF NUMBER $cb = 1}
+ <P>
+ <FORM NAME="detail-action" METHOD="post" ACTION="@{URITOP}">
+ @{URITAGS style=hidden}
+ @{SET csvc=[ $s @ $h ]}
+ @{SET crc=@[RCTEXT $rc]}
+ @{IF NUMBER $instances = 1}
+ @{SET cinsts=(1 instance)}
+ @{ELSE}
+ @{SET cinsts=($instances instances)}
+ @{ENDIF}
+ @{SET ccmt=@[CHECKSTATUS type=comment service=$s host=$h]}
+ @{SET clast=@[CHECKSTATUS type=last service=$s host=$h]}
+ <INPUT TYPE=hidden NAME=cc VALUE="@{ECHO $csvc $crc $cinsts \n Comment: $ccmt \n Last check: $clast}">
+ <INPUT TYPE=submit NAME=ca VALUE="Append To Clipboard">
+ <SELECT NAME="cn" VALUE=0>
+ @{FOREACH c CLIPBOARD}
+ <OPTION>@{ECHO $c}
+ @{ENDEACH} 
+ </SELECT>
+ </FORM>
+ @{ENDIF}
+ </TD>
+ </TR>
+ @{ENDIF}
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+
+@{INCLUDE footer.html}
+</HTML>

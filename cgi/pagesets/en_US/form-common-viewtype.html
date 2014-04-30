@@ -1,0 +1,66 @@
+<!-- Do not include a foreach loop body in an include file as it will be
+     inefficient -->
+   <TR CLASS="infobody">
+   <TH CLASS="infobody" COLSPAN=2>Select A Custom View Type
+   </TH>
+   </TR>
+ 
+   <TR CLASS="infobody">
+   <TD CLASS="rc-1">
+    <INPUT TYPE="radio" NAME="vt" VALUE="summary">
+   </TD>
+   <TD CLASS="infobar">
+    Show summary
+   </TD>
+   </TR>
+   <TR CLASS="infobody">
+   <TD CLASS="rc-1">
+    <INPUT TYPE="radio" NAME="vt" VALUE="grid">
+   </TD>
+   <TD CLASS="infobar">
+    Show grid
+   </TD>
+   </TR>
+   <TR CLASS="infobody">
+   <TD CLASS="rc-1">
+    <INPUT TYPE="checkbox" NAME="sort" VALUE="ASCIN" @{IF DEFINED STRING sort}CHECKED@{ENDIF}>
+   </TD>
+   <TD CLASS="infobar">
+    Sort alphabetically
+   </TD>
+   </TR>
+   <TR CLASS="infobody">
+   <TD CLASS="infobar" COLSPAN=2>
+    <INPUT TYPE="submit" VALUE="Submit">
+   </TD>
+   </TR>
+
+   @{SET rw=@[AUTHLEVEL rw]}
+   @{IF NUMBER $rw = 1}
+   <TR CLASS="infobody">
+   <TH CLASS="infobody" COLSPAN=2>Or Select An Action
+   </TH>
+   </TR>
+   
+   <TR CLASS="infobody">
+   <TD CLASS="infobar" COLSPAN=2>
+    <SELECT NAME="a">
+    <OPTION>None
+    <OPTION>Acknowledge
+    <OPTION>Unacknowledge
+    <OPTION>Escalate
+    <OPTION>Inhibit
+    <OPTION>Uninhibit
+    <OPTION>Reschedule
+    </SELECT>
+    <BR>
+    <INPUT TYPE=text NAME=cmt VALUE="(no reason given)" SIZE=25>
+    <INPUT TYPE=hidden NAME=ret VALUE="@{URI}">
+   </TD>
+   </TR>
+   <TR CLASS="infobody">
+   <TD CLASS="infobar" COLSPAN=2>
+    <INPUT TYPE="submit" VALUE="Submit">
+   </TD>
+   </TR>
+   @{ENDIF}

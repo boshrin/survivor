@@ -1,0 +1,1045 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Building and Installing</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Building and Installing</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#prerequisites">Prerequisites</A>
+  <UL>
+  <LI><A HREF="#platforms">Scheduler Platforms</A>
+  <LI><A HREF="#gcc">GCC</A>
+  <LI><A HREF="#perl">Perl</A>
+  <LI><A HREF="#dns">DNS</A>
+  <LI><A HREF="#diskio">Disk I/O</A>
+  <LI><A HREF="#modules">Module Dependencies</A>
+  </UL>
+ <LI><A HREF="#building">Building</A>
+ <LI><A HREF="#installing">Installing</A>
+ </UL>
+
+ <P>
+
+ <A ID="prerequisites"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Prerequisites
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="platforms"></A>
+ <H3>Scheduler Platforms</H3>
+
+ The <A HREF="ss.html">survivor scheduler</A> requires a platform that
+ implements POSIX threads.  (However, any type of platform can be monitored by
+ the scheduler.)  The scheduler is known to build on the following
+ platforms:
+
+ <UL>
+ <LI>AIX 5.3 (powerpc)
+ <LI>GNU/Linux 2.4.9 (RedHat 7.2, i686)
+ <LI>GNU/Linux 2.4.18 (Debian 3.0/woody, powerpc)
+ <LI>GNU/Linux 2.6.9 (RedHat ES4, i686)
+ <LI>Solaris 7 (sparc)<BR>
+     (<I>This version of Solaris may encounter problems with debugging
+     information.  See <A HREF="problems.html">Known Problems</A> for
+     more information.</I>)
+ <LI>Solaris 8 (sparc)<BR>
+     (<I>In order to run under Solaris 8, one or more patches to the
+     operating system are required.  Additionally, this version of
+     Solaris may encounter problems with debugging information.
+     See <A HREF="problems.html">Known Problems</A> for more information.</I>)
+ <LI>Solaris 9 (sparc)<BR>
+     (<I>Later versions of Solaris have better threading implementations.
+     For this reason, Solaris 9 is the recommended Solaris platform,
+     especially for large deployments.</I>)
+ </UL>
+
+ It should be easy to <A HREF="porting.html">port</A> the scheduler to other
+ modern platforms.  However, the scheduler is known <I>not</I> to build
+ on these platforms:
+
+ <UL>
+ <LI>Darwin 6.x,7.x,8.x/MacOS 10.2.x,10.3.x,10.4.x<BR>
+     (<I><TT>sem_init</TT> is not implemented.</I>)
+ <LI>Darwin 5.x/MacOS X 10.1.5 and earlier<BR>
+     (<I>POSIX thread function <TT>pthread_kill</TT> is missing.</I>)
+ <LI>NetBSD<BR>
+     (<I>Pth does not support semaphores.</I>)
+ <LI>Solaris 2.5.1 and earlier<BR>
+     (<I>POSIX thread reader/writer locks are missing.</I>)
+ </UL>
+
+ <P>
+
+ <A ID="gcc"></A>
+ <H3>GCC</H3>
+
+ If compiling with GCC, versions prior to 2.95, including 2.7.2, are
+ known not to work.  An indicative error is reported while building
+ <TT>libcm/cmutils.C</TT>, regarding lvalue assignment.  Versions
+ 2.95.2 and later versions of 2.x are known to work.  Version 3.x and
+ later should work (versions 3.3 and 4.1.1 have been successfully
+ tested).
+
+ <P>
+
+ Additionally, GCC (confirmed in v2.95.2) should not be used to build
+ <TT>-g -O2</TT>.  This will not happen by default.
+
+ <P>
+
+ <A ID="perl"></A>
+ <H3>Perl</H3>
+
+ Perl version 5.005 or greater is required for the scheduler host, and
+ 5.004 or greater is recommended on any <A HREF="sr.html">remote</A> host.
+
+ <P>
+
+ For sites with large numbers of hosts and services, it is recommended
+ to build a multi-threaded version of Perl (using ithreads, not
+ 5005threads) in order for the Perl based checks to run more
+ efficiently.  The multi-threaded Perl is only required on the
+ scheduler host, and must be version 5.8.0 or greater.
+
+ <P>
+
+ <A ID="dns"></A>
+ <H3>DNS</H3>
+
+ Sites with large numbers of hosts and services should pay careful
+ attention to the efficiency of their name resolution setup.  It may
+ be desirable to place a name server process on the same host as the
+ scheduler, or to enable hostname caching in <TT>nscd</TT> (on Solaris
+ and Linux), or to otherwise ensure the fast resolution of names.
+
+ <P>
+
+ <A ID="diskio"></A>
+ <H3>Disk I/O</H3>
+
+ Sites with large numbers of hosts and services should consider disk
+ I/O issues.  The scheduler performs significant amounts of disk
+ operations, primarily write operations.  Two approaches can be used
+ to increase the concurrency of write operations, both require the
+ availability of multiple disks, and both are related to the <A
+ HREF="cf-instance.html">instance configuration file</A>.
+
+ <P>
+
+ <OL>
+ <LI>Form the multiple disks into a RAID, and configure the state and
+     history directories to be located on the RAID.  Depending on the
+     hardware and software of the RAID, it will most likely be RAID 0
+     (stripe), which increases write concurrency but decreases
+     reliability by having additional points of failure.
+     <P>
+     
+ <LI>Establish multiple scheduler instances, and store the data for
+     each instance on a different disk.
+ </OL>
+
+ <P>
+
+ <A ID="modules"></A>
+ <H3>Module Dependencies</H3>
+
+ Some modules require additional pieces to run.  These pieces may or
+ may not be installed by default by the host operating system, and may
+ already be installed to support the service being checked.
+
+ <P>
+
+ <I>Perl Module Dependencies</I> can generally be downloaded from <A
+ HREF="http://www.cpan.org">http://www.cpan.org</A>.  For scheduler
+ check modules and transmit modules, the dependency perl module need
+ only be installed on the scheduler host.  For remote check modules,
+ the dependency perl module must be installed on each host being
+ checked.  See <A HREF="cm-about.html">About Check Modules</A> for a
+ description of scheduler vs. remote check modules.
+
+ <P>
+
+ To facilitate the installation of the more general perl modules,
+ copy the bundle file from <TT>src/modules/Bundle/Survivor.pm</TT>
+ to <TT>~/.cpan/Bundle/Survivor.pm</TT>.  Then, start the CPAN shell
+ and install the bundle.
+
+ <PRE>
+ $ perl -MCPAN -e shell
+ cpan> install Bundle::Survivor
+ </PRE>
+
+ <I>Executable Module Dependencies</I> must be found in the default
+ module <TT>$PATH</TT>, which is defined in
+ <TT>INSTDIR/mod/common/Survivor.pm</TT>.  For scheduler check modules
+ and transmit modules, the dependency executable need only be installed
+ on the scheduler host.  For remote check modules, the dependency
+ executable must be installed on each host being checked.  See <A
+ HREF="cm-about.html">About Check Modules</A> for a description of
+ scheduler vs. remote check modules.
+
+ <P>
+
+ <CENTER>
+ <TABLE WIDTH=70%>
+
+ <!-- When adding a new dependency, include a link to download it -->
+
+ <TR>
+ <TH CLASS="default">Check Module</TH>
+ <TH CLASS="default">Perl Module Dependencies</TH>
+ <TH CLASS="default">Executable Module Dependencies</TH>
+ </TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-conserver.html">conserver</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.conserver.com"><TT>console</TT></A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-cyrusstuckmailbox.html">cyrusstuckmailbox</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://asg.web.cmu.edu/cyrus/imapd"><TT>ctl_mboxlist</TT></A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-cyrussync.html">cyrussync</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-SSH-Perl"><TT>Net::SSH::Perl</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://asg.web.cmu.edu/cyrus/imapd/">cyr_quota</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-database.html">database</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=DBI"><TT>DBI</TT></A>
+   <LI>For DB2: <A HREF="http://search.cpan.org/search?dist=DBD-DB2"><TT>DBD::DB2</TT></A>
+   <LI>For Ingres: <A HREF="http://search.cpan.org/search?dist=DBD-Ingres"><TT>DBD::Ingres</TT></A>
+   <LI>For mSQL: <A HREF="http://search.cpan.org/search?mode=module&amp;query=DBD%3A%3Amsql"><TT>DBD::msql</TT></A>
+   <LI>For MySQL: <A HREF="http://search.cpan.org/search?dist=DBD-mysql"><TT>DBD::mysql</TT></A>
+   <LI>For Oracle: <A HREF="http://search.cpan.org/search?dist=DBD-Oracle"><TT>DBD::Oracle</TT></A>
+   <LI>For Postgres: <A HREF="http://search.cpan.org/search?dist=DBD-Pg"><TT>DBD::Pg</TT></A>
+   <LI>For Sybase: <A HREF="http://search.cpan.org/search?dist=DBD-Sybase"><TT>DBD::Sybase</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-daytime.html">daytime</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libnet"><TT>Net::Time</TT></A> (>=2.10)
+   <LI><A HREF="http://search.cpan.org/search?dist=Time-modules"><TT>Time::ParseDate</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-dblocks.html">dblocks</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=DBI"><TT>DBI</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-dhcp.html">dhcp</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.mavetju.org/download">dhcping</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-filetest.html">filetest</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=perl"><TT>File::stat</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-flexlm.html">flexlm</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.flexlm.com">lmstat</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ftpd.html">ftpd</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libnet"><TT>Net::FTP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-hplj.html">hplj</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-httpurl.html">httpurl</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>HTTP::Request::Common</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>LWP::UserAgent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=URI"><TT>URI</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-imap.html">imap</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClient</TT></A> Version 2.2.7 is known to work.
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-krb5.html">krb5</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://web.mit.edu/kerberos/www">kinit <I>and</I> kdestroy</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ldap.html">ldap</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=perl-ldap"><TT>Net::LDAP</TT></A> See <A HREF="problems.html">known problems</A> for issues related to
+    this module
+   <LI>For monitoring LDAPS hosts, <A
+    HREF="http://search.cpan.org/search?dist=IO-Socket-SSL">
+    <TT>IO::Socket::SSL</TT></A> is required
+   <LI>For LDAPS hosts that do not support <I>starttls</I>, <A
+    HREF="http://search.cpan.org/search?dist=perl-ldap"><TT>Net::LDAPS</TT></A>
+    is also required.   
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-load.html">load</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI>Linux distributions lacking the <TT>rup</TT> command may need to
+    install the <TT>rup</TT> (or <TT>rstat-client</TT>) package.  Failing
+    that, this module may still be used as a remote module.
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-mailbe.html">mailbe</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=MailTools"><TT>Mail::Send</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-mailboxcreate.html">mailboxcreate</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClent</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-mailfe.html">mailfe</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=MailTools"><TT>Mail::Send</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-mon.html">mon</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mon"><TT>Mon::Client</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-monfail.html">monfail</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mon"><TT>Mon::Client</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-nadisk.html">nadisk</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-named.html">named</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-DNS"><TT>Net::DNS</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-namedSerial.html">namedSerial</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-DNS"><TT>Net::DNS</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ntpc.html">ntpc</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.ntp.org">ntpq</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ph.html">ph</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-PH"><TT>Net::PH</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ping.html">ping</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.fping.com">fping</A> is required for full
+    functionality
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-radius.html">radius</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.radius.cistron.nl">radtest</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-raidbox.html">raidbox</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-rtsp.html">rtsp</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=URI"><TT>URI</TT></A>(>=1.20)
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-sasl.html">sasl</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://asg.web.cmu.edu/sasl/"><TT>testsaslauthd</TT></A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-smbd.html">smbd</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.samba.org/">smbclient</A>
+   </UL>
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-snmp.html">snmp</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-storedge.html">storedge</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-telnet.html">telnet</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-Telnet"><TT>Net::Telnet</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-tftpd.html">tftpd</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-TFTP"><TT>Net::TFTP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-time.html">time</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libnet"><TT>Net::Time</TT></A>(>=2.10)
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-tty.html">tty</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=perl"><TT>POSIX</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-ups.html">ups</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+<TR>
+<TH CLASS="default"><A HREF="cm-wins.html">wins</A></TH>
+<TD CLASS="default">
+-
+</TD>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://www.samba.org/">nmblookup</A>
+   </UL>
+</TD>
+</TR>
+
+
+ <TR>
+ <TH CLASS="default">Transmit Module</TH>
+ <TH CLASS="default">Perl Module Dependencies</TH>
+ <TH CLASS="default">Executable Module Dependencies</TH>
+ </TR>
+
+<TR>
+<TH CLASS="default"><A HREF="tmm-mail.html">mail</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=MailTools"><TT>Mail::Mailer</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+
+ <TR>
+ <TH CLASS="default">WebAuth Module</TH>
+ <TH CLASS="default">Perl Module Dependencies</TH>
+ <TH CLASS="default">Executable Module Dependencies</TH>
+ </TR>
+
+<TR>
+<TH CLASS="default"><A HREF="wam-wind.html">wind</A></TH>
+<TD CLASS="default">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>HTTP::Request::Common</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>LWP::UserAgent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=URI"><TT>URI</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=URI"><TT>URI::Escape</TT></A>
+   </UL>
+</TD>
+<TD CLASS="default">
+-
+</TD>
+</TR>
+
+
+ </TABLE>
+ </CENTER>
+
+ <P>
+
+ Modules not listed above should run out of the box.  However, it is still
+ important to read each module's documentation to properly configure it
+ to check as desired.
+
+ <P>
+
+ <A ID="building"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Building
+ </TD>
+ </TR>
+ </TABLE>
+
+ <OL>
+ <LI>First, determine the user and group that the package will be
+     installed as.  The default user is <TT>survivor</TT>.  By default,
+     the selected user will own the files that the package generates.
+     No special system level services are required, so privileged
+     users such as root should not be used.
+     <P>
+
+     The default group is <TT>staff</TT>.  Only users in the selected
+     group will be able to run the command line interface.  Note that
+     any member of the selected group will have permission to edit
+     the history files.  If this is not desirable, then access to the
+     system should not be provided via that command line interface
+     (and those users should not be able to login to the scheduler host).
+     This may be corrected in a future release.
+     <P>
+
+     <B>Important</B>: The selected user must be a member of the
+     selected group in order to properly set group ownership of
+     files and directories.
+     <P>
+
+ <LI>Select an installation directory.  By default, the package will
+     install in <TT>/usr/local</TT>, but for ease of maintenance it
+     may be desirable to use a name like <TT>/opt/survivor</TT> or
+     <TT>/usr/local/survivor</TT>.  Various subdirectories will be
+     created (if they don't already exist) under the selected
+     directory.
+     <P>
+
+ <LI>Run <TT>configure</TT>.  By default, <TT>configure</TT> will
+     attempt to build with OpenSSL.  If OpenSSL is unavailable, or
+     not in one of the compiler's default include directory, it may
+     be necessary to tell <TT>configure</TT>.  If building with SSL
+     results in errors about <TT>openssl/des.h</TT> declarations,
+     try adding <TT>-DNO_DES</TT> to <TT>$CXXFLAGS</TT> before
+     invoking <TT>configure</TT>.
+     <P>
+
+     A working version of <TT>g++</TT> is required, other compilers
+     may work.  (Sun Workshop CC v6 did not previously test successfully.)
+     A working version of <TT>lex</TT> is also required.  <TT>flex</TT>
+     and Solaris <TT>/usr/ccs/bin/lex</TT> are both known to work.
+     <P>
+
+     On AIX, it may be necessary to configure <TT>--enable-shared=no</TT>
+     in order to avoid errors about <TT>Cannot load program</TT> and
+     <TT>Cannot load module libparsexml.a(libexpat.so.0)</TT> when
+     starting the scheduler.
+     <P>
+
+     On AIX, it is recommended that GNU tools such as <TT>make</TT>,
+     <TT>install</TT>, and <TT>flex</TT> be used.
+     <P>
+
+     An example using the default user and group but with OpenSSL
+     in a non-default location:
+
+     <PRE>
+     % ./configure --with-openssl=/opt/openssl
+     </PRE>
+
+     Using a separate build directory, a custom installation directory,
+     and a different username:
+
+     <PRE>
+     % mkdir obj
+     % cd obj
+     % ../configure --prefix=/opt/survivor --enable-user=monitor
+     </PRE>
+
+     <CENTER>
+     <TABLE WIDTH=90%>
+     <TR>
+       <TH CLASS="default">Configure Option</TH>
+       <TH CLASS="default">Default</TH>
+       <TH CLASS="default">Description</TH>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-debug</TT>
+       </TD>
+       <TD CLASS="default">
+	 yes
+       </TD>
+       <TD CLASS="default">
+	 Compile in debugging.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-group=<I>x</I></TT>
+       </TD>
+       <TD CLASS="default">
+	 staff
+       </TD>
+       <TD CLASS="default">
+	 Set the group that the package will be installed as to <I>x</I>.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-module-serialization</TT>
+       </TD>
+       <TD CLASS="default">
+	 yes
+       </TD>
+       <TD CLASS="default">
+	 Force module to start one at a time to avoid a race condition.
+	 (If disabled, an alternate workaround is implemented.)
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-remote-only</TT>
+       </TD>
+       <TD CLASS="default">
+	 no
+       </TD>
+       <TD CLASS="default">
+	 If set, configure a build suitable only for remote
+	 installation.  (No compiled programs will be built.)  This is
+	 suitable for working with the <A HREF="sr.html">remote
+	 gateway</A>.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-shared</TT>
+       </TD>
+       <TD CLASS="default">
+	 yes
+       </TD>
+       <TD CLASS="default">
+	 If set, build subcomponents (eg: libexpat) using shared
+	 libraries.  On some platforms (AIX), it may be necessary to
+	 disable shared libraries.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--enable-user=<I>x</I></TT>
+       </TD>
+       <TD CLASS="default">
+	 survivor
+       </TD>
+       <TD CLASS="default">
+	 Set the user that the package will be installed as to <I>x</I>.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--prefix=<I>x</I></TT>
+       </TD>
+       <TD CLASS="default">
+	 <TT>/usr/local</TT>
+       </TD>
+       <TD CLASS="default">
+	 Set installation location to <I>x</I>.
+	 If set, configure a build suitable only for remote
+	 installation.  (No compiled programs will be built.)  This is
+	 suitable for working with the <A HREF="sr.html">remote
+	 gateway</A>.
+       </TD>
+     </TR>
+
+     <TR>
+       <TD CLASS="default">
+	 <TT>--with-openssl[=<I>x</I>]</TT>
+       </TD>
+       <TD CLASS="default">
+	 Yes, found in <TT>$PATH</TT>
+       </TD>
+       <TD CLASS="default">
+	 Build with OpenSSL, for components that use SSL.  If set, <I>x</I>
+	 indicates where to find the OpenSSL installation.
+       </TD>
+     </TR>
+     </TABLE>
+     </CENTER>
+
+     <P>
+     
+ <LI>After <TT>configure</TT> runs successfully, type <TT>make</TT>.
+     <P>
+ </OL>
+
+ <A ID="installing"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installing
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <OL>
+ <LI>In the top level directory, as <I>root</I>, type <TT>make
+     install</TT>.  The following will be installed:
+
+     <UL>
+     <LI><TT>INSTDIR/sbin/ss</TT>: The survivor scheduler.
+     <LI><TT>INSTDIR/sbin/sg</TT>: The survivor mail gateway.
+     <LI><TT>INSTDIR/sbin/sr</TT>: The survivor remote daemon, used by
+         <A HREF="tm-about.html">transport modules</A> for certain
+	 types of monitoring.
+     <LI><TT>INSTDIR/sbin/sw</TT>: The survivor CGI (web) interface.
+     <LI><TT>INSTDIR/bin/sc</TT>: The survivor command line interface.
+     <LI><TT>INSTDIR/mod</TT>: Various modules distributed with the package.
+     </UL>
+
+     <P>
+        
+     SURVIVOR does not depend on the names of the executables.
+     If desired, they may be renamed.
+
+     <P>
+
+     <TT>sg</TT> and <TT>sw</TT> are installed setgid
+     <TT>$INSTGROUP</TT> by default.  This is because they are usually
+     run by other unprivileged users (such as <TT>www</TT> or
+     <TT>sendmail</TT>).  If these users are members of
+     <TT>$INSTGROUP</TT>, or if these interfaces will not be used, the
+     setgid bit may be removed.
+
+     <P>
+
+ <LI>By default, the high performance <A HREF="cm-pingx.html">pingx</A>
+     module is not installed because it must be installed setuid root.
+     Instructions for installing the module are included in the module's
+     documentation.
+
+     <P>
+
+ <LI>It may be advisable to install the <A HREF="util-watcher.html">watcher</A>
+     utility.
+
+     <P>
+
+ <LI>Some types of checks must be executed directly on the server
+     being monitored, as explained in
+     the <A HREF="tm-about.html">transport module</A> documentation.
+     The documentation for the <A HREF="sr.html">remote gateway</A>
+     discusses installation and configuration.
+     <P>
+       
+ </OL>
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 02:58:18 $</I><BR>
+<I>$Revision: 0.56 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

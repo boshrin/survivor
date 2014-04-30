@@ -1,0 +1,24 @@
+# Sample cgi.cf file.  This file is expected to be in /etc/survivor/cgi.cf
+
+# Authenticate connections only from somedomain.org.
+authmodule ip {
+    validhost reg[somedomain\.org$]
+}
+
+# Authorize admin access from workstation.somedomain.org and
+# write access from all others.
+
+authorization {
+    user workstation\.somedomain\.org admin
+    user .*\.somedomain\.org rw
+}
+
+# Location where state information is written.
+# This directory must exist before sw can use it.
+statedir /survivor/cgi/state
+
+# Default clipboard contact information, so it doesn't have to be reentered.
+clipemail operators@somedomain.org
+clipphone 213-555-1212
+
+

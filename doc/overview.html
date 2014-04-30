@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HEAD>
+<TITLE>survivor: overview</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Overview</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#overview">Overview</A>
+ </UL>
+
+ <A ID="overview"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Overview
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Unix Systems Group of Columbia University Information Technology
+ responsible for around 200 hosts, ranging from desktop workstations to
+ file servers for 60,000 users.  The monitoring system used to monitor
+ these systems was designed at a time when there were closer to 10
+ hosts, and it became clear that a replacement was needed.
+
+ <P>
+
+ A search began for a replacement product, but none met the exact
+ requirements, which included the following:
+
+ <UL>
+ <LI>Reliable
+ <LI>Easy to use
+ <LI>Easy to maintain
+ <LI>Scalable
+ <LI>Modular
+ <LI>State that appropriately survives reconfiguration
+ <LI>Time aware
+ <LI>Check and alert behaviors defined by hosts and/or services
+ <LI>Logical groupings of hosts
+ <LI>Acknowledgements
+ <LI>Escalations
+ <LI>History records for long term status monitoring
+ <LI>Dependencies
+ <LI>Call list maintenance
+ <LI>Local vs remote checking
+ <LI>Configurable levels of failure
+ <LI>Enabling/disabling of services, hosts, or service@host pairs
+ <LI>Configuration files that are easy to read and edit
+ <LI>Error checking that provides useful information rather than
+     bizarre behavior
+ </UL>
+
+ And so the survivor project was established.
+
+ <P>
+
+ The central portion of the package is the survivor <A
+ HREF="ss.html">scheduler</A> (<TT>ss</TT>).  It is a multi-threaded
+ daemon that handles the scheduling and execution of checks and
+ alerts.  The scheduler runs an
+ <I>instance</I>, which is a set of configuration files, state, and
+ history.  Multiple instances can be created for multiple
+ configurations, with each instance run via a separate scheduler.
+
+ <P>
+
+ The scheduler executes checks and alerts in accordance with its
+ configuration files.  Checks and alerts are implemented by modules
+ which may be written in any language so long as they conform with the
+ appropriate specifications.  The results from these checks and alerts
+ are stored in state and history files.
+
+ <P>
+
+ Checks, by default, execute on the host where the scheduler runs.
+ This is sufficient to cover many cases, such as checking services like
+ HTTP, SMTP, IMAP, etc.  The survivor <A HREF="sr.html">remote daemon</A>
+ (<TT>sr</TT>) is provided to facilitate performing checks that must be
+ performed on individual hosts.
+
+ <P>
+
+ The state may be viewed and manipulated by other programs, including
+ the <A HREF="sc.html">command line interface</A> (<TT>sc</TT>), the
+ <A HREF="sw.html">web interface</A> (<TT>sw</TT>), and the <A
+ HREF="sg.html">mail gateway</A> (<TT>sg</TT>).
+
+<HR>
+<I>$Date: 2006/11/19 02:54:58 $</I><BR>
+<I>$Revision: 0.6 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

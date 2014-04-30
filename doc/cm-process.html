@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Process Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>process</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>process</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>process</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module process {</B>
+       [<B>warn</B> &lt;relation>]
+       [<B>prob</B> &lt;relation>]
+       <B>name</B> &lt;string>
+       [<B>name</B> ...]
+       [<B>matchtype</B> &lt;flags>]
+       [<B>userid</B> &lt;string>]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional relation, reg/regv not allowed</TD>
+ <TD CLASS=kwdef>
+   Generate a warning if the specified relation matches the number of
+   processes found.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob"></A><B>prob</B></TD>
+ <TD CLASS=kwref>optional relation, reg/regv not allowed</TD>
+ <TD CLASS=kwdef>
+   Generate a problem if the specified relation matches the number of
+   processes found.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-name"></A><B>name</B></TD>
+ <TD CLASS=kwref>required string list</TD>
+ <TD CLASS=kwdef>
+   The regular expression used to match the process.  If more than
+   one is provided, each must match.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchtype"></A><B>matchtype</B></TD>
+ <TD CLASS=kwref>optional flags <TT>a</TT>,<TT>i</TT></TD>
+ <TD CLASS=kwdef>
+   If not provided, only the name of the program (argv[0]) is examined
+   to compare against the <I>name</I> filter.
+   <UL>
+   <LI><TT>a</TT> indicates to examine the name of the program plus all
+       of the arguments.
+   <LI><TT>i</TT> indicates the program is run through an interpreter,
+       and so the name of the program begins with the second token.
+   </UL>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword><A ID="kw-userid"></A><B>userid</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Match only those processes owned by this user.  If the userid is
+   specified as a numeric uid rather than a username, this module may
+   run significantly faster on hosts with slow name service backends.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ If neither <I>warn</I> nor <I>prob</I> are provided, matching no
+ processes will result in a problem while matching one or more processes
+ will return OK.
+
+ <P>
+   
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>process</TT> module determines if zero or more processes are
+ running matching the provided regular expressions, optionally only
+ examining those with the provided <I>userid</I>.  For SYSV
+ environments, For SYSV environments, <TT>ps -e -o
+ user,uid,pid,time,args</TT> is used, for BSD environments, <TT>ps -a
+ -o user,uid,pid,time,command</TT> is used if it can be determined
+ that such options are supported, otherwise <TT>ps -aux</TT> is used.
+
+ <P>
+
+ The <I>matchtype</I> argument can be used to adjust how matching
+ occurs.  By default, only the name of the program is matched.
+ However, in some cases (<TT>a</TT>), the full argument string (as
+ obtained via <TT>ps</TT>) is necessary for comparison.  In other
+ cases (<TT>i</TT>), programs are run through an interpreter (eg:
+ <TT>/usr/bin/perl</TT> or <TT>java</TT>), and the program name is
+ actually an argument to the interpreter running it.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To verify that at least one process matching <TT>.*named</TT> owned
+     by root is running (the <A HREF=cm-named.html><TT>named</TT></A> and
+     <A HREF=cm-namedSerial.html><TT>namedSerial</TT></A> modules can be
+     used to verify that named is responding):
+     <PRE>
+     module process {
+       userid   root
+       name     .*named
+     }
+     via remote
+     </PRE>
+
+ <LI>To verify that between 5 and 25 processes matching <TT>.*httpd</TT>
+     owned by the www user are running (the
+     <A HREF=cm-protocol.html><TT>protocol</TT></A> module can be used to
+     verify that httpd is responding):
+     <PRE>
+     module process {
+       userid  www
+       name    .*httpd
+       prob    nb[5,25]
+     }
+     via remote
+     </PRE>
+
+ <LI>To verify both regular and secure web servers are running, generating
+     a warning if less than 25 are found and a problem if none are found:
+     <PRE>
+     module process {
+       userid  www
+       name    .*httpd
+       name    .*httpsd
+       warn    lt[25]
+       prob    lt[1]
+     }
+     via remote
+     </PRE>
+
+ <LI>To look for a java process called <TT>javaApp</TT>:
+     <PRE>
+     module process {
+       name       reg[.*javaApp]
+       matchtype  i
+     }
+     via remote
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 21:16:27 $</I><BR>
+ <I>$Revision: 0.12 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-matchtype">matchtype</A><BR>
+ <A CLASS="keywords" HREF="#kw-name">name</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-userid">userid</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

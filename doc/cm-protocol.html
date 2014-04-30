@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Protocol Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>protocol</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>protocol</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  <LI><A HREF="#bugs">Design Errors</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>protocol</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module protocol {</B>
+       [<B>port</B> &lt;number>]
+       [<B>service</B> &lt;string>]
+       [<B>response</B> &lt;relation>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-port"></A><B>port</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Port number to connect to.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-service"></A><B>service</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Service to check, used to specify a port and also
+   to specify a predefined protocol, if appropriate.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-response"></A><B>response</B></TD>
+ <TD CLASS=kwref>optional reg[s] relation</TD>
+ <TD CLASS=kwdef>
+   Regular expression to expect as an answer.
+ </TD>
+ </TR>
+</TABLE>
+
+ <P>
+   
+ One of <I>port</I> or <I>service</I> must be specified.
+
+ <P>
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>protocol</TT> module connects to a service listening on a
+ port and attempts a text-based conversation with it using a
+ pre-compiled conversational protocol, a runtime limited protocol, or
+ a simple connection to see if any server is answering.  SSL is
+ supported if configured at compile time.
+
+ <P>
+
+ <I>Pre-compiled</I> protocols can be <I>conversational</I>, meaning they
+ may have more than one query/response sequence.  Support for http,
+ https, imap, imaps, pop3, pop3s, nntp, nntps/snews, smtp, and smtps
+ is included.  Additional protocols can be easily added.  To use a
+ pre-compiled protocol, simply use either the name of the protocol or
+ its port number (as defined in <TT>/etc/services</TT> or retrievable by
+ <TT>getservbyname/getservbyport</TT>) as the argument to the module.
+
+ <P>
+
+ <I>No-response</I> protocols do not expect a response.  These are useful to
+ only verify that a port is responding (listening for connections)
+ without trying to exchange any messages with that port.  To use a
+ no-response protocol, simply use either the name of the protocol (as
+ defined in <TT>/etc/services</TT> or retrievable by
+ <TT>getservbyname</TT>) or its port number as the argument to the
+ module.
+
+ <P>
+
+ <I>Limited response</I> protocols can also be specified in the argument.
+ A port number (which need not be defined in <TT>/etc/services</TT>
+ and need not be retrievable by <TT>getservbyname/getservbyport</TT>)
+ or service name (which does need to be suitably defined) must be
+ provided, followed by a regular expression that is compared against
+ the response received.  Sending a string is not supported.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To use the pre-compiled https protocol:
+     <PRE>
+     module protocol {
+       service https
+     }
+     </PRE>
+
+ <LI>To use the pre-compiled smtp protocol:
+     <PRE>
+     module protocol {
+       service smtp
+     }
+     </PRE>
+
+ <LI>To use a no-response protocol to test big brother:
+     <PRE>
+     module protocol {
+       service bb4
+     }
+     </PRE>
+
+ <LI>To use a limited response protocol to test ssh:
+     <PRE>
+     module protocol {
+       port     22
+       response reg[SSH.*]
+     }
+     </PRE>
+ </OL>
+
+ <A ID="bugs"></A>
+ <H3>Design Errors</H3>
+
+ The test file retrieved for <TT>http</TT> and <TT>https</TT> is
+ defined at compile time in <TT>Makefile.inc</TT>.  For more
+ customizable monitoring of web servers, see
+ the <A HREF=cm-httpurl.html><TT>httpurl</TT></A> module.
+ 
+ <HR>
+ <I>$Date: 2006/11/19 21:18:45 $</I><BR>
+ <I>$Revision: 0.13 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-port">port</A><BR>
+ <A CLASS="keywords" HREF="#kw-response">response</A><BR>
+ <A CLASS="keywords" HREF="#kw-service">service</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,130 @@
+# Sample check.cf file
+
+# A default timeout of 45 seconds applies to all checks.  This can be
+# changed at any point in the file, the new default value will apply until
+# changed again or until the end of the file.  The default value can
+# also be overridden individually within each module.
+# In this example, the default timeout is set to 90 seconds.
+
+default timeout 90 seconds
+
+# In order for a check to run, the name of the check must match the
+# name of a host group (defined in host.cf).  If there is a check
+# named 'load' and a host group 'load', then the check 'load' will be
+# executed against the hosts in the group 'load'.  In this example,
+# the load check is defined to use the load module to check that each
+# host does not have an excessively high load.  (In general, the
+# arguments that should be provided to each module are specified in
+# the documentation for that module.)
+
+check load {
+  module load {
+    warn 20
+    prob 30
+  }
+}
+
+# Ordinarily, a check will execute according to the check schedule
+# and alertplans defined for the hosts being checked.  In the previous
+# example, all the hosts would check on the critical schedule, but
+# only the hosts 'kerberos' and 'sqlserver' would alert using the
+# critical alertplan.  The others would alert using the replicated
+# alertplan.  (Review the sample host.cf file to see why this is.)
+# If it were desirable to have load alert via the critical alertplan
+# for all the hosts being checked for load, an alertplan can be
+# specified for the check as follows:
+#
+# check load {
+#   module load {
+#     warn 20
+#     prob 30
+#   }
+#   alert on critical alertplan
+# }
+#
+# It is possible to override the check schedule in the same manner.
+
+# In the next example, the protocol check module is used to check
+# that the http servers are responding to http requests.  In
+# addition, if an alert is generated, the contents of the file 'web'
+# (as found in the helpdir specified in instance.cf) will be sent
+# with the contents of the alert.
+
+check http {
+  module protocol {
+    service http
+  }
+
+  helpfile web
+}
+
+# For some configurations, it makes sense to run a given check on
+# every host specified in that configuration.  Rather than have to
+# include every host in a group definition for every such check,
+# it is possible to specify that a check run on every defined host.
+# In that case, there need not be a matching host group definition.
+# In the next example, the ping module is used to make sure every
+# host is up.  Each host will be checked (and alerts transmitted)
+# according to the default schedules in the host's hostclass.
+
+check ping {
+  module ping {}
+
+  check all hosts
+}
+
+# Some check modules must be run directly on the host being checked
+# rather than via probe-like means.  These checks are configured to
+# run via a transport module.  The remote gateway (sr) must be set up
+# on each machine to be checked.  Instructions for doing so can be
+# found in the documentation.  In the following example, the plaintext
+# transport module is used to execute the process check module to make
+# sure that a root-owned sendmail process is running on each host.
+
+transport remote {
+  module plaintext {}
+}
+
+check sendmail {
+  module process {
+    user root
+    name .*sendmail
+  }
+  via remote
+
+  check on standard schedule
+  alert on noncritical alertplan
+  
+  check all hosts
+  helpfile sendmail
+}
+
+# A fix module can be used to automatically attempt to correct a
+# problem.  Like check modules, they can (and generally should)
+# be executed by transport modules.  Here, we define a fix to
+# restart sendmail using the init.d fix module.
+
+fix restart-sendmail {
+  module init.d {
+    service sendmail
+  }
+  via remote
+}
+
+# Fix modules then get attached to check module.  The previous
+# sendmail example would become this:
+#
+# check sendmail {
+#   module process {
+#     user root
+#     name .*sendmail
+#   }
+#   via remote
+#
+#   check on standard schedule
+#   alert on simplefix alertplan
+#   fix with restart-sendmail
+#
+#   check all hosts
+#   helpfile sendmail
+# }

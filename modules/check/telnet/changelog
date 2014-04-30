@@ -1,0 +1,11 @@
+----------------------------
+revision 0.2
+date: 2003/07/28 06:00:50;  author: selsky;  state: Exp;  lines: +10 -18
+use waitfor()
+make sure to close connection in all cases
+more success case towards top
+----------------------------
+revision 0.1
+date: 2003/07/28 04:45:09;  author: selsky;  state: Exp;
+initial revision
+=============================================================================

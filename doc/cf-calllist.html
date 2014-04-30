@@ -1,0 +1,644 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: calllist.cf</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: calllist.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>calllist.cf</TT></A>
+ <LI><A HREF="#alerts">Alerts</A>
+  <UL>
+  <LI><A HREF="#alerts-about">About Alerts</A>
+  <LI><A HREF="#alerts-dependencies">Dependencies</A>
+  <LI><A HREF="#alerts-keywords">Alert Stanza Keywords</A>
+  <LI><A HREF="#alerts-examples">Examples</A>
+  </UL>
+ <LI><A HREF="#persons">Persons</A>
+  <UL>
+  <LI><A HREF="#persons-about">About Persons</A>
+  <LI><A HREF="#persons-dependencies">Dependencies</A>
+  <LI><A HREF="#persons-keywords">Person Stanza Keywords</A>
+  <LI><A HREF="#persons-examples">Examples</A>
+  </UL>
+ <LI><A HREF="#calllists">Call Lists</A>
+  <UL>
+  <LI><A HREF="#calllists-about">About Call Lists</A>
+  <LI><A HREF="#calllists-dependencies">Dependencies</A>
+  <LI><A HREF="#calllists-keywords">Call List Stanza Keywords</A>
+  <LI><A HREF="#calllists-examples">Examples</A>
+  </UL>
+ <LI><A HREF="#claliases">Call List Aliases</A>
+  <UL>
+  <LI><A HREF="#claliases-about">About Call List Aliases</A>
+  <LI><A HREF="#claliases-dependencies">Dependencies</A>
+  <LI><A HREF="#claliases-keywords">Call List Alias Stanza Keywords</A>
+  <LI><A HREF="#claliases-examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>calllist.cf</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>calllist.cf</TT> defines <A CLASS=kwlink HREF=#alerts>Alerts</A>,
+ which define combinations of <A HREF=fmm-about.html>format</A> and
+ <A HREF=tmm-about.html>transmit</A> modules to send alert messages,
+ <A CLASS=kwlink HREF=#persons>Persons</A>, which define sets of addresses that
+ can be used to notify a given individual (or entity),
+ <A CLASS=kwlink HREF=#calllists>Call Lists</A>, which are used to
+ notify one or more Persons when an alert is generated,
+ and <A CLASS=kwlink HREF=#claliases>Call List Aliases</A>, which
+ allow a Call List to be associated with more than one Alert.
+
+ <P>
+ 
+ <A ID="alerts"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Alerts
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alert via</B> &lt;name> <B>{</B>
+         <B>format as</B> &lt;name>
+	 <B>transmit with</B> &lt;name>
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="alerts-about"></A>
+ <H3>About Alerts</H3>
+
+ An <I>alert</I> stanza defines the <A HREF=fmm-about.html>format</A>
+ and <A HREF=tmm-about.html>transmit</A> modules that are used to
+ format an alert message and then send it out to the intended
+ recipients.  The name of the alert stanza is used in the <A
+ HREF=#kw-via><TT>via</TT></A> keyword of a <A HREF=#persons>Person</A>
+ or <A HREF=#calllists>Call List</A> definition.
+
+ <P>
+
+ <A ID="alerts-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="alerts-keywords"></A>
+ <H3>Alert Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alertvia"></A>
+  <B>alert via</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Define a new Alert.  The name defined here is used by the
+  <A HREF="#kw-via"><I>via</I></A> keyword in a Person or Call List
+  definition.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-formatas"></A>
+  <B>format as</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the <A HREF=fmm-about.html>format</A> module to use.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-transmitwith"></A>
+  <B>transmit with</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the <A HREF=tmm-about.html>transmit</A> module to use.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="alerts-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>An Alert that uses the <A HREF=fmm-full.html><TT>full</TT></A>
+     format module and <A HREF=tmm-mail.html><TT>mail</TT></A> transmit
+     module.
+
+     <PRE>
+     alert via mail {
+       format as full
+       transmit with mail
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="persons"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Persons
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>person</B> &lt;name> <B>{</B>
+         <B>notify</B> &lt;name> <B>via</B> &lt;name>
+	 [...]
+	 [<B>notify</B> &lt;name> <B>otherwise</B>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="persons-about"></A>
+ <H3>About Persons</H3>
+
+ <I>Persons</I> define how an individual can be reached.  This simplifies
+ Call List definitions by allowing Call Lists to operate over <I>people</I>
+ instead of addresses, meaning addresses don't need to be defined
+ multiple times if a Person is a member of more than one Call List.
+ It also simplifies the definition of two Call Lists for the same group
+ (eg: one for <TT>mail</TT> and one for <TT>mailtopager</TT>), since the
+ second list can simply be an alias for the first.
+
+ <P>
+
+ <A ID="persons-dependencies"></A>
+ <H3>Dependencies</H3>
+ 
+ <UL>
+ <LI>The Alert specified by the <TT>via</TT> keyword must be defined
+     first in an <TT>alert</TT> stanza.
+ </UL>
+
+ <A ID="persons-keywords"></A>
+ <H3>Person Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-person"></A>
+  <B>person</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Person.  The name defined here is used in the
+  <A HREF=#kw-notifies><I>notifies</I></A> keyword of a Call List definition.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-notify"></A>
+  <B>notify</B> &lt;name> <B>via</B> &lt;name><P>
+  <B>notify</B> &lt;name> <B>otherwise</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define an address for the Person to be reached at.  If <TT>via</TT>
+  is specified, then the address provided is reachable via the Alert
+  named.  If <TT>otherwise</TT> is specified, then the address becomes
+  the default entry, reachable by any Alert invoked by the Call List.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="persons-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, the Person <I>janeuser</I> has two addresses,
+     one for the <TT>mail</TT> Alert, and one for <TT>page</TT>.
+
+     <PRE>
+     person janeuser {
+       notify janeuser@site.org via mail
+       notify 5551212@paging.com via page
+     }
+     </PRE>
+
+ <LI>In this example, the Person <I>joeuser</I> has one specific
+     address, for <TT>page</TT>, and one default address for any other
+     Alert that might be used to notify him.
+
+     <PRE>
+     person joeuser {
+       notify 5552121@paging.com via page
+       notify joeuser@site.org otherwise
+     }
+     </PRE>
+ </OL>
+
+ <P>
+
+ <A ID="calllists"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Call Lists
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>call list</B> &lt;name> <B>{</B>
+         <B>notifies {</B>
+	     &lt;name>
+	     [...]
+	 <B>}</B>
+	 <B>via</B> &lt;name>
+	 [<B>rotates using</B> &lt;name> <B>schedule</B> | <B>broadcasts to all</B>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="calllists-about"></A>
+ <H3>About Call Lists</H3>
+
+ A <I>call list</I> stanza specifies who is notified when an alert
+ message is generated and how they are notified (via which Alert).
+ There are three types of Call Lists.
+
+ <P>
+
+ <OL>
+ <LI><B>Simple.</B><BR>
+ 
+    A Simple Call List contains one or more recipients.  If more than
+    one recipient is listed, each subsequent alert notification will
+    be passed to the next address on the list.  Note this is per alert
+    notification, not per problem.  If a problem generates two alert
+    notifications because the problem has not cleared and there is
+    more than one Person defined in the Call List, the two alert
+    notifications will be sent to different Persons.
+    <P>
+
+ <LI><B>Broadcast.</B><BR>
+    A Broadcast Call List is like a Simple Call List, except that
+    whenever an alert notification is sent via a Broadcast Call List,
+    it is always sent to every member of the list.
+    <P>
+
+ <LI><B>Rotating.</B><BR>
+    A Rotating Call List is like a Simple Call List with more than one
+    entry, except that the rotation happens at a specified time.
+    Rotation can happen according to any set of daily or weekly
+    intervals specified in the Schedule, beginning when the scheduler
+    is started or HUP'd after the Call List is defined.  Subsequently,
+    days or weeks (as appropriate) when no alert notification is
+    transmitted are correctly accounted for.      
+    <P>
+ </OL>
+
+ Regardless of the type of Call List, if <TT>notify on clear</TT> is
+ in effect (see <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>),
+ the notification of a problem clearing will be sent to whoever
+ received the last alert for that problem, even if the person or
+ persons is no longer a member of the original Call List.
+
+ <P>
+
+ When editing Simple and Rotating Call Lists, it should be noted that
+ Persons are remembered, not positions.  If the active Person (the last
+ Person notified for a Simple Call List or the current Person for a
+ Rotating Call List) is moved, he or she will still remain active, and
+ the rotation will continue on from that position.  If the active
+ Person is removed entirely, the list will start over from the
+ beginning.
+
+ <P>
+
+ A Person may not be defined twice in the same Call List.
+
+ <P>
+
+ Substitutions may be created to temporarily adjust a Simple or
+ Rotating Call List.  See the <A HREF="sc.html#kw-clsub">command line
+ interface</A> documentation for more information.
+ 
+ <P>
+     
+ <A ID="calllists-dependencies"></A>
+ <H3>Dependencies</H3>
+ 
+ <UL>
+ <LI>Each member in a Call List must first be defined in a <TT>person</TT>
+     stanza.
+ <LI>Each Person in a Call List must be reachable by the Alert used in
+     the Call List.  Thus, if the Call List alerts <TT>via mail</TT>,
+     then every member of the list must have a <TT>notify <I>x</I> via
+     mail</TT> or <TT>notify <I>x</I> otherwise</TT> entry.
+ <LI>The Schedule specified for a Rotating Call List must be defined
+     in <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>.
+ </UL>
+
+ <A ID="calllists-keywords"></A>
+ <H3>Call List Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-calllist"></A>
+  <B>call list</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Call List.  The name defined here is used in
+  <A HREF=cf-schedule.html>AlertPlan</A> definitions.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-notifies"></A>
+  <B>notifies</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the list of <A HREF=#kw-person>Persons</A> notified by this
+  Call List.  Which Person is notified depends on whether this is a
+  Simple, Broadcast, or Rotating Call List.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-via"></A>
+  <B>via</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the <A HREF=#kw-alertvia>Alert</A> used for notification
+  by this Call List.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-rotates"></A>
+  <B>rotates using</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Make this list a Rotating Call List.  The Call List will rotate at
+  the times specified by the named schedule, which is defined in
+  <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>.  Rotation can
+  happen according to any set of daily or weekly intervals.  Rotation
+  begins when the scheduler is started or HUP'd after the Call List
+  is defined.  Subsequently, days or weeks (as appropriate) when no alert
+  notification is transmitted are correctly accounted for.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-broadcasts"></A>
+  <B>broadcasts to all</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Make this list a Broadcast Call List.  All members specified in the
+  <TT>notifies</TT> stanza are notified whenever this list is in effect.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="calllists-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>This example of a Simple Call List notifies <I>joeuser</I> via
+     the <TT>mail</TT> Alert.
+
+     <PRE>
+     call list example1 {
+       notifies {
+         joeuser
+       }
+
+       via mail
+     }
+     </PRE>
+     
+ <LI>This example is also a Simple Call List.  <I>janeuser</I> will be
+     the recipient of the first alert notification to be
+     generated, <I>joeuser</I> will be the recipient of the second
+     alert notification to be generated, and then
+     <I>janeuser</I> will again be the recipient when a third alert
+     notification is generated.  The various alert notifications can
+     be any combination of alert notifications for the same or
+     different problems.  Although this Call List rotates, it is still
+     a <I>Simple</I> Call List and should not be confused with
+     a <I>Rotating</I> Call List.
+
+     <PRE>
+     call list example2 {
+       notifies {
+         janeuser
+         joeuser
+       }
+
+       via mail
+     }
+     </PRE>
+
+ <LI>In this example, a Broadcast Call List is defined that notifies
+     both <I>joeuser</I> and <I>janeuser</I> simultaneously.
+
+     <PRE>
+     call list example3 {
+       notifies {
+         janeuser
+	 joeuser
+       }
+
+       via mail
+       broadcasts to all
+     }
+     </PRE>
+
+ <LI>In the following example of a Rotating Call List, <I>janeuser</I>
+     will receive all alert notifications until the next Monday at
+     3pm, when <I>joeuser</I> will receive all alert notifications.
+
+     <P>
+
+     <I>From schedule.cf</I>
+
+     <PRE>
+     schedule schedex {
+       at {
+         monday 15:00
+       }
+     }
+     </PRE>
+
+     <I>From calllist.cf</I>
+
+     <PRE>
+     call list example4 {
+       notifies {
+         janeuser
+	 joeuser
+       }
+
+       via mail
+       rotates using schedex schedule
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+ 
+ <A ID="claliases"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Call List Aliases
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alias</B> &lt;name> <B>via</B> &lt;name> <B>to</B> &lt;name>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="claliases-about"></A>
+ <H3>About Call List Aliases</H3>
+
+ Call List Aliases allow a Call List to use more than one Alert.
+ This is useful for a Rotating Call List to maintain the same current
+ recipient, or simply to avoid having to maintain the same list in
+ more than one place.
+ 
+ <P>
+
+ <A ID="claliases-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>A Call List must be defined before it can be aliased.
+ </UL>
+
+ <A ID="claliases-keywords"></A>
+ <H3>Call List Alias Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alias"></A>
+  <B>alias</B> &lt;name> <B>via</B> &lt;name> <B>to</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Define a new Call List Alias.  The name specified by <TT>via</TT>
+   is the name of the <A HREF=#kw-alertvia>Alert</A> to use
+   in lieu of the Alert defined in the original Call List.  The
+   name specified by <TT>to</TT> is the name of the "new" Call List.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="claliases-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, the <TT>example4</TT> Call List from the previous
+     example is aliased to be notified via the <TT>page</TT> Alert.
+
+     <PRE>
+     alias example4 via page to example5
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ Next: <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 04:22:46 $</I><BR>
+ <I>$Revision: 0.9 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-alias>alias</A><BR>
+ <A CLASS="keywords" HREF=#kw-alertvia>alert via</A><BR>
+ <A CLASS="keywords" HREF=#kw-broadcasts>broadcasts to all</A><BR>
+ <A CLASS="keywords" HREF=#kw-calllist>call list</A><BR>
+ <A CLASS="keywords" HREF=#kw-formatas>format as</A><BR>
+ <A CLASS="keywords" HREF=#kw-notifies>notifies</A><BR>
+ <A CLASS="keywords" HREF=#kw-notify>notify</A><BR>
+ <A CLASS="keywords" HREF=#kw-person>person</A><BR>
+ <A CLASS="keywords" HREF=#kw-rotates>rotates using</A><BR>
+ <A CLASS="keywords" HREF=#kw-transmitwith>transmit with</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>via</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

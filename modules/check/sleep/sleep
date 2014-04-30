@@ -1,0 +1,41 @@
+#!/usr/bin/perl -w
+
+# sleep check module
+
+# Version: $Revision: 0.8 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2006/01/23 02:15:59 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("seconds" => "number between(0,inf)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&SleepValidate);
+
+my $r = $sc->Exec( \&SleepCheck);
+
+exit($r);
+
+sub SleepValidate {
+    return(MODEXEC_OK, 0, 'Sleep OK');
+}
+
+sub SleepCheck {
+    my $self = shift;
+    my $host = shift;
+
+    sleep($sc->Arg('seconds'));
+    
+    return(MODEXEC_OK, 0, 'Sleep completed');
+}

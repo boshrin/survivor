@@ -1,0 +1,7 @@
+From 1234567890@vtext.com Sun Mar  2 22:18:54 2003
+Date: Mon, 27 Jan 2003 15:48:42 -0500 (EST)
+From: 1234567890@vtext.com
+To: survivor+e@columbia.edu
+Subject: ALERT: ping@localhost
+
+T=Q874954334,I=sample  No response from host  15:10:04 01/27/2003

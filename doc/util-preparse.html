@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Preparse Utility (preparse)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Preparse Utility</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>preparse</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>preparse</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    preparse &lt;hostcf>
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>host.cf:</B> Path to a <TT>host.cf</TT> file to be verified
+ </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The <TT>preparse</TT> utility parses
+ a <A HREF=cf-host.html><TT>host.cf</TT></A>, looking for hosts
+ defined in multiple HostClasses.  It is useful to validate the
+ configuration file before installing, but does not perform a full
+ check of this or any other file.  As a perl script, it currently can
+ be installed anywhere perl is available.
+
+ <P>
+
+ Upon successful completion, <TT>preparse</TT> will exit with return code
+ 0.  Upon error, appropriate messages will be displayed and the exit code
+ will be non-zero.
+
+ <P>
+
+ The functionality and implementation of this utility is subject to change in
+ a future release.  
+
+ <P>
+
+ See also the command line interface <A HREF="sc.html#kw-checkcf">checkcf</A>
+ command.
+ 
+ <P>
+   
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ None.
+
+ <P>
+   
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The <TT>preparse</TT> utility is available in the survivor source
+ distribution, in the <TT>util</TT> directory.  It is not installed
+ by default.
+
+ <P>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:56:47 $</I><BR>
+ <I>$Revision: 0.6 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

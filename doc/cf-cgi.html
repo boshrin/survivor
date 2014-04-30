@@ -1,0 +1,687 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: cgi.cf</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: cgi.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>cgi.cf</TT></A>
+ <LI><A HREF=#authmods>Authentication Modules</A>
+  <UL>
+  <LI><A HREF=#authmods-about>About Authentication Modules</A>
+  <LI><A HREF=#authmods-dependencies>Dependencies</A>
+  <LI><A HREF=#authmods-keywords>Authentication Module Keywords</A>
+  <LI><A HREF=#authmods-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#authz>Authorizations</A>
+  <UL>
+  <LI><A HREF=#authz-about>About Authorizations</A>
+  <LI><A HREF=#authz-dependencies>Dependencies</A>
+  <LI><A HREF=#authz-keywords>Authorization Keywords</A>
+  <LI><A HREF=#authz-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#clip>Clipboards</A>
+  <UL>
+  <LI><A HREF=#clip-about>About Clipboards</A>
+  <LI><A HREF=#clip-dependencies>Dependencies</A>
+  <LI><A HREF=#clip-keywords>Clipboard Keywords</A>
+  <LI><A HREF=#clip-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#pageset>Pageset</A>
+  <UL>
+  <LI><A HREF=#pageset-about>About Pagesets</A>
+  <LI><A HREF=#pageset-dependencies>Dependencies</A>
+  <LI><A HREF=#pageset-keywords>Pageset Keywords</A>
+  <LI><A HREF=#pageset-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#timeout>Session Timeout</A>
+  <UL>
+  <LI><A HREF=#timeout-about>About Session Timeout</A>
+  <LI><A HREF=#timeout-dependencies>Dependencies</A>
+  <LI><A HREF=#timeout-keywords>Session Timeout Keywords</A>
+  <LI><A HREF=#timeout-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#srcdir>Source Directory</A>
+  <UL>
+  <LI><A HREF=#srcdir-about>About Source Directory</A>
+  <LI><A HREF=#srcdir-dependencies>Dependencies</A>
+  <LI><A HREF=#srcdir-keywords>Source Directory Keywords</A>
+  <LI><A HREF=#srcdir-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#statedir>State Directory</A>
+  <UL>
+  <LI><A HREF=#statedir-about>About State Directory</A>
+  <LI><A HREF=#statedir-dependencies>Dependencies</A>
+  <LI><A HREF=#statedir-keywords>State Directory Keywords</A>
+  <LI><A HREF=#statedir-examples>Examples</A>
+  </UL>
+ </UL>
+ 
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>cgi.cf</TT>
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;argname> : [a-zA-Z0-9\._-]+
+     &lt;argvalue> : [^ \n\t][^\n]*
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+     &lt;number> : [0-9]+
+     &lt;path> : [^\n]*
+     &lt;regex> : [^ \n\t]*
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>cgi.cf</TT> controls the behavior of the <A HREF=sw.html>Web
+ Interface</A>.
+
+ <P>
+ 
+ <A ID="authmods"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Authentication Modules
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>authmodule</B> &lt;name> <B>{</B>
+         [&lt;argname> &lt;argvalue>]
+         [...]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="authmods-about"></A>
+ <H3>About Authentication Modules</H3>
+
+ <A HREF="wam-about.html">Web Authentication Modules</A> authenticate
+ users for the web interface.  That is, they identify who a user is
+ (and optionally, what groups the user is in), but do not determine
+ what privileges the user has.
+ 
+ <A ID="authmods-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="authmods-keywords"></A>
+ <H3>Authentication Module Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-authmodule"></A>
+  <B>authmodule</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the <I>name</I> of the module to run.  Web Authentication modules
+  are expected to be found in <TT>$MODDIR/webauth/<I>modulename</I></TT>
+  (where <TT>$MODDIR</TT> is by default <TT>$INSTDIR/mod</TT>).
+
+  <P>
+
+  Arguments passed to the module are specified as name/value pairs,
+  with one pair per line. The specific arguments for each module are
+  described in the module's documentation. <TT>#</TT> symbols are
+  treated as part of the argument, not as a comment.
+
+  <P>
+
+  Multiple authmodules may be defined.  When a login operation is
+  requested, the authmodules will be called in the order specified
+  until one returns an <A HREF="spec-wam.html">AuthOK</A> value of
+  either <I>yes</I> or <I>deferred</I>.
+  
+  <P>
+  
+  If no authmodule is defined, CGI functions requiring privileged access
+  will not be available.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="authmods-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Using the <A HREF="wam-ip.html">IP</A> module, with only two
+     workstations as authenticatable users:
+
+     <PRE>
+     authmodule ip {
+       validhost reg[foo\.site\.org$]
+     }
+
+     authmodule ip {
+       validhost reg[bar\.site\.org$]
+     }
+     </PRE>
+
+     Note that, because only one regular expression relation can be
+     provided per argument, it is necessary to stack two
+     <TT>authmodule</TT> stanzas.  It would be better to simply
+     use <TT>authmodule ip {}</TT> and restrict access using a
+     <TT>user</TT> <A HREF=#authz>authorization</A>.
+ </OL>
+
+ <P>
+ 
+ <A ID="authz"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Authorizations
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>authorization {</B>
+         (<B>user</B> | <B>group</B>) &lt;regex> (<B>admin</B> | <B>clipboard</B> | <B>rw</B> | <B>exec</B> | <B>ro</B> | <B>none</B>)
+         [...]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="authz-about"></A>
+ <H3>About Authorizations</H3>
+
+ Authorizations determine which authenticated users have what levels
+ of access.  Usernames and group memberships are obtained from
+ <A HREF=#authmods>authentication modules</A> and compared against
+ the entries defined here.
+
+ <A ID="authz-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="authz-keywords"></A>
+ <H3>Authorization Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-authorization"></A>
+  <B>authorization</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify who has what level of access. The following levels of access
+  are defined:
+
+   <UL>
+   <LI><B>admin</B>: Administrator (implies <I>clipboard</I>)
+   <LI><B>clipboard</B>: Clipboard (implies <I>rw</I>)
+   <LI><B>rw</B>: Read/Write (implies <I>exec</I>)
+   <LI><B>exec</B>: Execute (implies <I>ro</I>)
+   <LI><B>ro</B>: Read Only
+   <LI><B>none</B>: No access
+   </UL>
+
+  During an authorization request, entries are processed from the top
+  of the list until the first matching line is found.  If no matching
+  entry is found, the default authorization <I>ro</I> is implied.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="authz-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To change the default authorization to <I>none</I> while allowing
+     only the user <I>jsmith</I> full access:
+
+     <PRE>
+     authorization {
+       user jsmith admin
+       user .* none
+     }
+     </PRE>
+
+ <LI>To grant members of the group <I>admins</I> and the "user"
+     <I>workstation.site.org</I> (as returned by the <A
+     HREF="wam-ip.html">ip</A> web authentication module) read/write
+     access:
+
+     <PRE>
+     authorization {
+       group admins rw
+       user  workstation\.site\.org rw
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="clip"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Clipboards
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>clipemail</B> &lt;name>
+     <B>clipphone</B> &lt;name>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="clip-about"></A>
+ <H3>About Clipboards</H3>
+
+ <A HREF="sw.html#clipbaords">Clipboards</A> permit notes to be saved
+ and transmitted.  Clipboard configuration happens via the web
+ interface, however some default values may be set here.
+
+ <A ID="clip-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="clip-keywords"></A>
+ <H3>Clipboard Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clipemail"></A>
+  <B>clipemail</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The default contact email address for Clipboards.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clipphone"></A>
+  <B>clipphone</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The default contact phone number for Clipboards.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="clip-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Setting the default contact email address sent with the Clipboard:
+
+     <PRE>
+     clipemail nobody@nowhere.com
+     </PRE>
+ <LI>Setting the default contact phone number sent with the Clipboard:
+
+     <PRE>
+     clipphone 212-555-1212
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="pageset"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Pageset
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>pageset</B> &lt;name>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="pageset-about"></A>
+ <H3>About Pagesets</H3>
+
+ <A HREF="#spec-sw.html#pagefilters">Pagesets</A> are collections
+ of source pages that can be delivered by the web interface.
+ The default Pageset can be defined here.
+
+ <A ID="pageset-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="pageset-keywords"></A>
+ <H3>Pageset Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-pageset"></A>
+  <B>pageset</B> &lt;path>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the default Pageset, or collection of source files to use.
+  If multiple Pagesets are available, this value can be overridden
+  by the client.  The location of the Pagesets is determined by the
+  <A HREF=#srcdir>Source Directory</A>.
+
+  <P>
+
+  If this keyword is omitted, <TT>en_US</TT> will be used as the default.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="pageset-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Set the default Pageset to <I>mypageset</I>:
+
+     <PRE>
+     pageset mypageset
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="timeout"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Session Timeout
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>authsessiontime</B> &lt;number>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="timeout-about"></A>
+ <H3>About Session Timeout</H3>
+
+ The Session Timeout determines how frequently reauthentication is
+ required.
+
+ <A ID="timeout-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="timeout-keywords"></A>
+ <H3>Session Timeout Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-authsessiontime"></A>
+  <B>authsessiontime</B> &lt;number>
+ </TD>
+ <TD CLASS=kwdef>
+  Set the session timeout, to <I>number</I> minutes.
+
+  <P>
+
+  If this keyword is omitted, <TT>30</TT> will be used as the default.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="timeout-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Set the session timeout to three hours:
+
+     <PRE>
+     authsessiontime 180
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="srcdir"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Source Directory
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>srcdir</B> &lt;path>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="srcdir-about"></A>
+ <H3>About Source Directory</H3>
+
+ The Source Directory determines where <A HREF=#pageset>Pagesets</A>
+ are delivered from.
+
+ <A ID="srcdir-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="srcdir-keywords"></A>
+ <H3>Source Directory Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%> 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-srcdir"></A>
+  <B>srcdir</B> &lt;path>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the source file directory.  Under this directory are the
+  Pagesets, which contain the files processed and delivered by the
+  web interface.
+
+  <P>
+
+  If this keyword is omitted, <TT>$INSTDIR/html/sw</TT> will be used.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="srcdir-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Change the source directory:
+
+     <PRE>
+     srcdir /www/data/sw/pagesets
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="statedir"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ State Directory
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>statedir</B> &lt;path>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="statedir-about"></A>
+ <H3>About State Directory</H3>
+
+ The State Directory is used by the web interface to store state
+ information.
+
+ <A ID="statedir-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="statedir-keywords"></A>
+ <H3>State Directory Keywords</H3>
+  
+ <TABLE BORDER=0 WIDTH=100%> 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-statedir"></A>
+  <B>statedir</B> &lt;path>
+ </TD>
+ <TD CLASS=kwdef>
+  Set the state directory, where the web interface can write state
+  information.  This directory must be writeable by the user the
+  web server runs as.
+
+  <P>
+
+  <B>Note</B>: The state directory specified in the configuration
+  directory by the <TT>statedir</TT> keyword must be created manually.
+  It must be owned and writeable by the user that web server runs as, or
+  writeable by a group that the web server is in.
+
+  <PRE>
+  survivor# mkdir $STATEDIR
+  survivor# chown $WWWUSER $STATEDIR
+  survivor# chmod 755 $STATEDIR
+  </PRE>
+
+  <P>
+
+  <B>Note</B>: There is no default for this directory.  If this
+  directory is not specified, or if it does not exist, then operations
+  requiring state manipulation (including login) will not be available.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="statedir-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Set the state directory:
+
+     <PRE>
+     statedir /var/survivor/cgi
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <HR>
+ 
+ <I>$Date: 2006/11/19 16:49:46 $</I><BR>
+ <I>$Revision: 0.5 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-authmodule>authmodule</A><BR>
+ <A CLASS="keywords" HREF=#kw-authorization>authorization</A><BR>
+ <A CLASS="keywords" HREF=#kw-authsessiontime>authsessiontime</A><BR>
+ <A CLASS="keywords" HREF=#kw-clipemail>clipemail</A><BR>
+ <A CLASS="keywords" HREF=#kw-clipphone>clipphone</A><BR>
+ <A CLASS="keywords" HREF=#kw-pageset>pageset</A><BR>
+ <A CLASS="keywords" HREF=#kw-srcdir>srcdir</A><BR>
+ <A CLASS="keywords" HREF=#kw-statedir>statedir</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

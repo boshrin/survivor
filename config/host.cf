@@ -1,0 +1,83 @@
+# Sample host.cf file
+
+# Each host must be defined in exactly one host class.
+# Each host class defines default check schedule and alert
+# plans for services monitored on that host.  (These
+# schedules may be overridden on a per-service basis in
+# the check.cf file.)  The class "all" is reserved.
+
+# In this first example hostclass, the hosts identified
+# are critical, with maximal monitoring.
+
+class critical {
+  hosts {
+    kerberos
+    sqlserver
+  }
+
+  check on critical schedule
+  alert on critical alertplan
+}
+
+# This next set contains hosts that are as critical as the
+# those in the "critical" hostclass, but that are replicated
+# (and so an outage would not be noticeable).
+
+class replicated {
+  hosts {
+    mail1
+    mail2
+    mail3
+    www1
+    www2
+    www3
+  }
+
+  check on critical schedule
+  alert on replicated alertplan
+}
+
+# And finally, some hosts that aren't as important.
+
+class noncritical {
+  hosts {
+    myworkstation
+    alice-ws
+    bob-ws
+  }
+
+  check on standard schedule
+  alert on noncritical alertplan
+}
+
+# In order for a check to run on a host, the host must be
+# defined in a group with the same name as a check defined
+# in check.cf.  Hosts may be defined in multiple groups.
+# Groups may exist that don't have corresponding checks
+# (although they aren't of much use).  It may be useful
+# to autogenerate the group portion of this file from other,
+# site specific data.
+
+# This first example puts the three web servers into a group
+# named http.  Then, when a check called 'http' is defined in
+# check.cf, these three hosts will be checked for http.
+
+group http {
+  www1
+  www2
+  www3
+}
+
+# We only need to check load on the hosts that aren't
+# workstations.
+
+group load {
+  kerberos
+  sqlserver
+  mail1
+  mail2
+  mail3
+  www1
+  www2
+  www3 
+}

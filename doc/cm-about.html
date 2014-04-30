@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: About Check Modules</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: About Check Modules</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>What Check Modules Do</A>
+ <LI><A HREF=#modtypes>Module Types</A>
+ <LI><A HREF=#moddata>Module Data</A>
+ <LI><A HREF=#custom>Adding Custom Modules</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ What Check Modules Do
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Check Modules evaluate the status of services that run on hosts.
+ 
+ <P>
+ 
+ <A ID="modtypes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Types
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Check Modules may be two types of executables:
+
+ <OL>
+ <LI><B>Compiled.</B><BR>
+     These are built using a compiler, generally at the time when the
+     package is built.  Written in a language such as C or C++, they
+     may take advantage of existing APIs but may require tweaking to
+     build on varying platforms.
+     <P>
+
+ <LI><B>Scripted.</B><BR>
+     These are written in a language such as Perl or shell.  More
+     portable than compiled modules, they may still require tweaking
+     to run.
+     <P>
+ </OL>
+
+ Check Modules may run in one of two locations:
+
+ <OL>
+ <LI><B>Scheduler</B><BR>
+     These run on the host that runs the survivor scheduler.
+     Generally, they take advantage of network protocols to perform
+     service checking.
+     <P>
+
+ <LI><B>Remote</B><BR>
+     These run on the host being checked, via the <A
+     HREF="tm-about.html">transport modules</A> and the
+     <A HREF="sr.html">remote gateway</A>.  For portability, remote
+     modules should generally be scripted.  Note that some modules
+     may not be indicated to run via remote gateways, but may work
+     that way anyway.
+     <P>
+ </OL>
+
+ <A ID="moddata"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Data
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Check Modules are provided an XML document containing a <A
+ HREF="survivor.dtd">SurvivorCheckData</A> element, which may include
+ arguments as configured in <A
+ HREF="cf-check.html"><TT>check.cf</TT></A>.
+
+ <P>
+
+ Modules generate an XML document containing zero or more
+ <A HREF="survivor.dtd">SurvivorCheckResult</A> elements.
+
+ <P>
+  
+ <A ID="custom"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Adding Custom Modules
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All Check Modules must conform to the <A HREF=spec-cm.html>Check
+ Module Specification</A>, otherwise they may not interact correctly
+ with the scheduler.
+
+ <P>
+ 
+ It is important for check modules to be properly parallelized, to
+ prevent one non-responsive host from interfering with the checking of
+ other hosts.  There are two methods for easy parallelization:
+
+ <OL>
+ <LI><B>libcm</B><BR>
+     Compiled C++ modules may be built to use <TT>libcm</TT>, a
+     multithreaded library to parallelize checking.  The object
+     interface is defined in <TT>include/libcm.H</TT>.  As a
+     starting point, see the sample test modules in
+     <TT>src/modules/check/test/</TT>.
+     <P>
+
+ <LI><B>Survivor.pm</B> and <B>Survivor/Check.pm</B><BR>
+     Perl modules may be written against <TT>Survivor.pm</TT> and the
+     related <TT>Survivor/Check.pm</TT> modules, which can detect if they
+     are running under a <A HREF=building.html#perl>multithreaded
+     version of Perl</A>, and can automatically parallelize via
+     <TT>fork</TT> if threads are not available.  As a starting point,
+     see the sample test modules in <TT>src/modules/check/test/</TT>.
+     <P>
+
+     For information on these modules, run
+
+     <PRE>
+     % perldoc src/modules/common/Survivor.pm
+     % perldoc src/modules/common/Survivor/Check.pm
+     </PRE>
+ </OL>
+
+ <P>
+
+ Check Modules may be run either on the scheduler host, or directly on
+ the host being monitored.  Modules run directly on the host being
+ monitored must work with the <A HREF=tm-about.html>transport modules</A>,
+ which works with the <A HREF=sr.html>remote gateway</A>.
+
+ <P>
+
+ Check Modules must require their arguments to be <A
+ HREF=spec-xmlarg.html>typed</A>.
+
+ <P>
+
+ Check Modules may track the duration of check execution and include
+ this information in the check result document.  This functionality is
+ handled automatically by <TT>libcm</TT> and
+ <TT>Survivor/Check.pm</TT>, but can be disabled via
+ <TT>cm_measure_duration(false);</TT> in the former and
+ <TT>$self->MeasureDuration(0);</TT> in the latter.  Note that
+ <TT>libcm</TT> uses millisecond resolution, but <TT>Check.pm</TT>
+ (due to <A
+ HREF="http://search.cpan.org/~nwclark/perl-5.8.7/pod/perlfaq8.pod#How_can_I_measure_time_under_a_second%3F">limitations
+ in Perl</A>) uses second resolution.  See also the <A
+ HREF="td-duration.html">technical document on duration
+ measurement</A>.
+ 
+ <P>
+ 
+ For assistance in testing Check Modules, the <A
+ HREF="util-xmlmaker.html">XML Maker utility</A> may be useful.
+ Additionally, the special module arguments <TT>debugfile</TT>
+ (type <I>file</I>) or <TT>debugsyslog</TT> (type <I>boolean</I>)
+ may be used to enable debugging.
+
+ <P>
+
+ <B>Important</B>: Please see the <A HREF=license.html>license</A>
+ for this package to see if custom modules are subject to the same
+ license.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 18:10:30 $</I><BR>
+<I>$Revision: 0.11 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

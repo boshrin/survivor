@@ -1,0 +1,29 @@
+----------------------------
+revision 0.7
+date: 2003/01/29 01:18:00;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:05:54;  author: benno;  state: Exp;  lines: +3 -3
+Adjust header
+----------------------------
+revision 0.5
+date: 2002/12/16 00:23:20;  author: benno;  state: Exp;  lines: +30 -23
+Convert to named arguments
+----------------------------
+revision 0.4
+date: 2002/07/26 21:58:00;  author: selsky;  state: Exp;  lines: +6 -3
+handle 0 passed to -a correctly
+----------------------------
+revision 0.3
+date: 2002/05/27 17:27:08;  author: selsky;  state: Exp;  lines: +15 -12
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:59:05;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:53:00;  author: benno;  state: Exp;
+initial revision
+=============================================================================

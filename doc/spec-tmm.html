@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Transmit Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Transmit Module Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>Transmit modules <B>must</B> be reentrant.  That is, if a transmit
+     module is run more than once simultaneously, all instances
+     <B>must</B> run to completion without interference.
+     <P>
+
+ <LI>Transmit modules <B>must not</B> change their process group by any
+     means, including via <TT>setsid()</TT>, <TT>setpgid()</TT>,
+     <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/transmit/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>transmit/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/transmit</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+
+        The <TT>install-remote</TT> directive <B>should</B> be the same
+        as <TT>install</TT>, except where it does not make sense for
+        the module to be installed as part of a remote distribution.
+        (Transmit modules typically do not need to be installed remotely.)
+        <P>
+
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/tmm-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+
+ <LI>Transmit modules do not accept any command line arguments, but instead
+     receive their required data via a
+     <A HREF=survivor.dtd><TT>SurvivorFormattedAlertData</TT></A> element
+     provided in an XML document on stdin.
+     <P>
+    
+ <LI>Transmit modules <B>should not</B> write output files.
+     <P>
+
+ <LI>Transmit modules <B>must not</B> generate output.
+     <P>
+
+ <LI>If the <TT>ReplyOK</TT> attribute in the
+     <TT>SurvivorFormattedAlertData</TT> document is <TT>yes</TT>, then
+     the scheduler is sending a message suitable for a two way reply.
+     Transmit modules may honor this value or may change this value to
+     <TT>no</TT>, however the value may not be changed from <TT>no</TT>
+     to <TT>yes</TT>.
+     <P>
+
+ <LI>Transmit modules <B>must</B> exit with one of the following values
+     (as defined in <TT>include/survivor.H</TT>):
+
+     <UL>
+     <LI><B><TT>MODEXEC_OK</TT></B>: Alert transmitted successfully or
+         successfully queued for transmission.
+     <LI><B><TT>MODEXEC_PROBLEM</TT></B>: An error occurred in
+         transmitting or queuing the alert.
+     <LI><B><TT>MODEXEC_MISCONFIG</TT></B>: The module is misconfigured
+         and is unable to transmit or queue the alert.
+     </UL>
+     <P>
+ </OL>
+
+<HR>
+<I>$Date: 2006/11/20 00:09:18 $</I><BR>
+<I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

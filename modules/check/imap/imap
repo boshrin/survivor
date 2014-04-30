@@ -1,0 +1,108 @@
+#!/usr/bin/perl -w
+
+# imap check module
+
+# Version: $Revision: 0.5 $
+# Author: Matt Selsky
+# Date: $Date: 2006/09/07 08:22:52 $
+#
+# Copyright (c) 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Mail::IMAPClient;
+
+my %argfmt = ('protocol' => 'optional string one(imap,imaps) default(imap)',
+	      'username' => 'string',
+	      'password' => 'password',
+	      'select' => 'optional boolean default(true)');
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&ImapValidate);
+
+if($sc->Arg('protocol') eq 'imaps') {
+    require IO::Socket::SSL;
+    import IO::Socket::SSL;
+}
+
+if($sc->Arg('protocol') ne 'imap') {
+    # Disable threading pending verification that SSL is threadsafe
+    $sc->UseThreads(0);
+}
+
+# XXX we may need to disable forking later
+
+my $r = $sc->Exec( \&ImapCheck);
+
+exit($r);
+
+sub ImapValidate {
+    return(MODEXEC_OK, 0, "Imap OK");
+}
+
+sub ImapCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $rc = MODEXEC_OK;
+    my $err;
+
+    my $username = $self->Arg('username');
+    my $password = $self->Arg('password');
+
+    my $doselect = $self->Arg('select');
+
+    my $imap = new Mail::IMAPClient;
+
+    if($self->Arg('protocol') eq 'imaps') {
+	my $ssl_socket = new IO::Socket::SSL("$host:imaps");
+	unless(defined $ssl_socket) {
+	    return(MODEXEC_PROBLEM, 0, "Cannot create SSL socket: $@");
+	}
+	$imap->Socket($ssl_socket);
+	$imap->State(1);
+    } else {
+	$imap->Server($host);
+	unless($imap->connect()) {
+	    return(MODEXEC_PROBLEM, 0, 'Connection refused for imap protocol');
+	}
+    }
+
+    $imap->Timeout($self->Timeout()) if $self->Timeout();
+
+    $imap->User($username);
+    $imap->Password($password);
+
+    unless($imap->login()) {
+	return(MODEXEC_PROBLEM, 0, "Cannot login as $username");
+    } else {
+	$err = "Success logging in as $username";
+    }
+
+    if($doselect) {
+	if($imap->select('INBOX')) {
+	    $err = "Success opening INBOX as $username";
+	} else {
+	    $rc = MODEXEC_PROBLEM;
+	    $err = "Cannot open INBOX as $username";
+	}
+    }
+
+    unless($imap->logout()) {
+	return(MODEXEC_PROBLEM, 0, "Cannot logout as $username");
+    }
+
+    if($rc == MODEXEC_OK) {
+	return($rc, 1, $err);
+    } else {
+	return($rc, 0, $err);
+    }
+}

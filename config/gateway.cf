@@ -1,0 +1,32 @@
+# Sample gateway.cf file.  This file must be installed in /etc/survivor/.
+# This file is optional, reasonable defaults will be assumed without it.
+
+# Allow relay for messages received by the gateway addressed to this host
+
+relay localhost
+
+# Allow relay for messages received by the gateway addressed to these domains
+
+relay domain {
+  .*\.somedomain\.org
+}
+
+# Create relay targets to simplify incoming mail addresses.
+
+# In this first example, mail to alice@survivor.somedomain.org
+# will be relayed to the person alice defined in calllist.cf
+# (assuming mail to survivor.somedomain.org is delivered to the gateway).
+
+relay user alice {
+  person alice
+  via mail
+  instance sample
+}
+
+# In this example, mail to oncall@survivor.somedomain.org will be
+# relayed to the oncall calllist defined in calllist.cf.
+
+relay user oncall {
+  calllist oncall
+  instance sample
+}

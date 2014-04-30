@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Cyrussync Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>cyrussync</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>cyrussync</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>cyrussync</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module cyrussync {</B>
+       <B>conf</B> &lt;file>
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Executables
+<SURVIVOR META="dependency" TYPE="executable">
+   <UL>
+   <LI><A HREF="http://asg.web.cmu.edu/cyrus/imapd/">cyr_quota</A>
+   </UL>
+</SURVIVOR META="dependency">
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Net-SSH-Perl"><TT>Net::SSH::Perl</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-conf"></A><B>conf</B></TD>
+ <TD CLASS=kwref>file</TD>
+ <TD CLASS=kwdef>
+   Path of Cyrus imapd.conf configuration file.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <tt>cyrussync</tt> module compares the mailbox sizes of each user
+ between the primary and the secondary host and returns an error if
+ there is a discrepancy. First, it traverses through <I>conf</I> to
+ find entries for <I>sync_host</I>, <I>sync_authname</I>, and
+ <I>sync_password</I>, for the secondary hostname, its username, and
+ its password.  It then uses SSH to remotely run the <tt>cyr_quota</tt>
+ utility. It compares this output with the output of the utility on the
+ checked host and reports an error if appropriate. <I>conf</I> must be
+ readable by the user executing the check module.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To test synchronization:
+     <PRE>
+     module cyrussync {
+       conf /etc/imapd.conf
+     }
+     via remote
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 18:34:59 $</I><BR>
+ <I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-conf">conf</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

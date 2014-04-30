@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Technical Document: Porting</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR Technical Document: Porting</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About This Document</A>
+ <LI><A HREF=#porting>Porting</A>
+  <UL>
+  <LI><A HREF=#mtlevel>MT-Level</A>
+  <LI><A HREF=#gethostbynamer><TT>gethostbyname_r</TT></A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About This Document
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ This document contains details of the SURVIVOR implementation.  It
+ contains no information necessary for the operation of the systems
+ monitor that is not available in the general sections of this
+ manual.
+
+ <P>
+ 
+ <A ID="duration"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Porting
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ Only the scheduler and related core portions of the package should
+ need to be ported, as most of the check modules that can run remotely
+ are written in perl or another scripting language, and so should run
+ without modification on the desired target platforms.
+
+ <P>
+
+ In order to port the scheduler, the target platform must support
+ POSIX threading.  The following steps should be followed:
+
+ <OL>
+ <LI>Modify the top level <TT>Configure</TT> script to recognize the
+     new platform and generate the appropriate top level defines.
+ <LI>Add a stanza to <TT>include/os.H.in</TT> for the new platform.
+ <LI>If the platform does not define <TT>time_t</TT> as a long, redefine
+     it, fix the code, or switch platforms.
+ <LI>Try building the package.  Any changes that need to be made should
+     be tagged with descriptive labels, eg
+
+     <PRE>
+     #if defined(_HAVE_GETHOST_WITH_POINTER)
+     </PRE>
+
+     and not
+
+     <PRE>
+     #if defined(LINUX)
+     </PRE>
+
+     Add the appropriate defines to <TT>include/os.H.in</TT> and then
+     rerun <TT>Configure</TT> to generate a new <TT>os.H</TT>.
+ </OL>
+
+ <A ID="mtlevel"></A>
+ <H3>MT-Level</H3>
+
+ (The following note on MT-Level would be more appropriate in a general
+ "developer's notes" sort of page, if one existed.)
+
+ <P>
+
+ Regardless of an object's MT-Level, Constructors are always Safe (although
+ it may not make sense to call them more than once) and Destructors are
+ always Unsafe.
+
+ <P>
+
+ <UL>
+ <LI>Safe indicates that all other methods in an object are Safe.
+ <LI>Unsafe indicates that the object must be protected in a multithreaded
+  environment.
+ <LI>Exceptions within an object are noted.
+ </UL>
+
+ <A ID="gethostbynamer"></A>
+ <H3><TT>gethostbyname_r</TT></H3>
+
+ <TT>gethostbyname_r</TT> is not implemented in a standard fashion.  It
+ should be replaced with <TT>getaddrinfo()</TT>.  Until then, note the
+ following for AIX:
+
+ <PRE>
+ According to an IBM engineer in the Usenet posting below,
+ gethostbyname_r() is a wrapper around gethostbyname().
+
+ http://groups.google.com/groups?hl=en&amp;lr=&amp;ie=UTF-8&amp;oe=UTF-8&amp;selm=3B7BCE0B.DF8D5E4E%40us.noibm.com
+
+ It seems that gethostbyname() writes results to a per-thread
+ allocated area which makes it thread safe. The gethostbyname_r()
+ wrapper is supposed to copy this data into the malloc'ed buffer
+ provided by curl. It seems that it performs a shallow copy, rather
+ than the deep copy performed by curl's own pack_hostent() function.
+
+ This means that pointers in the returned hostent structure point to
+ the shared gethostbyname() buffer, and is therefore overwritten by
+ calls to this function.
+
+ http://curl.haxx.se/mail/archive-2003-03/0002.html
+ </PRE>
+ 
+ <HR>
+ <I>$Date: 2006/11/20 02:52:15 $</I><BR>
+ <I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

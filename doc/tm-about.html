@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: About Transport Modules</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: About Transport Modules</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>What Transport Modules Do</A>
+ <LI><A HREF=#modtypes>Module Types</A>
+ <LI><A HREF=#moddata>Module Data</A>
+ <LI><A HREF=#custom>Adding Custom Modules</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ What Transport Modules Do
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ Transport Modules are used by the scheduler to communicate with the
+ <A HREF="sr.html">remote gateway</A>, to allow other modules to be
+ executed directly on the host being monitored.
+
+ <CENTER><IMG SRC="cm-vs-tm.gif" ALT="Illustration of transport modules" BORDER=1 /></CENTER>
+
+ <P>
+
+ <A ID="modtypes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Types
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Like <A HREF=cm-about.html>Check Modules</A>, Transport Modules may be
+ either compiled or scripted.  However, unlike Check Modules, Transport
+ Modules only run on the scheduler host.
+
+ <P>
+
+ <A ID="moddata"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Data
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Transport Modules are provided an XML document containing a <A
+ HREF="survivor.dtd">SurvivorTransportData</A> document.
+
+ <P>
+
+ Modules generate results in accordance with the remote module type
+ being execute.
+ 
+ <P>
+  
+ <A ID="custom"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Adding Custom Modules
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All Transport Modules must conform to the <A
+ HREF=spec-tm.html>Transport Module Specification</A>, otherwise they
+ may not interact correctly with the scheduler.
+
+ <P>
+ 
+ It is important for Transport Modules to be properly parallelized, to
+ prevent one non-responsive host from interfering with the checking of
+ other hosts.  There are two methods for easy parallelization:
+
+ <OL>
+ <LI><B>libcm</B><BR>
+     Compiled C++ modules may be built to use <TT>libcm</TT>, a
+     multithreaded library to parallelize checking.  Since Transport
+     Modules are really just a special type of <A
+     HREF=cm-about.html>Check Module</A>, use of the object interface
+     as defined in <TT>include/libcm.H</TT> may be helpful.
+     <P>
+
+ <LI><B>Survivor.pm</B> and <B>Survivor/Check.pm</B><BR>
+     Perl modules may be written against <TT>Survivor.pm</TT> and the
+     related <TT>Survivor/Check.pm</TT> modules, which can detect if
+     they are running under a <A HREF=building.html#perl>multithreaded
+     version of Perl</A>, and can automatically parallelize via
+     <TT>fork</TT> if threads are not available.  Again, since
+     Transport Modules are just a special type of Check Module, these
+     routines may be useful.
+     <P>
+
+     For information on these modules, run
+
+     <PRE>
+     % perldoc src/modules/common/Survivor.pm
+     % perldoc src/modules/common/Survivor/Check.pm
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ Transport Modules may require their arguments to be typed, using the
+ same <A HREF="spec-xmlarg.html">argument type specification</A> as
+ Check Module arguments.
+
+ <P>
+
+ For assistance in testing Transport Modules, the <A
+ HREF="util-xmlmaker.html">XML Maker utility</A> may be useful.
+
+ <P>
+
+ <B>Important</B>: Please see the <A HREF=license.html>license</A>
+ for this package to see if custom modules are subject to the same
+ license.
+
+ <P>
+
+<HR>
+<I>$Date: 2006/11/19 22:20:18 $</I><BR>
+<I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

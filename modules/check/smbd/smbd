@@ -1,0 +1,81 @@
+#! /usr/bin/perl -w
+
+# smbd check module
+
+# Version: $Revision: 0.5 $
+# Author: Matt Selsky <selsky@columbia.edu>
+#   (Based on monitor originally written for Mon monitoring system)
+# Date: $Date: 2006/02/11 20:40:23 $
+
+# Copyright (c) 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ();
+
+my $sc = new Survivor::Check;
+
+$sc->GetOpt( \%argfmt, \&SmbdValidate);
+
+my $SMBCLIENT = $sc->Which('smbclient');
+
+defined $SMBCLIENT or
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, 'smbclient executable not found');
+
+my $r = $sc->Exec( \&SmbdCheck );
+
+exit($r);
+
+sub SmbdValidate {
+    return(MODEXEC_OK, 0, 'Smbd OK');
+}
+
+sub SmbdCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $err;
+    open(SMB, "$SMBCLIENT -NL $host 2>&1|");
+
+    my $line;
+    while( defined($line = <SMB>) ) {
+        chomp $line;
+	if( $line =~ /^\s+Sharename\s+/ ) {
+	    $line = <SMB>; # eat line with ---
+	    $line = <SMB>;
+	    chomp $line;
+	    if( length $line ) {
+		if( $line =~ /^Error returning browse list:/ ) {
+		    $err = 'Error returning browse list';
+		} elsif( $line =~ /^Error/ ) {
+		    $err = "Unknown error - $_";
+		}
+	    }
+	    last;
+	} elsif( $line =~ /^session request to .* failed/ ) {
+	    $err = 'Access denied';
+	    last;
+	} elsif( $line =~ /error connecting to [\d\.]+:139/ ) {
+	    $err = 'Connection refused';
+	    last;
+	} elsif( $line =~ /Connection reset by peer/ ) {
+	    $err = 'Connection refused. Check ACLs.';
+	    last;
+	}
+    }
+
+    close(SMB);
+
+    if(defined $err) {
+	return(MODEXEC_PROBLEM, 0, $err);
+    } else {
+	return(MODEXEC_OK, 1, 'No errors detected');
+    }
+}

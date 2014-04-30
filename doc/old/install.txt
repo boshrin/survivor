@@ -1,0 +1,90 @@
+				Installing Survivor
+
+Prerequisites
+-------------
+The survivor scheduler requires a platform that implements POSIX
+threads.  Currently, the scheduler has only been built under Solaris,
+but it should build under other platforms with minimal modifications.
+
+The survivor remote daemon is implemented as a Perl script, and so
+should run anywhere Perl can run.
+
+See NOTES for specific patches required for specific operating systems
+(especially Solaris 8).
+
+Building
+--------
+(1) Edit INSTDIR in Makefile.inc in the top level directory to contain
+    the location where you would like the package installed.  By
+    default, this is /opt/survivor-{version}.  Under this directory,
+    various subdirectories (bin, sbin, etc...) will be created.
+
+(2) Edit INSTUSER in Makefile.inc in the top level directory to
+    contain the username that will own the package and that the
+    scheduler and other programs will run as.  This defaults to
+    nobody, as the scheduler requires no special privileges.
+
+(3) Edit INSTGROUP in Makefile.inc in the top level directory to
+    contain the group that will own the package.  Only users in this
+    group will be able to run the command line interface.  This
+    defaults to staff.
+
+(4) In the top level directory, type 'make'.
+
+Installing
+----------
+(5) In the top level directory, as root, type 'make install'.  The
+    following will be installed:
+
+    INSTDIR/sbin/ss
+	The survivor scheduler.
+
+    INSTDIR/sbin/sg
+        The survivor mail gateway.
+
+    INSTDIR/sbin/sr
+	The survivor remote daemon, used by the remote module.
+
+    INSTDIR/sbin/sw
+	The survivor CGI (web) interface.
+
+    INSTDIR/bin/sc
+	The survivor command line interface.
+
+    INSTDIR/mod/
+	Various modules distributed with the package.
+
+Configuring
+-----------
+(6) Each survivor instance requires a configuration directory, a state
+    directory, and a history directory.  Ordinarily, only one survivor
+    instance is required.
+
+    The default location for the configuration files is /etc/survivor.
+    See config-spec.txt for more information on configuration files.
+
+    The default location for the state directory is
+    /var/survivor/state.  This directory MUST exist before the
+    scheduler starts.  It must be writeable by the install user
+    and by the install group.
+
+     # mkdir -m 770 /var/survivor/state
+     # chown $INSTUSER /var/survivor/state
+     # chgrp $INSTGROUP /var/survivor/state
+
+    The default location for the history directory is
+    /var/survivor/history.  This directory MUST exist before the
+    scheduler starts.  It must be writeable by the install user.
+
+     # mkdir -m 750 /var/survivor/history
+     # chown $INSTUSER /var/survivor/history
+     # chgrp $INSTGROUP /var/survivor/history
+
+Starting
+--------
+(7) Start the daemon.  A sample script suitable for installing
+    in /etc/init.d can be found in init.d/survivor.
+
+Re-configuring
+--------------
+(8) Change config files, kill -HUP, watch for reparsing errors.

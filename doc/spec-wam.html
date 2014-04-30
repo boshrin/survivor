@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Web Authentication Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Web Authentication Module
+ Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <OL>
+ <LI>Web Authentication modules <B>must</B> be reentrant.  That is, if a
+     module is run more than once simultaneously, all instances
+     <B>must</B> run to completion without interference.
+     <P>
+
+ <LI>Web Authentication modules <B>must not</B> change their process
+     group by any means, including via <TT>setsid()</TT>,
+     <TT>setpgid()</TT>, <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/webauth/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>webauth/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/webauth</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+
+        The <TT>install-remote</TT> directive <B>should</B> be the
+        same as <TT>install</TT>, except where it does not make sense
+        for the module to be installed as part of a remote
+        distribution.  (Web Authentication modules typically do not
+        need to be installed remotely.)
+        <P>
+
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/wam-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+
+ <LI>Web Authentication modules do not accept any command line
+     arguments, but instead receive their required data via a <A
+     HREF=survivor.dtd><TT>SurvivorWebAuthRequest</TT></A> element
+     provided in an XML document on stdin.
+     <P>
+
+     The optional <TT>ModuleOption</TT> elements <B>should</B>
+     conform to the <A HREF="spec-xmlarg.html">Module XML Argument
+     Specification</A>.
+    
+ <LI>Web Authentication modules <B>should not</B> write output files.
+     <P>
+
+ <LI>Web Authentication modules <B>must</B> generate output on
+     stdout consisting of an XML document containing a
+     <A HREF=survivor.dtd><TT>SurvivorWebAuthResult</TT></A> element.
+     <P>
+
+     The attribute <TT>AuthOK</TT> values are as follows:
+
+     <UL>
+     <LI><B>yes</B>: Successful authentication, username and
+         optionally group memberships included.
+     <LI><B>deferred</B>: Authentication incomplete.  The module
+         has handled the request (as for a cgi), and <TT>sw</TT>
+	 should transmit any content in the <TT>Deferral</TT>
+	 element and then exit.
+     <LI><B>no</B>: Authentication failed.
+     </UL>
+     <P>
+
+ <LI>Web Authentication modules <B>must</B> exit with one of the
+     following values (as defined in <TT>include/survivor.H</TT>):
+
+     <UL>
+     <LI><B><TT>MODEXEC_OK</TT></B>: Authentication request successfully
+         processed.
+     <LI><B><TT>MODEXEC_PROBLEM</TT></B>: An error occurred in
+         processing the request.
+     <LI><B><TT>MODEXEC_MISCONFIG</TT></B>: The module is misconfigured
+         and is unable to process the request.
+     </UL>
+     <P>
+ </OL>
+ 
+<HR>
+<I>$Date: 2006/11/20 00:09:53 $</I><BR>
+<I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

@@ -1,0 +1,33 @@
+----------------------------
+revision 0.8
+date: 2005/06/06 01:24:51;  author: benno;  state: Exp;  lines: +7 -5
+$mount is not defined when reading exports lines with only comments
+----------------------------
+revision 0.7
+date: 2003/01/29 01:11:14;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:03:17;  author: benno;  state: Exp;  lines: +4 -2
+Adjust headers
+----------------------------
+revision 0.5
+date: 2002/12/16 00:08:29;  author: selsky;  state: Exp;  lines: +85 -71
+Update for Survivor::Check
+----------------------------
+revision 0.4
+date: 2002/05/31 22:16:08;  author: selsky;  state: Exp;  lines: +24 -4
+add support for linux etab in place of xtab
+----------------------------
+revision 0.3
+date: 2002/05/28 20:33:46;  author: selsky;  state: Exp;  lines: +52 -49
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:57:29;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:45:52;  author: benno;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Load Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>load</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>load</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>load</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module load {</B>
+       [<B>warn</B> &lt;number>]
+       [<B>prob</B> &lt;number>]
+       [<B>warn5</B> &lt;number>]
+       [<B>prob5</B> &lt;number>]
+       [<B>warn15</B> &lt;number>]
+       [<B>prob15</B> &lt;number>]
+     <B>}</B>
+     [<B>via</B> &lt;transport>]
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Executables
+<SURVIVOR META="dependency" TYPE="executable">
+   <UL>
+   <LI>Linux distributions lacking the <TT>rup</TT> command may need to
+    install the <TT>rup</TT> (or <TT>rstat-client</TT>) package.  Failing
+    that, this module may still be used as a remote module.
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum one minute load average required to generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob"></A><B>prob</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum one minute load average required to generate a problem.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn5"></A><B>warn5</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum five minute load average required to generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob5"></A><B>prob5</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum five minute load average required to generate a problem.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn15"></A><B>warn15</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum fifteen minute load average required to generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob15"></A><B>prob15</B></TD>
+ <TD CLASS=kwref>optional number between zero and infinity</TD>
+ <TD CLASS=kwdef>
+   Minimum fifteen minute load average required to generate a problem.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ At least one <I>warn</I> or <I>prob</I> value must be provided.  A
+ value of zero will prevent a warning or problem from being generated
+ for that test.
+ 
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>load</TT> module determines the one, five, and/or fifteen
+ minute load average on the host to be checked.  In order to determine
+ the load, the module executes <TT>rup</TT> when used as a scheduler
+ module and <TT>uptime</TT> when used as a remote module.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To generate a warning when the one minute load exceeds 10 or a problem
+     when the one minute load exceeds 20:
+     <PRE>
+     module load {
+       warn 10
+       prob 20
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:13:49 $</I><BR>
+ <I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn5">warn5</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn15">warn15</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob5">prob5</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob15">prob15</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

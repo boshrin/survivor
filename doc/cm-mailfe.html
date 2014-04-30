@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Mailfe Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>mailfe</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>mailfe</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>mailfe</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module mailfe {</B>
+       [<B>protocol</B> (<B>imap</B> | <B>imaps</B>)]
+       <B>username</B> &lt;relation>
+       <B>password</B> &lt;password>
+       [<B>wait</B> &lt;number>]
+       [<B>expunge</B> &lt;boolean>]
+       [<B>imaphost</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=MailTools"><TT>Mail::Send</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-imapprot"></A><B>protocol</B></TD>
+ <TD CLASS=kwref>optional string, either 'imap' or 'imaps', default is 'imaps'</TD>
+ <TD CLASS=kwdef>
+   Whether to use IMAP over port 143 or IMAP-SSL over port 993.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-username"></A><B>username</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Username for IMAP login.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>password</TD>
+ <TD CLASS=kwdef>
+   Password for IMAP login.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword><A ID="kw-wait"></A><B>wait</B></TD>
+ <TD CLASS=kwref>optional number, default is 2</TD>
+ <TD CLASS=kwdef>
+   Time in seconds to wait after the message is sent before checking
+   that it was delivered.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-expunge"></A><B>expunge</B></TD>
+ <TD CLASS=kwref>optional boolean, default is true</TD>
+ <TD CLASS=kwdef>
+   Whether or not to permanently delete test messages after retrieval.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-smtphost"></A><B>imaphost</B></TD>
+ <TD CLASS=kwref>optional string, default is host being checked</TD>
+ <TD CLASS=kwdef>
+   The IMAP host from which to retrieve the test message, if different from
+   the host being checked.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>mailfe</TT> module module sends an email through the host
+ being checked (the "frontend") and waits a specified time. It then
+ connects to an IMAP server (through the same server, unless an IMAP
+ host is passed in the optional parameter), logs in, and attempts to
+ receive the message, in order to determine if the frontend is
+ operating as expected. It will also expunge the received message, if
+ desired. Only IMAP and IMAP-SSL are supported currently. IMAP-TLS is
+ not supported.  See also the <A
+ HREF="cm-mailbe.html"><TT>mailbe</TT></A> check module.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To retrieve from the host being cheked and not expunge after retrieval:
+     <PRE>
+     module mailfe {
+       username bob
+       password pw
+       expunge false
+     }
+     </PRE>
+
+ <LI>To retrieve from <TT>imap.example.com</TT> over non-SSL IMAP:
+     <PRE>
+     module mailfe {
+       protocol imap
+       username alice
+       password pw
+       imaphost imap.example.com      
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 20:19:46 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-expunge">expunge</A><BR>
+ <A CLASS="keywords" HREF="#kw-smtphost">imaphost</A><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-imapprot">protocol</A><BR>
+ <A CLASS="keywords" HREF="#kw-username">username</A><BR>
+ <A CLASS="keywords" HREF="#kw-wait">wait</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

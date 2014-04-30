@@ -1,0 +1,17 @@
+----------------------------
+revision 0.4
+date: 2007/01/07 00:07:13;  author: benno;  state: Exp;  lines: +8 -8
+Make message 10 chars shorter to allow better chance of forwardability
+----------------------------
+revision 0.3
+date: 2004/03/27 12:48:32;  author: benno;  state: Exp;  lines: +3 -3
+Fix bug in substr use
+----------------------------
+revision 0.2
+date: 2003/10/06 22:23:47;  author: benno;  state: Exp;  lines: +4 -3
+Use ReplyOK
+----------------------------
+revision 0.1
+date: 2003/05/28 23:59:55;  author: benno;  state: Exp;
+Initial revision
+=============================================================================

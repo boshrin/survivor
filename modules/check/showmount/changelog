@@ -1,0 +1,29 @@
+----------------------------
+revision 0.7
+date: 2003/01/29 01:27:17;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:09:43;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.5
+date: 2002/12/24 22:52:50;  author: selsky;  state: Exp;  lines: +28 -35
+Update for Survivor::Check
+----------------------------
+revision 0.4
+date: 2002/05/28 19:16:29;  author: selsky;  state: Exp;  lines: +25 -23
+port to Survivor.pm
+----------------------------
+revision 0.3
+date: 2002/04/28 23:16:43;  author: toor;  state: Exp;  lines: +7 -4
+case bug
+----------------------------
+revision 0.2
+date: 2002/04/04 21:05:36;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 21:49:23;  author: benno;  state: Exp;
+initial revision
+=============================================================================

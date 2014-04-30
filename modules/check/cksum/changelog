@@ -1,0 +1,9 @@
+----------------------------
+revision 0.2
+date: 2004/11/11 16:51:27;  author: benno;  state: Exp;  lines: +5 -5
+Check for non-readable file
+----------------------------
+revision 0.1
+date: 2004/11/11 16:44:20;  author: benno;  state: Exp;
+Initial revision
+=============================================================================

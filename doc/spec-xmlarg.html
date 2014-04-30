@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Module XML Argument Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Module XML Argument Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+  <UL>
+  <LI><A HREF=#argtypes>Argument Types</A>
+  </UL>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Modules that accept information via an <A HREF="survivor.dtd">XML
+ document</A> may accept arguments (ie: module specific configuration
+ information).  These arguments may be typed.
+
+ <P>
+
+ <OL>
+ <LI>Curly braces <TT>{}</TT> <B>must not</B> be used anywhere
+     except as delimiters to the entire argument in the
+     configuration files.
+ <LI>Arguments <B>must</B> be named.  The name <B>must</B> consist
+     solely of alphanumeric characters, underscores, hyphens,
+     and dots.
+ <LI>Arguments <B>may</B> be typed according to the <A
+     HREF=#argtypes>currently available set of argument types</A>.
+ <LI>The argument name <TT>module</TT> is reserved for modules that
+     call other modules.
+ <LI>Argument names beginning with an underscore are reserved for
+     modules that call other modules.
+ <LI>Argument names <TT>debugfile</TT> (of type <I>file</I>) and
+     <TT>debugsyslog</TT> (of type <I>boolean</I>) are reserved to
+     enable module debugging.
+ </OL>
+
+ <P>
+
+ Arguments that are not conformant cannot use the provided parsing
+ mechanisms, may not parse correctly in the configuration files,
+ and may not work correctly with other modules.	
+
+ <P>
+
+ <A ID="argtypes"></A>
+ <H3>Argument Types</H3>
+
+ A module may insist that its arguments be typed.  When the arguments
+ are typed, run time checking is performed to verify that the arguments
+ passed conform to the requirements of the module.  While no explicit
+ tags are required to identify types of arguments in the configuration
+ file, the values provided must meet the criteria of the argument type.
+ The following types are defined:
+
+ <OL>
+ <LI><B>boolean</B>: The value passed must be one of <I>true</I>, <I>t</I>,
+     <I>yes</I>, <I>y</I>, or <I>1</I> to indicate <I>true</I>, or
+     <I>false</I>, <I>f</I>, <I>no</I>, <I>n</I>, or <I>0</I> to indicate
+     <I>false</I>.
+ <LI><B>directory</B>: As for type <I>string</I>, except the argument
+     must exist and must be a directory on the host the module is run on.
+ <LI><B>extraction</B>: The argument passed indicates a specification
+     for extracting part of a string, and must be one of:
+     <UL>
+     <LI><I>column[x]</I> to extract the column in position <I>x</I>,
+         starting from 0, using whitespace to separate columns
+     <LI><I>substr[x,y]</I> to extract the substring beginning at the
+         character at position <I>x</I> (starting from 0) of length
+	 <I>y</I>
+     </UL>
+ <LI><B>file</B>: As for type <I>string</I>, except the argument must
+     exist and must be a file, symlink, pipe, or socket on the host
+     the module is run on.
+ <LI><B>flags</B>: The argument passed is a set of zero or more characters
+     (no separators between each flag).  It is recommended, but not
+     required, that a <I>flags</I> argument be used with the <I>any</I>
+     modifier.
+ <LI><B>number</B>: A string of characters representing a number.
+     Only the characters <TT>0</TT> through <TT>9</TT>, <TT>-</TT>, and
+     <TT>.</TT> are permitted.  The negative sign, if used, must only
+     appear once at the beginning of the string.  The decimal point, if
+     used, must only appear once in the string.
+ <LI><B>password</B>: As for type <I>string</I>.  Additional features
+     or restrictions may be added later.
+ <LI><B>relation</B>: The argument passed indicates a relative value and
+     must be one of:
+     <UL>
+     <LI>For numeric values
+         <UL>
+         <LI><I>lt[x]</I> to indicate <I>less than x</I>
+	 <LI><I>gt[x]</I> to indicate <I>greater than x</I>
+	 <LI><I>eq[x]</I> to indicate <I>equal to x</I>
+	 <LI><I>ne[x]</I> to indicate <I>not equal to x</I>
+	 <LI><I>bt[x,y]</I> to indicate <I>between x and y (inclusive)</I>
+	 <LI><I>nb[x,y]</I> to indicate <I>not between x and y (inclusive)</I>
+	 </UL>
+     <LI>For regular expressions
+         <UL>
+         <LI><I>reg[s]</I> to indicate <I>matching the regular expression
+	 s</I>
+	 <LI><I>regv[s]</I> to indicate <I>not matching the regular expression
+	 s</I>.
+	 </UL>
+     <LI>For time comparisons
+         <UL>
+	 <LI><I>tnt[x]</I> to indicate <I>time newer than x seconds ago</I>
+	 <LI><I>tot[x]</I> to indicate <I>time older than x seconds ago</I>
+	 </UL>
+     </UL>
+ <LI><B>string</B>: A text string, conforming to the requirements
+     outlined above. 
+ </OL>
+
+ In addition, types may be modified.  The following modifiers are defined:
+
+ <OL>
+ <LI><B>any(a,b,c,...)</B>: The value provided may be zero or more of the
+     values <I>a</I>, <I>b</I>, <I>c</I>, or <I>...</I>.
+ <LI><B>between(x,y)</B>: The value provided must be at least <I>x</I> and
+     not greater than <I>y</I>.  If either value is <I>inf</I> (infinity),
+     then that bound is not checked.  Only type <I>number</I> may use
+     this modifier.
+ <LI><B>default(x)</B>: The default value for this argument if none is
+     provided.  This modifier may only be used along with the <I>optional</I>
+     modifier.
+ <LI><B>list</B>: The value provided is a list of values.  When this modifier
+     is set, multiple arguments of the same name may be provided, and each
+     will be considered a member of the list.  Without this modifier, the
+     same argument may not be passed more than once to a module.  Types
+     <I>boolean</I>, <I>flags</I>, and <I>relation</I> may not use this
+     modifier.
+ <LI><B>one(a,b,c,...)</B>: The value provided must be exactly one of the
+     values <I>a</I>, <I>b</I>, <I>c</I>, or <I>...</I>.  This modifier
+     should not be used with the <I>list</I> modifier.
+ <LI><B>optional</B>: The argument is optional.  If not provided, the
+     module will use its predefined default value for that argument.
+ </OL>
+
+ Parsers are provided to assist in parsing named arguments.  See the
+ appropriate module documentation.
+
+<HR>
+<I>$Date: 2006/11/20 00:11:13 $</I><BR>
+<I>$Revision: 0.5 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

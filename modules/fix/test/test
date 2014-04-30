@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+
+# test fix module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2003/01/29 01:36:38 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Fix;
+
+# argformat describes the arguments we expect.  GetOpt will then use
+# this to handle all the argument parsing and validation for us.
+# The key is the name of the argument, value is a string describing the
+# argument, using the bold faced types and modifiers described in
+# doc/cm-args.html.
+
+my %argformat = ("service" => "string");
+
+# Create a new Fix object.
+
+my $sf = new Survivor::Fix();
+
+# GetOpt will exit on error, so we need not check for return.
+
+$sf->GetOpt(\%argformat);
+
+# We would try the fix here, if we had a fix to try.
+
+my $r = MODEXEC_OK;
+my $s = "Fix for " . $sf->Arg("service") . " successfully executed";
+
+# Result will generate the required output and exit with the required
+# value.
+
+$sf->Result($r, $s);

@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+
+# tftpd check module
+
+# Version: $Revision: 0.11 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/07/15 17:27:49 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::TFTP;
+
+my %argfmt = ("filename" => "string",
+	      "blocksize" => "optional number between(1,inf) default(512)",
+	      "port" => "optional number between(1,65535) default(69)");
+
+my $sc = new Survivor::Check;
+
+$sc->GetOpt(\%argfmt, \&TftpdValidate);
+
+my $r = $sc->Exec( \&TftpdCheck);
+
+exit($r);
+
+sub TftpdValidate {
+    return(MODEXEC_OK, 0, "Tftpd OK");
+}
+
+sub TftpdCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $tftp = Net::TFTP->new($host,
+			      BlockSize => $self->Arg("blocksize"),
+			      Port => $self->Arg("port"));
+
+    if( $tftp->get( $self->Arg("filename"), '/dev/null' ) ) {
+	my $problem = &cleanupError( $tftp->error );
+	return(MODEXEC_PROBLEM, 0, "GET failed - $problem");
+    } else {
+	return(MODEXEC_OK, 1, 'File retrieved successfully');
+    }
+}
+
+sub cleanupError {
+    my $message = shift;
+
+    $message =~ s/[:\n]//g;
+
+    return $message;
+}

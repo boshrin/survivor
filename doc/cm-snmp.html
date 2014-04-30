@@ -1,0 +1,279 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Snmp Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>snmp</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>snmp</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>snmp</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module snmp {</B>
+       [<B>community</B> &lt;string>]
+       <B>oid</B> &lt;string>
+       [<B>warnmatch</B> &lt;relation>]
+       [<B>probmatch</B> &lt;relation>]
+       [<B>match</B> &lt;relation>]
+       [<B>warncount</B> &lt;relation>]
+       [<B>probcount</B> &lt;relation>]
+       [<B>mib</B> &lt;file>]
+       [<B>snmpversion</B> (<B>1</B> | <B>2</B> | <B>2c</B> | <B>3</B>)]
+       [<B>snmptimeout</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-community"></A><B>community</B></TD>
+ <TD CLASS=kwref>optional string, default is 'public'</TD>
+ <TD CLASS=kwdef>
+   Community name with read-access.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-oid"></A><B>oid</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   SNMP OID to use as search filter.  OID may be either numerical or
+   named.  If it is named, it may be necessary to use the
+   <TT>mib</TT> argument to provide the name of a mib file
+   containing the translations.  Using numerical OIDs is preferred
+   since named OID resolution is not always perfect.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warnmatch"></A><B>warnmatch</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Trigger a warning if this relation matches the response.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probmatch"></A><B>probmatch</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Trigger a problem if this relation matches the response.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-match"></A><B>match</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   If <I>warncount</I> or <I>probcount</I> is specified, use this relation
+   to determine if a line from the response is considered matching.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warncount"></A><B>warncount</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   If <I>match</I> is specified, trigger a warning if this relation matches
+   the count of lines matching <I>match</I>.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warnprob"></A><B>warnprob</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   If <I>match</I> is specified, trigger a problem if this relation matches
+   the count of lines matching <I>match</I>.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-mib"></A><B>mib</B></TD>
+ <TD CLASS=kwref>optional file</TD>
+ <TD CLASS=kwdef>
+   MIB file to load in order to find special OID definitions.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmpversion"></A><B>snmpversion</B></TD>
+ <TD CLASS=kwref>optional string, one of '1', '2','2c', or '3', default
+  is '1'</TD>
+ <TD CLASS=kwdef>
+   SNMP protocol version to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmptimeout"></A><B>snmptimeout</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity, default
+  is '5'</TD>
+ <TD CLASS=kwdef>
+   SNMP query timeout, in seconds.  Note that multiple queries may be
+   issued within one check, so this should not be the same as the module
+   timeout.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ At least one of <I>match</I>, <I>warnmatch</I> or <I>probmatch</I> must
+ be specified.
+   
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>snmp</TT> module uses the Perl <TT>SNMP</TT> module to
+ determine if the host being checked has status in line with the
+ specified query.  If only <TT>warnmatch</TT> and <TT>probmatch</TT>
+ are specified, all lines returned at or under <TT>oid</TT> must match
+ the <TT>warnmatch</TT>/<TT>probmatch</TT> specification.  If no line
+ matching <TT>oid</TT> is found, the module is considered
+ misconfigured.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To warn if the value at oid .iso.3.6.1.4.1.789.1.2.1.3 (accessed at
+     community <I>mycommunity</I>) is greater than 60 or generate a problem
+     if it is greater than 90:
+     <PRE>
+     module snmp {
+       community mycommunity
+       oid .iso.3.6.1.4.1.789.1.2.1.3
+       warnmatch gt[60]
+       probmatch gt[90]
+     }
+     </PRE>
+
+ <LI>As above, but using the textual oid as defined in <TT>/etc/netapp.mib</TT>:
+     <PRE>
+     module snmp {
+       community mycommunity
+       oid .iso.org.dod.internet.private.enterprises.netapp.netapp1.sysStat.cpu.cpuBusyTimePerCent
+       warnmatch gt[60]
+       probmatch gt[90]
+       mib /etc/netapp.mib
+     }
+     </PRE>
+
+ <LI>To generate a warning if less than 2 hot spares are present on a JetStor
+     device or a problem if less than 1 hot spare is present:
+     <PRE>
+     module snmp {
+       community mycommunity
+       oid .iso.3.6.1.4.1.14752.1.2.3.1.1.9
+       match reg[Hot Spare]
+       warncount lt[2]
+       probcount lt[1]
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2007/02/11 02:08:47 $</I><BR>
+ <I>$Revision: 0.11 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-community">community</A><BR>
+ <A CLASS="keywords" HREF="#kw-match">match</A><BR>
+ <A CLASS="keywords" HREF="#kw-mib">mib</A><BR>
+ <A CLASS="keywords" HREF="#kw-oid">oid</A><BR>
+ <A CLASS="keywords" HREF="#kw-probcount">probcount</A><BR>
+ <A CLASS="keywords" HREF="#kw-probmatch">probmatch</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmptimeout">snmptimeout</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmpversion">snmpversion</A><BR>
+ <A CLASS="keywords" HREF="#kw-warncount">warncount</A><BR>
+ <A CLASS="keywords" HREF="#kw-warnmatch">warnmatch</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

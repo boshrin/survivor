@@ -1,0 +1,47 @@
+----------------------------
+revision 0.11
+date: 2005/12/21 23:29:22;  author: selsky;  state: Exp;  lines: +21 -12
+Check for device and rest on separate lines
+----------------------------
+revision 0.10
+date: 2004/08/19 15:51:28;  author: selsky;  state: Exp;  lines: +3 -3
+return notice if no filesystems to check
+----------------------------
+revision 0.9
+date: 2004/08/18 23:34:10;  author: selsky;  state: Exp;  lines: +6 -2
+make sure we have filesystems to check
+----------------------------
+revision 0.8
+date: 2003/01/31 12:02:27;  author: selsky;  state: Exp;  lines: +9 -11
+Use single quotes
+Send df STDERR to /dev/null instead of STDOUT
+----------------------------
+revision 0.7
+date: 2003/01/29 01:10:34;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:02:59;  author: benno;  state: Exp;  lines: +103 -151
+Convert to named args
+----------------------------
+revision 0.5
+date: 2002/08/14 10:12:41;  author: selsky;  state: Exp;  lines: +37 -33
+Clean up
+Use new Survivor module routines instead of hard-coding filesystem types
+----------------------------
+revision 0.4
+date: 2002/06/04 05:08:42;  author: selsky;  state: Exp;  lines: +9 -10
+use more portable df commands, use IsBSDish()
+----------------------------
+revision 0.3
+date: 2002/06/01 00:04:56;  author: selsky;  state: Exp;  lines: +57 -44
+initial port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:57:14;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:45:02;  author: benno;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,69 @@
+----------------------------
+revision 0.16
+date: 2005/11/28 00:51:55;  author: benno;  state: Exp;  lines: +5 -5
+Fix countwarn to generate WARNING, not PROBLEM
+----------------------------
+revision 0.15
+date: 2004/06/12 00:10:34;  author: benno;  state: Exp;  lines: +27 -6
+Add showline
+----------------------------
+revision 0.14
+date: 2003/03/04 17:40:40;  author: benno;  state: Exp;  lines: +30 -3
+Add matchone
+----------------------------
+revision 0.13
+date: 2003/01/29 01:12:20;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.12
+date: 2002/12/31 04:03:31;  author: benno;  state: Exp;  lines: +302 -395
+Port to named args
+----------------------------
+revision 0.11
+date: 2002/09/30 15:05:33;  author: benno;  state: Exp;  lines: +14 -3
+fix bug preventing warnings from being generated when both warn and
+prob are specified
+----------------------------
+revision 0.10
+date: 2002/07/10 16:31:09;  author: selsky;  state: Exp;  lines: +9 -5
+silence warnings about "" as prob,warn
+----------------------------
+revision 0.9
+date: 2002/07/05 14:26:08;  author: selsky;  state: Exp;  lines: +17 -12
+clean up glob, grep
+don't use File::stat anymore since it's broken in perl <= 5.6.1
+----------------------------
+revision 0.8
+date: 2002/06/06 22:40:13;  author: selsky;  state: Exp;  lines: +10 -8
+fix uninitialized variable warnings
+----------------------------
+revision 0.7
+date: 2002/06/05 07:30:27;  author: selsky;  state: Exp;  lines: +194 -210
+fix many uninitialized variables
+don't use grep()
+better error checking
+----------------------------
+revision 0.6
+date: 2002/06/02 20:04:58;  author: selsky;  state: Exp;  lines: +367 -380
+initial port to Survivor.pm
+----------------------------
+revision 0.5
+date: 2002/04/04 20:57:51;  author: benno;  state: Exp;  lines: +11 -2
+copyright
+----------------------------
+revision 0.4
+date: 2002/04/03 21:08:04;  author: benno;  state: Exp;  lines: +13 -3
+survivorGlob can generate errors
+----------------------------
+revision 0.3
+date: 2002/04/02 18:59:27;  author: benno;  state: Exp;  lines: +6 -3
+use survivorGlob
+----------------------------
+revision 0.2
+date: 2002/04/02 18:57:36;  author: benno;  state: Exp;  lines: +296 -97
+Add op, max, count
+----------------------------
+revision 0.1
+date: 2002/04/02 18:55:08;  author: benno;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Krb5 Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>krb5</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>krb5</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>krb5</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module krb5 {</B>
+       <B>principal</B> &lt;string>
+       <B>keytab</B> &lt;file>
+       [<B>cfdir</B> &lt;directory>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Executables
+<SURVIVOR META="dependency" TYPE="executable">
+   <UL>
+   <LI><A HREF="http://web.mit.edu/kerberos/www">kinit <I>and</I> kdestroy</A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-principal"></A><B>principal</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Principal used for testing.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-keytab"></A><B>keytab</B></TD>
+ <TD CLASS=kwref>file</TD>
+ <TD CLASS=kwdef>
+   Keytab file containing key for <I>principal</I>.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-cfdir"></A><B>cfdir</B></TD>
+ <TD CLASS=kwref>optional directory, default is
+   <TT>/etc/survivor/krb5</TT></TD>
+ <TD CLASS=kwdef>
+   Directory containing required configuration files.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>krb5</TT> module executes the Kerberos V version of
+ <TT>kinit</TT> in order to verify that the KDC on the host being
+ checked is responding to ticket requests.
+
+ <P>
+
+ The <I>keytab</I> file must contain the key for <I>principal</I>.  To
+ set this up requires write access to the primary KDC.  In this
+ example, the principal <TT>test/check.domain.org</TT> is written to
+ the keytab <TT>/etc/check.keytab</TT>:
+
+ <PRE>
+        pollerhost# kadmin -p <I>adminprinc</I>
+        kadmin:  addprinc -randkey test/check.domain.org
+	kadmin:  ktadd -k /etc/check.keytab test/check.domain.org
+	kadmin:  quit
+	pollerhost# chown $INSTUSER /etc/check.keytab
+	pollerhost# chmod 400 /etc/check.keytab
+ </PRE>
+
+ Note above that the keytab file is made readable only by the user
+ that the scheduler runs as.  This may prohibit the command line
+ interface from manually running this check module, if it is run by a
+ user unable to read the keytab.
+
+ <P>
+
+ The configuration directory (<I>cfdir</I>) must contain a valid
+ <TT>krb5.conf</TT> file for each KDC to be tested, named
+ <TT>krb5.<I>hostname</I>.conf</TT>.  The contents of the file must
+ include only <I>hostname</I> as a KDC (in addition to all the other
+ standard definitions).  For example, if <TT>alice</TT> is the primary
+ KDC and <TT>bob</TT> is the secondary, the following two
+ configuration files would be placed in <I>cfdir</I>:
+
+ <H4>krb5.alice.conf</H4>
+
+ <PRE>
+ [libdefaults]
+     ticket_lifetime = 600
+     default_realm = REALM.ORG
+     default_tkt_enctypes = des-cbc-crc
+     default_tgs_enctypes = des-cbc-crc
+
+ [realms]
+     REALM.ORG = {
+         kdc = alice.realm.org:88
+         default_domain = realm.org
+     }
+
+ [domain_realm]
+     .realm.org = REALM.ORG
+     realm.org = REALM.ORG
+ </PRE>
+
+ <H4>krb5.bob.conf</H4>
+
+ <PRE>
+ [libdefaults]
+     ticket_lifetime = 600
+     default_realm = REALM.ORG
+     default_tkt_enctypes = des-cbc-crc
+     default_tgs_enctypes = des-cbc-crc
+
+ [realms]
+     REALM.ORG = {
+         kdc = bob.realm.org:88
+         default_domain = realm.org
+     }
+
+ [domain_realm]
+     .realm.org = REALM.ORG
+     realm.org = REALM.ORG
+ </PRE>
+
+ <B>Important</B>: This module writes temporary files (the credentials
+ obtained in verifying the principal) with predictable names:
+ <TT>/tmp/check.krb5.<I>hostname</I></TT>.  While this should be no
+ less secure than <TT>kinit</TT> run by ordinary users, if potentially
+ malicious (or ordinary) users are permitted to login to the scheduler
+ host (which they shouldn't be), it may be possible to set up a race
+ condition or symlink attack to get this module to write the test
+ tickets to a file owned by the malicious or clueless user.  While the
+ contents of the file should be harmless (the test principal created
+ above should have no privileges anywhere), the possibility of exploit
+ cannot be ignored completely.
+
+ <P>
+
+ <B>Also</B>: This module will not succeed for all KDCs until the
+ <TT>addprinc</TT> operation performed above on the primary KDC has
+ propagated to all secondary KDCs.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To test a KDC using the principal <TT>test/check.domain.org</TT>
+     with <TT>/etc/survivor/krb5</TT> holding the relevant configuration
+     files:
+     <PRE>
+     module krb5 {
+       principal test/check.domain.org
+       keytab    /etc/check.keytab
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:11:29 $</I><BR>
+ <I>$Revision: 0.5 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-cfdir">cfdir</A><BR>
+ <A CLASS="keywords" HREF="#kw-keytab">keytab</A><BR>
+ <A CLASS="keywords" HREF="#kw-principal">principal</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

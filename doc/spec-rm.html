@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Report Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Report Module Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <OL>
+ <LI>Report modules <B>must</B> be reentrant.  That is, if a
+     module is run more than once simultaneously, all instances
+     <B>must</B> run to completion without interference.
+     <P>
+
+ <LI>Report modules <B>must not</B> change their process group by any
+     means, including via <TT>setsid()</TT>, <TT>setpgid()</TT>,
+     <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/report/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>report/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/report</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+
+        The <TT>install-remote</TT> directive <B>should</B> be the
+        same as <TT>install</TT>, except where it does not make sense
+        for the module to be installed as part of a remote
+        distribution.  (Report modules typically do not need to be
+        installed remotely.)
+        <P>
+
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/rm-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+
+ <LI>Report modules receive their required data via a <A
+     HREF=survivor.dtd><TT>SurvivorReportRequest</TT></A> element
+     provided in an XML document on stdin.
+     <P>
+    
+ <LI>Report modules <B>may</B> write temporary output files only if a
+     <TT>TmpDir</TT> element is provided within the
+     <TT>Formatting</TT> element and only in the location provided by
+     the <TT>TmpDir</TT> element.  Temporary files should be named in
+     such a way as to avoid conflict with other modules.  The form
+     <TT>$TmpDir/rm-$modname-$random.ext</TT> is recommended.
+     <P>
+
+ <LI>Report modules <B>must</B> generate output on stdout consisting
+     of a document of the format specified by the <TT>Style</TT>
+     attribute of the <TT>Formatting</TT> element.  If no appropriate
+     input is received, a suitable error <B>should</B> be provided.
+     Defined styles are:
+
+     <UL>
+     <LI><B>check</B>: Plain text document suitable for parsing by a check
+         module.  Output must consist of a line of the form
+	 <PRE>
+	 service host output
+	 </PRE>
+	 where <TT>output</TT> is well defined and consistent on a
+	 per-module basis.
+     <LI><B>html</B>: HTML document suitable for rendering by a web browser.
+     <LI><B>text</B>: Plain text document suitable for viewing in a terminal.
+     </UL>
+     <P>
+
+ <LI>Report modules <B>must</B> exit with one of the
+     following values (as defined in <TT>include/survivor.H</TT>):
+
+     <UL>
+     <LI><B><TT>MODEXEC_OK</TT></B>: Report request successfully
+         processed.
+     <LI><B><TT>MODEXEC_PROBLEM</TT></B>: An error occurred in
+         processing the request.
+     <LI><B><TT>MODEXEC_MISCONFIG</TT></B>: The module is misconfigured
+         and is unable to process the request.
+     </UL>
+     <P>
+ </OL>
+ 
+<HR>
+<I>$Date: 2006/11/20 00:08:08 $</I><BR>
+<I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

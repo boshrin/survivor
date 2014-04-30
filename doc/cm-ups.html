@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Ups Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>ups</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>ups</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>ups</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module ups {</B>
+       [<B>community</B> &lt;string>]
+       [<B>replaceBattery</B> &lt;boolean>]
+       [<B>timeOnBattery</B> &lt;boolean>]
+       [<B>snmpversion</B> (<B>1</B> | <B>2</B> | <B>2c</B> | <B>3</B>)]
+       [<B>snmptimeout</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-community"></A><B>community</B></TD>
+ <TD CLASS=kwref>optional string, default is 'public'</TD>
+ <TD CLASS=kwdef>
+   SNMP community name with read-access.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-replaceBattery"></A><B>replaceBattery</B></TD>
+ <TD CLASS=kwref>optional boolean, default is true</TD>
+ <TD CLASS=kwdef>
+   Controls whether module reports battery needs replacement
+   condition and triggers a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-timeOnBattery"></A><B>timeOnBattery</B></TD>
+ <TD CLASS=kwref>optional boolean, default is true</TD>
+ <TD CLASS=kwdef>
+   Controls whether module reports non-zero time remaining on
+   battery condition and triggers a problem.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmpversion"></A><B>snmpversion</B></TD>
+ <TD CLASS=kwref>optional string, one of '1', '2','2c', or '3', default
+  is '1'</TD>
+ <TD CLASS=kwdef>
+   SNMP protocol version to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmptimeout"></A><B>snmptimeout</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity, default
+  is '5'</TD>
+ <TD CLASS=kwdef>
+   SNMP query timeout, in seconds.  Note that multiple queries may be
+   issued within one check, so this should not be the same as the module
+   timeout.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The module must check for at least one of <I>replaceBattery</I> and
+ <I>timeOnBattery</I>.
+ 
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>ups</TT> module uses the Perl <TT>SNMP</TT> module to query
+ the status of <A HREF="http://www.apc.com">American Power
+ Conversion</A> (APC) or Liebert uninterruptible power supplies.  UPSs
+ are checked for necessity of battery replacement and for time on
+ battery.
+
+ <P>
+
+ This module was initially written for APC devices.  Support has since
+ been added for Liebert devices, the only change is that different
+ MIBs are polled.  The Liebert UPS devices also have a generic alarm
+ value which must be checked.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To check a UPS with the community name "public":
+     <PRE>
+     module ups {}
+     </PRE>
+
+ <LI>To skip the battery replacement check:
+     <PRE>
+     module ups {
+       replaceBattery false
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2007/02/11 02:09:08 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-community">community</A><BR>
+ <A CLASS="keywords" HREF="#kw-replaceBattery">replaceBattery</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmptimeout">snmptimeout</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmpversion">snmpversion</A><BR>
+ <A CLASS="keywords" HREF="#kw-timeOnBattery">timeOnBattery</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

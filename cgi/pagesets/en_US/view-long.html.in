@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{IF DEFINED FLAG vf}
+@{SET vf=@[FLAG vf]}
+@{ELSE}
+@{SET vf=all}
+@{ENDIF}
+
+@{IF STRING $vf = addressed}
+@{SET title=View Acknowledged and Inhibited}
+@{SET nomatch=No acknowledgments or inhibitions}
+@{ENDIF}
+@{IF STRING $vf = all}
+@{SET title=View All}
+@{SET nomatch=No services found}
+@{ENDIF}
+@{IF STRING $vf = error}
+@{SET title=View By Outstanding Error}
+@{SET nomatch=No outstanding errors}
+@{ENDIF}
+@{IF STRING $vf = escalated}
+@{SET title=View Escalated}
+@{SET nomatch=No outstanding escalations}
+@{ENDIF}
+@{INCLUDE header.html}
+
+<!-- view-long.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI vf= file=}">@{ECHO $instance}</A>
+ > @{ECHO $title}
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+
+@{SET rw=@[AUTHLEVEL rw]}
+
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="infobody">
+ <TR CLASS="infobody">
+ @{IF NUMBER $rw = 1}
+ <FORM NAME="multi-action" METHOD="post" ACTION="@{URITOP}">
+ @{URITAGS style=hidden omit=h,s}
+ <TH CLASS="infobody">Select</TH>
+ @{ENDIF}
+ <TH CLASS="infobody">service@host</TH>
+ <TH CLASS="infobody">Status</TH>
+ <TH CLASS="infobody">Comment</TH>
+ <TH CLASS="infobody">Addressed</TH>
+ </TR>
+
+ @{SET matchtype=ALLACTIVE}
+ @{IF STRING $vf = addressed}
+ @{SET matchtype=ADDRESSED}
+ @{ENDIF}
+ @{IF STRING $vf = error}
+ @{SET matchtype=ERRORSTATE}
+ @{ENDIF}
+ @{IF STRING $vf = escalated}
+ @{SET matchtype=ESCALATED}
+ @{ENDIF}
+ 
+ @{SET match=0}
+ @{FOREACH sh $matchtype}
+  <!-- iterate over each item returned, splitting sh into its components -->
+   @{SPLIT $sh @ s h}
+   @{SET ok=0}
+   @{SET rc=@[CHECKSTATUS type=rc service=$s host=$h]}
+   @{SET quiet=@[ALERTSTATUS type=quiet service=$s host=$h]}
+   @{SET esc=@[ALERTSTATUS type=escalated service=$s host=$h]}
+   
+   @{IF STRING $vf = addressed}
+    @{IF NUMBER $quiet = 1}
+    @{SET ok=1}
+    @{ENDIF}
+   @{ENDIF}
+   @{IF STRING $vf = all}
+    @{IF NUMBER $rc > -1}
+    @{SET ok=1}
+    @{ENDIF}
+   @{ENDIF}
+   @{IF STRING $vf = error}
+    @{IF NUMBER $rc > 0}
+    @{SET ok=1}
+    @{ENDIF}
+   @{ENDIF}
+   @{IF STRING $vf = escalated}
+    @{IF NUMBER $esc > 0}
+    @{SET ok=1}
+    @{ENDIF}
+   @{ENDIF}
+    
+   @{IF NUMBER $ok = 1}
+    @{SET match=1}
+    @{SET rcclass=$rc}
+    @{IF NUMBER $quiet = 1}
+    @{SET rcclass=q}
+    @{ELSE}
+     @{IF NUMBER $esc > 0}
+     @{SET rcclass=e}
+     @{ENDIF}
+    @{ENDIF}
+    <TR CLASS="infobody">
+    @{IF NUMBER $rw = 1}
+    <TD CLASS="infobody">
+     <INPUT TYPE=checkbox NAME=sh VALUE="@{ECHO $s}@@{ECHO $h}">
+    </TD>
+    @{ENDIF}
+    <TD CLASS="infobody"><B>@{ECHO $s}@@{ECHO $h}</B></TD>
+    <TD CLASS="rc@{ECHO $rcclass}">
+     <A HREF="@{URI file= file=view-details.html s=$s h=$h vf=}">@{ECHO $rc}</A>
+    </TD>
+    <TD CLASS="infobody">@{CHECKSTATUS type=comment service=$s host=$h}</TD>
+    <TD CLASS="infobody">
+    @{IF NUMBER $quiet = 1}
+     @{SET ack=@[ALERTSTATUS type=acknowledged service=$s host=$h]}
+     @{SET inh=@[ALERTSTATUS type=inhibited service=$s host=$h]}
+     @{IF STRING NOTEMPTY $ack}
+     Acknowledged by <B>@{ECHO $ack}</B>
+     @{ENDIF}
+     @{IF STRING NOTEMPTY $inh}
+     Inhibited by <B>@{ECHO $inh}</B>
+     @{ENDIF}
+    @{ELSE}
+    -
+    @{ENDIF}
+    </TD>
+    </TR>
+   @{ENDIF}
+ @{ENDEACH}
+
+ @{IF NUMBER $rw = 1}
+ <TR CLASS="infobody">
+ <TD CLASS="infobar" COLSPAN=5>
+  @{IF NUMBER $match != 0}
+  <SELECT NAME="a">
+  <OPTION>Acknowledge
+  <OPTION>Unacknowledge
+  <OPTION>Escalate
+  <OPTION>Inhibit
+  <OPTION>Uninhibit
+  <OPTION>Reschedule
+  </SELECT>
+  <INPUT TYPE=text NAME=cmt VALUE="(no reason given)" SIZE=40>
+  <INPUT TYPE=hidden NAME=ret VALUE="@{URI}">
+  <INPUT TYPE="submit" VALUE="Submit">
+  @{ENDIF}
+ </TD>
+ </TR>
+ </FORM>
+ @{ENDIF}
+ 
+ @{IF NUMBER $match = 0}
+ <TR CLASS="infobody">
+ <TD CLASS="infobody" COLSPAN=@{IF NUMBER $rw = 1}5@{ELSE}4@{ENDIF}>
+  <I>@{ECHO $nomatch}</I>
+ </TD>
+ </TR>
+ @{ENDIF}
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+
+@{INCLUDE key.html}
+
+@{INCLUDE footer.html}
+</HTML>

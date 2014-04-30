@@ -1,0 +1,100 @@
+#!/usr/bin/perl -w
+
+# test check module
+
+# Version: $Revision: 0.9 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2003/11/02 21:38:29 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+# argformat describes the arguments we expect.  GetOpt will then use
+# this to handle all the argument parsing and validation for us.
+# The key is the name of the argument, value is a string describing the
+# argument, using the bold faced types and modifiers described in
+# doc/cm-args.html.
+
+my %argformat = ("exitcode" => "number between(0,1000)",
+		 "exittext" => "optional string");
+
+# GetOpt also requires a validation subroutine that verifies any
+# dependencies this module requires are in place.  (This is part of
+# the check module specification.)  Note that the arguments may not
+# have been parsed yet, so do not verify anything involving them.
+
+# It will be passed nothing.
+# It must return a tuple of (result code, scalar value, comment).
+
+sub TestValidate {
+    my ($self) = @_;
+    
+    # In this example, we just return true since the test module has
+    # no dependencies.
+
+    # The comment must be <Module> OK, where <Module> is the name of
+    # the module (case insensitive).
+
+    return(MODEXEC_OK, 0, "Test OK");
+}
+
+# This is the subroutine that Check::Exec will execute to perform the
+# actual check.  For best performance, it should be thread safe
+# (including any functions it calls).  If it absolutely cannot be made
+# thread safe, use $sc->UseThreads (after creating $sc, below, but
+# before calling Check::Exec) to tell Check::Exec not to use threading.
+#
+# Check::Exec will then use fork() to run the check in parallel.  If you
+# wish the check to run serially (no parallelization at all), disable
+# threading as above, and additionally use $sc->UseFork to disable
+# forking as well.
+
+# It will be passed a reference to the Check object and the name of
+# the host to be examined.
+# It must return a tuple of the form (result code, scalar value, comment).
+
+sub TestCheck {
+    my ($self, $host) = @_;
+
+    # In this example, all we do is read a shared variable, which is safe.
+    # More complicated code should be more carefully written.
+
+    my $true = $self->Which("true");
+
+    my $cmt = "";
+
+    if(defined $self->Arg("exittext")) {
+	$cmt = $self->Arg("exittext");
+    } else {
+	$cmt = "Test requested for $host with exitcode "
+	    . $self->Arg("exitcode");
+    }
+    
+    return($self->Arg("exitcode"), 0, $cmt);
+}
+
+# Create a new Check object.
+
+my $sc = new Survivor::Check();
+
+# Process options passed to us first, since that may alter how we behave.
+# Also, error checking on bad options doesn't need to be multithreaded.
+
+# GetOpt will exit on error, so we need not check for return.
+
+$sc->GetOpt(\%argformat, \&TestValidate);
+
+#$sc->UseThreads(0);
+#$sc->UseFork(0);
+
+my $r = $sc->Exec(\&TestCheck);
+
+exit($r);

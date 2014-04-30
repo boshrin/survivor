@@ -1,0 +1,855 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Upgrading</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Upgrading</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About Upgrading</A>
+ <LI><A HREF="#v100">Upgrading from 0.9.7 to 1.0</A>
+ <LI><A HREF="#v097">Upgrading from 0.9.6 to 0.9.7</A>
+ <LI><A HREF="#v096">Upgrading from 0.9.5 to 0.9.6</A>
+ <LI><A HREF="#v095">Upgrading from 0.9.4 to 0.9.5</A>
+ <LI><A HREF="#v094">Upgrading from 0.9.3 to 0.9.4</A>
+ <LI><A HREF="#v093">Upgrading from 0.9.2 to 0.9.3</A>
+ <LI><A HREF="#v092">Upgrading from 0.9 or 0.9.1 to 0.9.2</A>
+ <LI><A HREF="#v08x">Upgrading from 0.8.x to 0.9</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About Upgrading
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Although every effort is made to minimize incompatibilities between
+ versions, occasionally changes are required to facilitate future
+ enhancements and make the system more flexible.
+
+ <P>
+
+ <A ID="v100"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.7 to 1.0
+ </TD>
+ </TR>
+ </TABLE>
+
+ <OL>
+ <LI>v1.0 removes support for the <I>notwarncount</I> and <I>notprobcount</I>
+     arguments to the <A HREF="cm-snmp.html"><TT>snmp</TT></A> check module.
+     There is no replacement for this functionality.
+
+     <P>
+
+ <LI>v1.0 adds a <I>snmpversion</I> argument to the <A
+     HREF="cm-snmp.html"><TT>snmp</TT></A>, <A
+     HREF="cm-ups.html"><TT>ups</TT></A>, <A
+     HREF="cm-storedge-t3.html"><TT>storedge-t3</TT></A>, <A
+     HREF="cm-nadisk.html"><TT>nadisk</TT></A>, and <A
+     HREF="cm-hplj.html"><TT>hplj</TT></A>, check modules.  The
+     default SNMP version used is '1'.  For installations where these
+     modules were previously used with a different SNMP version, add
+     the appropriate version as an argument to all relevant checks.
+
+     <P>
+
+ <LI>v1.0 displays the first time a check returned the current result,
+     via both the command line and web interfaces.  When upgrading to
+     v1.0, the first check time is not available, so the time the
+     check runs first after the upgrade is used instead.  This is
+     inconsistent with the number of instances reported by the same
+     interfaces.
+ </OL>
+ 
+ <A ID="v097"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.6 to 0.9.7
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>v0.9.7 changes some flags to the web interface (<TT>sw</TT>) and
+     may require existing bookmarks referencing actions and custom
+     pagesets to be updated.
+     
+     <UL>
+     <LI>The flags <TT>h</TT> and <TT>s</TT> are no longer used to
+         specify service@host for an action to be performed.  Instead,
+	 <TT>sh</TT> should be used.
+     <LI>The flag <TT>ret</TT> should now be used when submitting an
+         action (<TT>a</TT> flag) to provide a return path after the
+	 action is processed.
+     </UL>     
+
+     <P>
+
+ <LI>v0.9.7 changes the specification for <TT>callliststatus</TT> files
+     in order to allow substitutions to properly end.  Rotating
+     call lists may lose their place following the upgrade.  Before
+     upgrading, determine who is on call for each rotating call list.
+
+     <PRE>
+     % sc clstat list1
+     [list1]
+      -> abc was last notified at abc@site.org via this list
+      -> List last rotated at Thu Aug 25 09:40:32 2005
+      -> abc is now on call
+     </PRE>
+
+     After the upgrade, use the new <I>clset</I> command to reset
+     the call list.
+
+     <PRE>
+     % sc -o person=abc clset list1
+     [list1] OK: Set
+     </PRE>
+
+     <P>
+
+ <LI>v0.9.7 changes the specification for report modules slightly.
+     Report modules may no longer assume a <TT>TmpDir</TT> will be provided.
+     Additionally, a new <I>check</I> style has been defined.
+     For more information, see the updated <A
+     HREF="spec-rm.html">specification</A>.
+
+     <P>
+
+     Any custom report modules should be updated.
+
+     <P>
+
+ </OL>
+ 
+ <A ID="v096"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.5 to 0.9.6
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>v0.9.6 removes the <TT>parallel</TT> check module.  This module
+     did not perform any checks, but ran other checks in parallel,
+     reducing the time required to run them.
+
+     <P>
+
+     Modules run under the <TT>parallel</TT> module can simply be
+     run serially instead.
+     
+     <P>
+
+     <A HREF="cm-about.html#custom">Other methods</A> are available for
+     module parallelization.  Most modules included with the package
+     use these methods by default.
+
+     <P>
+
+ <LI>v0.9.6 converts check, fix, and transport modules to accept
+     arguments via XML documents.  Custom <A
+     HREF="cm-about.html#custom">check</A>, <A
+     HREF="fm-about.html#custom">fix</A>, and <A
+     HREF="tm-about.html#custom">transport</A> modules that do not use
+     <TT>libcm</TT> or <TT>Survivor.pm</TT> must be modified.  Custom
+     modules that use <TT>libcm</TT> may need to be modified.
+
+     <P>
+
+ <LI>v0.9.6 generalizes the <TT>apc</TT> check to support Liebert UPSs
+     as well.  To reflect this, the module has been renamed to
+     <TT>ups</TT>.  References to <TT>apc</TT> in <TT>check.cf</TT>
+     must be changed to <TT>ups</TT>.
+
+     <P>
+ </OL>
+
+ <A ID="v095"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.4 to 0.9.5
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>v0.9.5 converts most state files to an XML based format in order
+     to facilitate the addition of new features both in this release
+     and in future releases.
+
+     <P>
+
+     In order to convert the existing state files, as root stop the
+     v0.9.4 scheduler and then run the <TT>convert-state.pl</TT> script
+     in <TT>src/util/upgrading</TT>.  This must be done while the
+     scheduler is stopped.  Run the script once for each
+     <TT>statedir</TT> directory defined in
+     <TT>/etc/survivor/instance.cf</TT>.  Then, start the 0.9.5
+     scheduler.
+
+     <P>
+
+     If this conversion is not performed, all existing state (but not
+     history) will be lost when the 0.9.5 scheduler is started.
+    
+     <P>
+
+ <LI>v0.9.5 adds a <TT>tmpdir</TT> keyword to <TT>instance.cf</TT>, used
+     for components of the system that require the ability to write
+     temporary files.  The default value is <TT>/tmp</TT>, which is not
+     suitable if the system is installed on a host accessible by
+     non-trusted users.  See <A
+     HREF="cf-instance.html#kw-tmpdir">instance.cf</A> for more information.
+
+     <P>
+ </OL>
+
+ <A ID="v094"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.3 to 0.9.4
+ </TD>
+ </TR>
+ </TABLE>
+
+ <OL>
+ <LI>v0.9.4 overhauls the internal management of history records in
+     order to facilitate several changes now and to prepare for
+     additional changes later.  While most of these changes are not
+     visible, the format of history records has changed.
+
+     <P>
+
+     In order to convert existing history records, as root run the
+     <TT>convert-history.pl</TT> script in <TT>src/util/upgrading</TT>.
+     This must be done while the scheduler is stopped.  It can be done
+     after the 0.9.4 scheduler has been installed as long as it is not
+     currently running.  Run the script once for each
+     <TT>historydir</TT> directory defined in
+     <TT>/etc/survivor/instance.cf</TT>.
+
+      <PRE>
+      scheduler# /etc/init.d/survivor stop
+      scheduler# cd src/util/upgrading
+      scheduler# ./convert-history.pl /survivor/sample/history
+      scheduler# /etc/init.d/survivor start
+      </PRE>
+
+     <P>
+
+     If necessary, it is safe to rerun <TT>convert-history</TT> twice on
+     the same directory, as long as the scheduler is not running.
+
+     <P>
+
+     Strictly speaking, converting existing history records is not
+     necessary.  However, having unconverted history records may
+     prevent the 0.9.4 utilities (including the history retrieval and
+     rotation functions of <TT>sc</TT> and the reporting function of
+     <TT>sw</TT>) from completing successfully.
+
+     <P>
+
+ <LI>v0.9.4, by default, disables the command line interface for the
+     root user.  This is to increase accountability, as at larger sites
+     many administrators may have access to the root account, making it
+     difficult to determine who, for example, inhibited alerts for a
+     host.  Since it is not necessary to be root to run <TT>sc</TT>, no
+     functionality is lost.  However, if it is desired to have the root
+     user be able to run the command line interface, simply add the
+     following line to each instance defined in <TT>instance.cf</TT>:
+
+      <PRE>
+      allow root
+      </PRE>
+
+     For more information, see the <A HREF=cf-instance.html>instance
+     configuration file documentation</A>.
+
+     <P>
+
+ <LI>The 0.9.4 web interface has been overhauled, with two notable
+     changes.  First, cookies are now required for authenticated
+     sessions.  Second, the format of several keywords in
+     <TT>cgi.cf</TT> has changed:
+
+     <UL>
+     <LI>The <TT>authtype</TT> keyword has been deleted, with
+         functionality moved into <A
+	 HREF="cf-cgi.html#authmods">authentication modules</A>
+	 and <A HREF="cf-cgi.html#authz">authorization</A> keywords.
+     <LI>The <TT>authloginurl</TT>, <TT>authlogouturl</TT>,
+         <TT>authvalidateurl</TT> and <TT>authservice</TT> keywords
+	 have been replaced with the <A HREF="wam-wind.html">wind
+	 WebAuth module</A>.
+     </UL>
+
+     For full details of how authentication and authorization now
+     works, see the documentation for <A HREF="cf-cgi.html">cgi.cf</A>
+     and the sample configuration file in the source <TT>config</TT>
+     directory.
+    
+     <P>
+ </OL>
+
+ <A ID="v093"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9.2 to 0.9.3
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ 0.9.3 removes a dependency on <TT>sendmail</TT>.  In order to ensure
+ alerts transmitted with the <TT>mail</TT> transmit module are
+ successfully sent out, the Perl module <TT>Mail::Mailer</TT> must
+ be installed on the scheduler host.
+
+ <P>
+
+ Additionally, 0.9.3 overhauls the configuration of dependencies.
+ Type II dependencies were improperly implemented in prior releases.
+ For information on Type II dependencies, see the <A
+ HREF=cf-dependency.html#dep2>documentation</A>.  Any Type II
+ dependencies in <TT>dependency.cf</TT> must be converted.
+
+ <P>
+
+ Type I dependencies have a new syntax, as defined in the <A
+ HREF=cf-dependency.html#dep1>documentation</A>.  Any Type I
+ dependencies in <TT>dependency.cf</TT> must be converted to the new
+ syntax.  For example,
+
+  <PRE>
+  depend foo on bar status
+  </PRE>
+
+ would become
+
+  <PRE>
+  depend {
+    checks { foo }
+    for all hosts
+    on bar status
+  }
+  </PRE>
+
+ and
+
+  <PRE>
+  depend all except { foo bar } on baz status
+  </PRE>
+
+ would become
+
+  <PRE>
+  depend {
+    all checks except { foo bar }
+    for all hosts
+    on baz status
+  }
+  </PRE>
+
+ <A ID="v092"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.9 or 0.9.1 to 0.9.2
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ 0.9.2 introduces a small change to increase the flexibility of the
+ alerting infrastructure, splitting alert modules into <A
+ HREF=fmm-about.html>format</A> and <A HREF=tmm-about.html>transmit</A>
+ modules.  The changes required to use the standard modules are very
+ simple, just add the following to the beginning of <A
+ HREF=cf-calllist.html><TT>calllist.cf</TT></A> (assuming no local
+ alert modules are in use):
+
+ <PRE>
+  alert via mail {
+    format as full
+    transmit with mail
+  }
+ 
+  alert via mailtopager {
+    format as compact
+    transmit with mail
+  }
+ 
+  alert via mailtonextel {
+    format as nextel
+    transmit with mail
+  }
+ 
+  alert via mailtosms {
+    format as sms
+    transmit with mail
+  }
+ </PRE>
+
+ Any custom alert modules written will need to be rewritten into
+ <A HREF=fmm-custom.html>format</A> and/or <A HREF=tmm-custom.html>transmit</A>
+ modules.
+
+ <P>
+
+ <A ID="v08x"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Upgrading from 0.8.x to 0.9
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ 0.9 introduces many changes that are incompatible with 0.8.x.  Many of
+ these changes will facilitate future enhancements and make the system
+ more flexible.  These instructions identify the steps needed to
+ upgrade.  We hope that future upgrades will not require nearly so many
+ changes (and preferably none at all).
+
+ <OL>
+ <LI><A HREF=building.html>Build</A> the new version.
+     <P>
+     
+ <LI>Stop the 0.8.x scheduler.
+     <P>
+     
+ <LI>Install the 0.9 remote package on all remotely monitored hosts.
+     <P>
+     
+ <LI>Install the 0.9 package on the scheduler host, but do not try
+     to start the scheduler.
+     <P>
+     
+ <LI>In <A HREF=cf-calllist.html><TT>calllist.cf</TT></A>, change any
+     rotating call lists to rotate using a schedule instead of an
+     explicit time.  For example, a call list originally defined as
+
+     <PRE>
+     call list foo {
+       notifies {
+ 	 jane@foo
+         joe@foo
+       }
+
+       via mail
+       rotates monday 12:00
+     }
+     </PRE>
+
+     would become
+
+     <PRE>
+     call list foo {
+       notifies {
+         jane@foo
+	 joe@foo
+       }
+
+       via mail
+       rotates using mondayNoon schedule
+     }
+     </PRE>
+
+     with <TT>mondayNoon</TT> defined in <A
+     HREF=cf-schedule.html><TT>schedule.cf</TT></A> as
+
+     <PRE>
+     schedule mondayNoon {
+       at {
+         monday 12:00
+       }
+     }
+     </PRE>
+
+     <P>
+     
+ <LI>Also in calllist.cf, switch to Person-based call lists.  Note that
+     because the state file format for call lists has changed, conversion
+     of call lists can be slightly complicated.  There are three options.
+     <P>
+
+     <OL>
+     <LI>The easiest procedure is to simply change the definitions.
+         See the <A HREF=cf-calllist.cf>documentation</A> for full
+	 details, but as an example
+
+	 <PRE>
+	 call list foo {
+	   notifies {
+	     jane@foo
+	     joe@foo
+	   }
+
+	   via mail
+	   broadcasts to all
+	 }
+	 </PRE>
+
+	 would become
+
+	 <PRE>
+	 person jane {
+	   notify jane@foo via mail
+	 }
+
+	 person joe {
+	   notify joe@foo via mail
+	 }
+
+	 call list foo {
+	   notifies {
+	     jane
+	     joe
+	   }
+
+	   via mail
+	   broadcasts to all
+	 }
+	 </PRE>
+
+	 Note that this procedure will reset simple and rotating call
+	 lists, and may confuse any existing substitutions.
+	 <P>
+	
+     <LI>To clear out all previous state, including any existing
+         substitutions, first remove all the directories under the
+	 directory <TT>calllist</TT> in each instance's state directory.
+	 To determine the state directory, see the instance configuration
+	 file, which is usually <TT>/etc/survivor/instance.cf</TT>.
+	 <P>
+
+	 Then, follow the instructions for #1, above.  This will still
+	 reset simple and rotating call lists, but there will be no
+	 confused entries for substitutions.
+	 <P>
+
+     <LI>If it is necessary to maintain previous state, it is possible
+         to manually convert the state files.  For assistance, please
+	 <A HREF=bug-report.html>file a bug report</A>.
+     </OL>
+     <P>
+    
+ <LI>The state file formats for check state and alert state have changed
+     to support new features introduced in v0.9 and to improve performance.
+     In order to preserve 0.8.x state, run the <TT>movestate.sh</TT> script
+     found in <TT>src/util/upgrading</TT> once for each <TT>statedir</TT>
+     directory defined in <TT>/etc/survivor/instance.cf</TT>.  If the script
+     is not run, old check and alert state will not carry forward to the v0.9
+     scheduler and superfluous files will be left lying around.
+     <P>
+
+     Run this script as <TT>$INSTUSER</TT>, or add an appropriate
+     <TT>chown</TT> line after the <TT>chmod</TT> line in the script.
+     <P>
+
+     <PRE>
+     scheduler% su - survivor
+     % cd src/util/upgrading
+     % ./movestate.sh /survivor/sample/state
+     </PRE>
+
+     This script should not be run more than once per <TT>statedir</TT>.
+     <P>
+     
+ <LI>In <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>, redefine the
+     alertplans.  Alertplans are now defined in terms of <I>tries</I>
+     rather than the number of check failures.  Whereas in v0.8.x an
+     alert action was based on the number of times a check failed (this
+     ability is still retained in v0.9 alertplans, but in a less prominent
+     way), v0.9 selects alert actions based on the number of times an alert
+     is transmitted.  See the <A HREF=cf-schedule.html>documentation</A>
+     for full details, but as an example
+
+     <PRE>
+     alertplan standard {
+       default {
+         after 2 warnings {
+	   alert unix-mailer
+	   using standard schedule
+	 }
+       }
+     }
+     </PRE>
+
+     would become
+
+     <PRE>
+     alertplan standard {
+       default {
+         after 2 check failures
+
+	 using standard schedule {
+	   try { alert unix-mailer }
+	 }
+       }
+     }
+     </PRE>
+
+     while in the following example, where multiple <I>returngroup problem</I>
+     stanzas were required to allow 1 failure overnight,
+
+     <PRE>
+     alertplan replicated {
+       on returngroup problem {
+         after 2 warnings {
+           alert unix-pager
+	   using dayevening schedule
+         }
+         after 4 warnings {
+           alert unix-pager
+	   using dayevening schedule
+         }
+       }
+       on returngroup problem {
+         after 2 warnings {
+           alert unix-pager
+	   using overnight schedule
+	   allow 1 failure
+	 }
+	 after 4 warnings {
+	   alert unix-pager
+	   using overnight schedule
+	   allow 1 failure
+	 }
+       }
+       default {
+         after 2 warnings {
+	   alert unix-mailer
+	   using extended schedule
+	 }
+       }
+     }
+     </PRE>
+
+     would become the less redundant
+
+     <PRE>
+     # Putting this here makes it the default for all alertplans through
+     # the end of the file, or until redefined.
+     after 2 check failures
+    
+     alertplan replicated {
+       on returngroup problem {
+	 using extended schedule {
+	   try 2 times {
+	     allow 1 failed host during overnight schedule
+	     alert unix-pager
+	   }
+	   try {
+	     allow 1 failed host during overnight schedule
+	     alert unix-pager
+	     flag escalated   # This is actually optional, since the second try
+	                      # is considered escalated by default
+	   }
+	 }
+       }
+       default {
+         using extended schedule {
+	   try { alert unix-mailer }
+	 }
+       }
+     }
+     </PRE>
+     <P>
+     
+ <LI>Also in <A HREF=cf-schedule.html><TT>schedule.cf</TT></A>, the
+     semantics of global notify on clear have changed.  Instead of
+     applying to all alertplans, a global notify on clear is now a
+     default value, and applies to all alertplans defined after it
+     (but not before it), until redefined or until the end of the
+     file.  To replicate the v0.8 behavior, make sure the notify on
+     clear statement is before the first alertplan definition, and add
+     the keyword <TT>default</TT>.  For example:
+
+     <PRE>
+     alertplan foo {
+       ...
+     }
+
+     # enable global notify on clear
+     notify using bar schedule on clear
+     </PRE>
+
+     becomes
+
+     <PRE>
+     # this applies to all subsequently defined alertplans, unless overridden
+     # or redefined
+     default notify using bar schedule on clear
+
+     alertplan foo {
+       ...
+     }
+     </PRE>
+     <P>
+     
+ <LI>In <A HREF=cf-check.html><TT>check.cf</TT></A>, all check modules
+     must now be converted to named argument style.  Unfortunately,
+     the only way to do this is to read the documentation for each
+     module and convert each entry appropriately.  The reason this is
+     so hard is the exact reason named arguments have been introduced:
+     the old format was inconsistent, hard to read, and hard to use.
+     <P>
+    
+ <LI>Also in <A HREF=cf-check.html><TT>check.cf</TT></A>, the remote
+     module is no longer a special type of check module, but is now
+     one of a new class of modules called <A
+     HREF=tm-about.html><I>transport modules</I></A>.  In order for a
+     module to run remotely, a transport module must be defined for it
+     to use.  A simple example to port a typical v0.8 entry (including
+     the conversion to named arguments, described above) would change
+
+     <PRE>
+     check mailq {
+       module remote(mailq,/var/spool/mqueue,0,1000:2000)
+     }
+
+     check swap {
+       module remote(swap,80,90)
+     }
+     </PRE>
+
+     to
+    
+     <PRE>
+     transport remote {
+       module plaintext {}
+     }
+
+     check mailq {
+       module mailq {
+         queuedir /var/spool/queue   # This could be omitted, it is the default
+	 age      0                  # This could also be omitted, same reason
+	 warn     1000
+	 prob     2000
+       }
+       via remote
+     }
+
+     check swap {
+       module swap {
+         warn     80
+	 prob     90
+       }
+       via remote
+     }
+     </PRE>
+     <P>
+     
+ <LI>Also in <A HREF=cf-check.html><TT>check.cf</TT></A>, the
+     semantics of the global check timeout have changed.  Instead of
+     applying to all checks that do not define their own timeout, the
+     global check timeout is now a default value, and applies to all
+     checks defined after it (but not before it), until redefined or
+     until the end of the file.  Until it is defined, the initial
+     default timeout of 45 seconds will apply.  To replicate the v0.8
+     behavior, make sure the timeout statement is before the first
+     check definition, and add the keyword <TT>default</TT>.  For
+     example:
+
+     <PRE>
+     check foo {
+       ...
+     }
+
+     # set global timeout
+     timeout 3 minutes
+     </PRE>
+
+     becomes
+
+     <PRE>
+     # this applies to all subsequently defined checks, unless overridden
+     # or redefined
+     default timeout 3 minutes
+
+     check foo {
+       ...
+     }
+     </PRE>
+     <P>
+     
+ <LI>In <A HREF=cf-dependency.html><TT>dependency.cf</TT></A>, changes
+     are required for both Type I and Type II dependencies.  Type I
+     dependencies simply need the keyword <TT>status</TT> appended.
+     For example:
+
+     <PRE>
+     depend all on ping
+     </PRE>
+
+     becomes
+
+     <PRE>
+     depend all on ping status
+     </PRE>
+
+     Type II dependencies need to be converted to named arguments, the
+     same as for check modules, described earlier.  Note that Type II
+     dependencies do not currently support transport modules.  This
+     will be addressed with a forthcoming revision of the dependency
+     mechanisms.
+     <P>
+     
+ <LI>Test the new configuration.  One way to do this is by using the 0.9
+     <A HREF=sc.html><TT>sc</TT></A> to manually run some or all checks.
+     <P>
+     
+ <LI>Start the 0.9 scheduler.
+     <P>
+ </OL>
+
+ <P>
+ 
+<HR>
+<I>$Date: 2007/03/29 12:17:29 $</I><BR>
+<I>$Revision: 0.12 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

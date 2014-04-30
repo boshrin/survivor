@@ -1,0 +1,21 @@
+----------------------------
+revision 0.5
+date: 2003/01/29 01:32:11;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.4
+date: 2002/12/31 04:16:42;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.3
+date: 2002/12/23 00:01:26;  author: selsky;  state: Exp;  lines: +76 -72
+Update for Survivor::Check
+----------------------------
+revision 0.2
+date: 2002/07/09 20:20:24;  author: benno;  state: Exp;  lines: +19 -14
+adjust errno analysis
+----------------------------
+revision 0.1
+date: 2002/06/28 18:55:46;  author: selsky;  state: Exp;
+Convert module to perl from compiled version
+=============================================================================

@@ -1,0 +1,1288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Future Enhancements and Changelog</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Future Enhancements and Change Log</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#future">Future Enhancements</A>
+ <LI><A HREF="#changelog">Change Log</A>
+  <UL>
+  <LI><A HREF="#v100">v1.0</A>
+  <LI><A HREF="#v097">v0.9.7</A>,
+      <A HREF="#v097a">v0.9.7a</A>,
+      <A HREF="#v097b">v0.9.7b</A>
+  <LI><A HREF="#v096">v0.9.6</A>,
+      <A HREF="#v096a">v0.9.6a</A>,
+      <A HREF="#v096b">v0.9.6b</A>
+  <LI><A HREF="#v095">v0.9.5</A>,
+      <A HREF="#v095a">v0.9.5a</A>
+  <LI><A HREF="#v094">v0.9.4</A>,
+      <A HREF="#v094a">v0.9.4a</A>,
+      <A HREF="#v094b">v0.9.4b</A>
+  <LI><A HREF="#v093">v0.9.3</A>,
+      <A HREF="#v093a">v0.9.3a</A>
+  <LI><A HREF="#v092">v0.9.2</A>,
+      <A HREF="#v092a">v0.9.2a</A>,
+      <A HREF="#v092b">v0.9.2b</A>,
+      <A HREF="#v092c">v0.9.2c</A>
+  <LI><A HREF="#v091">v0.9.1</A>,
+      <A HREF="#v091a">v0.9.1a</A>
+  <LI><A HREF="#v09">v0.9</A>,
+      <A HREF="#v09a">v0.9a</A>,
+      <A HREF="#v09b">v0.9b</A>,
+      <A HREF="#v09c">v0.9c</A>
+  <LI><A HREF="#v083">v0.8.3</A>,
+      <A HREF="#v083a">v0.8.3a</A>
+  <LI><A HREF="#v082">v0.8.2</A>,
+      <A HREF="#v082a">v0.8.2a</A>
+  <LI><A HREF="#v081">v0.8.1</A>,
+      <A HREF="#v081a">v0.8.1a</A>,
+      <A HREF="#v081b">v0.8.1b</A>
+  <LI><A HREF="#v08">v0.8</A>
+  </UL>
+ </UL>
+
+ <A ID="future"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Future Enhancements
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <I>This list is in the process of being moved to <A
+ HREF="bug-report.html">Bugzilla</A>.</I>
+
+ <H4>v1.1</H4>
+
+  <UL>
+  <LI>all: Darwin port
+      <UL>
+      <LI>Darwin doesn't implement <TT>sem_init</TT>, but does implement
+          <TT>sem_open</TT>/<TT>sem_close</TT>.
+      <LI><TT>atoi</TT> is not threadsafe on Darwin.  (See the man
+          page for a suggested replacement.)
+      <LI>Describe installation (where files are installed, installing
+          startup script, making the interface work, symlinks from
+	  <TT>/usr/bin/sc</TT> to <TT>$instdir/bin/sc</TT> should perhaps
+	  be automatically made, reference to
+	  http://www.macdevcenter.com/pub/a/mac/2002/09/10/sendmail.html).
+      <LI>Add <TT>SystemStarter</TT> script.<BR>
+          http://www.opensource.apple.com/projects/documentation/howto/html/SystemStarter_HOWTO.html
+      </UL>
+  <LI>all: BSD port.<BR>
+      <TT>ftp://ftp.netbsd.org/pub/NetBSD/packages/pkgsrc/devel/pth[-current]
+      ftp://ftp.netbsd.org/pub/NetBSD/packages/pkgsrc/README
+      </TT><BR>
+      This requires either a package supporting semaphores or a port to
+      use only GNU pthreads.
+  <LI>all: Enable FileDebugger via <TT>-L</TT>.
+  <LI>all: Add ability to reassign an alert to a CallList or Person,
+      overriding the AlertPlan.
+  <LI>all: Demo site
+  <LI>all: Distribute binary packages for Solaris.
+  <LI>mod: Add <TT>null</TT> alert module for services that don't need
+      to transmit alerts.
+  <LI>mod: <TT>process</TT> check module should offer options to look
+      at process age and memory usage.
+  <LI>mod: <TT>nis</TT> check module.
+  <LI>mod: Add mechanism to record length of time checks take to execute
+      and to raise errors or warnings if exceeding a time set in the cf.
+  <LI>ss: Add check throttling (similar to alert throttling), based
+      on some formula like hosts * checks / maximum frequency.
+  <LI>sc: Exit with "appropriate" exit codes.
+  <LI>util: <TT>watcher</TT> should look for module misconfigurations.
+  </UL>
+
+ <H4>v1.2</H4>
+
+  <UL>
+  <LI>libsrv: When parsing configuration files, any failure to insert
+      into newcf should result in lexerr++ and appropriate warning.
+  <LI>mod: filetest module should support warning and problem thresholds,
+      as should any other modules that accept scalar checks like this.
+  <LI>mod: Modules that use survivorAcc routines (or that should) should
+      have a verbosity option to not display "OK" status information.
+      eg: "WARNING:/usr at 98%" instead of
+      "WARNING:/usr at 98%,OK:/ at 33%,/opt at 12%,/home at 44%"
+  <LI>mod: Modules that produce "OK" as their only output might be more
+      verbose (eg: OK: mailq at 100 messages).
+  <LI>sg: Add mail relaying service to calllists and persons.
+      See TODO for suggestion.
+  <LI>sg: Allow sg to handle quoted messages with lines of the form
+      <PRE>
+      > Acknowledge
+      > Instance=test
+      </PRE>
+  <LI>sg: Additional two-way gateways, such as blackberry, if handling
+      quoted messages is insufficient for general support.
+  <LI>st: Trap-based scheduler, to allow receipt of unscheduled status
+      updates.
+  <LI>ss: Read errors on stderr from exec'ing modules and report them in
+      "Module is misconfigured" message.  (See CheckState::write_misconfig().)
+  </UL>
+
+ <H4>v1.3</H4>
+
+  <UL>
+  <LI>all: Combine common code in gateway/main.C, cli/Functionality.C,
+      and cgi/HTML.C.  Also, define status strings for MODEXEC_OK,
+      MODEXEC_NOTICE, etc.  (See cli:do_status() and html:clip_update())
+  <LI>all: Allow acknowledgments and inhibitions to expire after a user
+      defined amount of time.
+  <LI>sa: via sw, or as a standalone program.
+  <LI>sc: Add -b (or equivalent) for "brief" output, showing only errors
+      and perhaps "[host] OK".  This requires a fair amount of Functionality
+      rewriting.
+  <LI>ss: Consider more frequent (than otherwise specified by schedule)
+      rechecking of failed services.  This might be done with "checkplans",
+      check schedules dynamically selected based on previous check status.
+  </UL>
+
+ <H4>v1.4</H4>
+
+  <UL>
+  <LI>mod: Monitor network level services, like SLB and round robin.
+  <LI>mod: <TT>nessus</TT> check module.
+  <LI>mod: <TT>init.d</TT> fix module should be able to call
+      <TT>/etc/init.d/foo restart</TT>.
+  <LI>mod: Reduce <TT>ping</TT> module dependence on <TT>fping</TT>.
+  <LI>mod: <TT>orbit/rm/compress</TT>, <TT>pkill</TT>, fix modules.
+  <LI>mod: Add "post" support to <TT>httpurl</TT> module.
+  <LI>mod: Checks to monitor "well known" services (npr .rm, slashdot, etc),
+      possibly as configurations of existing modules.
+  <LI>mod: protocol check module should offer to verify the certificate
+      for ssl connections and generate a warning or problem on failure,
+      and should offer to warn if a certificate expiration is approaching.
+  <LI>mod: RPC-based service checks (if appropriate)
+  <LI>mod: Dial-in service check (using an attached modem)
+  <LI>mod: Database module should support an optional (simple) SQL query
+      to execute.
+  <LI>mod: ping module should be able to know what destination host's
+      gateway is and ping that.
+  <LI>mod: "Quality of Service" checks, eg to verify that
+      - mail is delivered in a timely fashion
+      - data transfer rates from servers are adequate
+      - syslogd is actually syslogging
+      - network roundtrip time is reasonable
+  <LI>mod: SSL based transport module
+  </UL>
+
+ <H4>v1.5</H4>
+
+  <UL>
+  <LI>all: Better error checking of OS calls like fopen.  This includes
+      better handling when wrapper calls like try_fopen fail, and use
+      of try_lock outside of State objects.
+  <LI>configure: Replace <TT>os.H</TT> with individual tests.
+  <LI>configure: Replace <TT>/usr/bin/perl</TT> with <TT>@PERL@</TT>
+  <LI>configure: Clean up <TT>Makefile.inc.in</TT>.
+  <LI>libcm: Rewrite threading algorithm to be like SurvivorMT.
+  <LI>libsrv: Document which libsrv methods call cf->foo() and make sure
+      they are called within a readlock (when called via the scheduler).
+  <LI>libsrv: CallListState could use the same sort of read_status
+      consolidation that CheckState, AlertState, and FixState have.
+  <LI>libsrv: Switch AlertPlan duplication (for alias substitutions in
+      the config file) to use protected: copies rather than _foo()
+      routines, similar to RecipientMethod(RecipientMethod).
+  <LI>libsrv: Rewrite Executor and XState objects to use CheckResult
+      (where appropriate).
+  <LI>mod: <TT>oncall</TT> module should use same libsrv code as <TT>sc</TT>
+      (which sc might not itself use) rather than fork sc.
+  <LI>mod: <TT>oncall</TT> module should not need to be passed an instance.
+  <LI>sr: Instantiate a Survivor object instead of passing NULL to ParseArgs.
+  </UL>
+
+ <H4>v1.6</H4>
+
+  <UL>
+  <LI>all: Clean up XXX marks.
+  <LI>all: Inhibitions and acknowledgments could have times attached to
+      them, eg: for scheduled maintenance.
+  <LI>libsrv: Executor has too many occurrences of hard coded check
+      result output.  Use libcm or equivalent.  CheckState also does this,
+      but it's probably OK there since it is the CheckState code.
+  <LI>mod: Digest alert module, to collect multiple alerts generated
+      within a user definable short period of time.
+  <LI>mod: Long term check module (to analyze history).  (An on-demand
+      version might also be useful, via sc or sw.  Generate data such
+      as availability (99.999% OK) or computations based on scalars.
+  <LI>mod: Acknowledgement/Inhibition auditing module.
+  <LI>mod: Reimplement request-string in protocol module.
+  <LI>mod: Add support to disk check module for filesystems other than ufs.
+  </UL>
+
+ <H4>v2.0</H4>
+
+  <UL>
+  <LI>all: Utilities (sc, sw, etc) could query ss for configuration
+      information rather than parse the cf files at each startup.
+      Or, more generally, an additional daemon could run on the scheduler
+      host and handle these type of requests (including state information).
+      (Or, it could just be part of ss to avoid having multiple processes
+      run.)  This could also address the problem described in building.html
+      about members of INSTGRP being able to edit history files.
+  <LI>all: XML or other interface so that frontends need not run on
+      the same host as the scheduler.
+  <LI>all: Global SurvivorXML object?
+  <LI>all: Break out english text into a localized language file.
+      (Organized by object class.)  (Do more try/throw stuff like libui?)
+  <LI>cf: Add "weekdays" and "weekends" keywords to date parsing for
+      calllist.cf and schedule.cf.  Functionality is already in
+      utils.C, but needs to be added to CallList.C, Schedule.C, config.l,
+      and spec-config.html.
+  <LI>cf: Add monthly date (from day 01 08:30 until day 02 05:30).
+      This may imply support for calllists that rotate monthly.
+  <LI>cf: Allow groups to be defined in terms of other groups
+      and possibly hostclasses.
+  </UL>
+
+ <H4>v2.1</H4>
+
+  <UL>
+  <LI>all: Alternate backends for state for better redundancy and to
+      minimize errors from bad filesystem calls.  Eg: SQL.
+  <LI>libsrv: PRNG object should use /dev/random if available.
+  <LI>ss: Update scheduler to allow history logs to be written to an
+      abstracted API for C++ objects or .so modules so that state or
+      history information can be written in real time to other locations,
+      including rrd format.
+  </UL>
+
+ <H4>v2.2</H4>
+
+  <UL>
+  <LI>mod: Format and/or Transmit module interface to defect tracking
+      systems.
+  </UL>
+
+ <H4>v3.0</H4>
+
+  <UL>
+  <LI>mod: API for argument setting (module installation) via sw.
+      (Named arguments may make this easy.)
+  <LI>mod: Compiled versions of scheduler modules dependent on
+      Perl packages to reduce externel dependencies (by autoconf'ing
+      modules where appropriate libraries exist).
+  <LI>ss: Distributed schedulers, with possibly redundant masters for
+      data consolidation.  (This would allow one web page to show data
+      from multiple servers running the scheduler.)
+  <LI>sw: Web based .cf editing (with support for rcs or equivalent).
+  </UL>
+ 
+ <A ID="changelog"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Change Log
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="v100"></A>
+ <H4>v1.0 (4 April 2007)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>mod: Remove <I>notwarncount</I> and <I>notprobcount</I> arguments from
+     <TT>snmp</TT> check module.
+ <LI>mod: Add <I>snmpversion</I> argument to <TT>snmp</TT>, <TT>ups</TT>,
+     <TT>storedge-t3</TT>, <TT>nadisk</TT>, <TT>hplj</TT> check modules.
+ </UL>
+ 
+ <I><B>The following changes were made that, while not incompatible
+    with previous versions, may be easily overlooked and cause
+    confusion following an upgrade (see <A HREF=upgrading.html>Upgrading</A>
+    for detailed information):</B></I>
+
+ <UL>
+ <LI>sc: Display time of first occurence of check, alert, and fix for a
+     given return code in <TT>status</TT> command (bug #568).
+ <LI>sw: Display time of first occurence of check, alert, and fix for a
+     given return code in <TT>view-details.html.in</TT> (bug #568).
+ </UL>
+    
+ <I>In addition, the following changes were also made:</I>
+ 
+ <UL>
+ <LI>configure: Add <TT>--enable-remote-only</TT> (bug #965).
+ <LI>configure: Fix bug (#261) where configure's <TT>install-sh</TT> could
+     not be found on systems without BSD style install.
+ <LI>configure: Fix bug (#260) where build failed when <TT>--disable-debug</TT>
+     used.
+ <LI>configure: Check for and build without <TT>libintl</TT> if not present.
+ <LI>doc: Add keyword index.
+ <LI>doc: Overhaul <TT>cf-host.html</TT>.
+ <LI>doc: Convert remainder of documentation to new format.
+ <LI>doc: Add <TT>obscure-tasks.html</TT> to document some useful, but less
+     obvious, tasks (bug #474).
+ <LI>doc: Standardize terminology.
+ <LI>doc: Generate changelogs for scripted modules via <TT>logbuilder.sh</TT>.
+ <LI>doc: Validate HTML.
+ <LI>doc: Add documentation for <TT>cm-storedge-t3</TT> check module.
+ <LI>init.d: Add support for <TT>chkconfig</TT>, verify that scheduler
+     is/is not running as appropriate (bug #941).
+ <LI>mod: Add <I>match</I>, <I>warncount</I>, and <I>probcount</I> arguments
+     to <TT>snmp</TT> check module.
+ <LI>mod: Add new <TT>mailboxcreate</TT> check module.
+ <LI>mod: Add <TT>flap</TT> report module (bug #564) to allow flap detection.
+ <LI>mod: Provide more useful text on timeout reading XML (bug #769).
+ <LI>mod: Add <TT>oracleic</TT> (Instant Client) to <TT>database</TT>
+     check module.
+ <LI>mod: Tweak length of messages generated by <TT>sms</TT> format module.
+ <LI>mod: Fix bug (#1314) where <TT>nadisk</TT> check module reported
+     uninitialized values.
+ <LI>mod: Fix file descriptor leak in <TT>load</TT> check module.
+ <LI>mod: Fix bug (#1499) with unbuffered output in <TT>XML.pm</TT> causing
+     misconfigurations.
+ <LI>mod: Add <TT>snmptimeout</TT> to <TT>snmp</TT>, <TT>ups</TT>,
+     <TT>storedge-t3</TT>, <TT>nadisk</TT>, <TT>hplj</TT> check modules.
+     check modules (bug #1313).
+ <LI>mod: Add <TT>sasl</TT> check module.
+ <LI>mod: Add <TT>raidbox</TT> check module.
+ <LI>mod: Add new <TT>dblocks</TT> check module.
+     <I>Contributed by David Filion.</I>
+ <LI>mod: Add new <TT>swraid</TT> check module.
+     <I>Contributed by David Filion.</I>
+ <LI>rpm: Distribute RPM of release.
+ <LI>sc: Fix bug (#196) where <TT>^C</TT> terminated <TT>sc</TT> but not
+     the check it was running at the time.
+ <LI>sc: When running multiple checks, <TT>^Z</TT> will terminate <TT>sc</TT>.
+ <LI>sc: Add <TT>checkcf</TT> command (bug #966).
+ <LI>sc: Display execution duration of check in <TT>status</TT> command.
+ <LI>sc: Add <TT>clset</TT> to usage output.
+ <LI>ss: Add timeout of queued checks to reduce likelihood of stalled checks
+     (bug #370).
+ <LI>sw: Display execution duration of check in <TT>view-details.html.in</TT>.
+ <LI>sw: Validate HTML.
+ </UL>
+
+ <A ID="v097b"></A>
+ <H4>v0.9.7b (15 November 2006)</H4>
+
+ <UL>
+ <LI>libsrv: Fix file descriptor leak in <TT>AlertState.C</TT>.
+ <LI>libsrv: Fix bug where substitution files were not truncated on rewrite
+     (also bug #399).
+ <LI>libsrv: Fix bug (#194) breaking call list aliases.
+ <LI>mod: Fix bug (#664) where modules under multithreaded Perl failed to run.
+ <LI>mod: Fix bug (#1042) where <TT>load</TT> check module failed to parse
+     <I>rup</I> output on linux platforms.
+ <LI>mod: Fix bug in <TT>protocol</TT> module when substituting hostname.
+ <LI>sc: Fix bug where <TT>clset</TT> command would fail if no alerts
+     had yet been sent.
+ <LI>sw: Fix bug (#1062) where actions were offered (but would not execute)
+     with insufficient privileges.
+ </UL>
+       
+ <A ID="v097a"></A>
+ <H4>v0.9.7a (6 September 2006)</H4>
+
+ <UL>
+ <LI>all: Add support for <TT>DESTDIR</TT> to support packaging.
+ <LI>gateway: Fix incorrect parsing of host and service (bug #635), fix
+     provided by Olivier Calle.
+ <LI>mod: Improve error reporting in <TT>smbd</TT> check module (bug #580).
+ <LI>mod: Fix bug (#820) in <TT>ups</TT> check module in converting seconds
+     to minutes for Liebert devices.
+ <LI>libsrv: Fix file descriptor leak in <TT>History::prune</TT>.
+ </UL>
+
+ <A ID="v097"></A>
+ <H4>v0.9.7 (27 January 2006)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>libsrv: Revise <TT>callliststatus</TT> file specification to track
+     person on call for rotating calllists, allowing substitutions
+     to properly end (bug #247).
+ <LI>mod: Report modules may no longer assume <TT>TmpDir</TT> will be provided.
+ <LI>mod: Add <I>check</I> report style.
+ <LI>sw: Add <TT>sh</TT> flag to specify service@host pair.
+ </UL>
+ 
+ <I>In addition, the following changes were also made:</I>
+  
+ <UL>
+ <LI>all: AIX port
+ <LI>all: Add support for module execution duration measurement, useful
+     for (eg) response time measurement.
+ <LI>cf: Add <TT>do not clear state</TT> and
+     <TT>clear state honors returngroups</TT> to <TT>schedule.cf</TT> to
+     allow greater customization of when acknowledgements are cleared.
+ <LI>cf: Flag persons defined twice in the same calllist as an error
+     when parsing configuration.
+ <LI>configure: Fix bug (#260) where <TT>--enable-debug</TT> actually
+     disabled debugging.
+ <LI>libdebug: Fix potential thread-unsafe call to <TT>ctime()</TT>. (#253)
+ <LI>libsrv: Fix bug computing intervals in <TT>Schedule.C</TT>, resulting
+     in misrotation of daily rotating call lists.
+ <LI>mod: Add new <TT>pingx</TT> check module.
+ <LI>mod: Add <I>matchcode</I>, <I>matchheader</I>, <I>errorheader</I>,
+     and <I>followredirect</I> arguments to <TT>httpurl</TT> check module.
+ <LI>mod: Add support for <I>debugfile</I> and <I>debugsyslog</I> to
+     enable debugging in check module execution.
+ <LI>mod: Add new <TT>report</TT> check module. (#256)
+ <LI>mod: Fix bug (#378) where <TT>filetest</TT> check module returned
+     <TT>PROBLEM</TT> instead of <TT>WARNING</TT> for <TT>countwarn</TT>
+     argument.
+ <LI>mod: Add new <TT>processinfo</TT> check module.
+ <LI>mod: Fix bug where <TT>disk</TT> check module could not handle <TT>df</TT>
+     output spanning multiple lines.
+     <I>Reported by Dejan Muhamedagic.</I>
+ <LI>mod: Fix bug where <TT>protocol</TT> check module did not handle convert
+     <I>port</I> argument to network byte order.
+     <I>Reported by Dejan Muhamedagic.</I>
+ <LI>mod: Add new <TT>responsetime</TT> report module.
+ <LI>mod: Add new <TT>conserver</TT> check module.
+ <LI>mod: Add new <TT>monfail</TT> check module.
+     <I>Contributed by David Filion.</I>
+ <LI>mod: Add new <TT>vmstat</TT> check module.
+     <I>Contributed by David Filion.</I>
+ <LI>mod: Add <I>warn5</I>, <I>prob5</I>, <I>warn15</I>, and <I>prob15</I>
+     to <TT>load</TT> check module.
+     <I>Suggested by David Filion.</I>
+ <LI>mod: Fix bug (#258) where filesystems were reported multiple times
+     by the <TT>disk</TT> check module.
+ <LI>mod: Fix bug (#567) where <TT>tunnel</TT> transport module did not
+     perform properly if <I>rinstdir</I> was not specified.
+     <I>Reported by Dejan Muhamedagic.</I>
+ <LI>mod: Add new <TT>cyrusstuckmailbox</TT> check module.
+ <LI>mod: Add new <TT>cyrussync</TT> check module.
+ <LI>mod: Add new <TT>mailbe</TT> check module.
+ <LI>mod: Add new <TT>mailfe</TT> check module.
+ <LI>sc: Improve <TT>clcal</TT> output, showing when start of next on call
+     and interleaving substitutions.
+ <LI>sc: Add clset to allow setting of the current oncall position
+     for rotating calllists.
+ <LI>sc: Add <TT>status -o [addressed,error,escalated,stalled]</TT> to retrieve
+     outstanding errors, inhibitions/acknowledgments, escalations, or
+     stalled checks.
+ <LI>sc: Fix bug (#423) where a misconfigured check module would be
+     reported as OK when run manually.
+ <LI>sc: Display approximate next check time in <TT>status</TT> output.
+ <LI>sg: Install setgid to allow access to state information.
+ <LI>sg: Fix bug where module specified in <TT>gateway.cf</TT> was
+     interpreted as a transmit module instead of an alert module.
+ <LI>sw: Add <TT>ret</TT> flag to specify return path following action.
+ <LI>sw: Allow actions (acknowledge, inhibit, reschedule, etc) to be
+     applied to multiple hosts, services, or service@host pairs.
+ <LI>sw: Fix bug (#257) where helpfile tag was not handled correctly.
+ <LI>sw: Fix bug (#263) where custom views could not be rendered.
+ <LI>sw: Display approximate next check time in <TT>view-detail</TT>.
+ <LI>ss: Fix bug where last notified address and last notified via
+     where swapped in <TT>callliststatus</TT> state file.
+ <LI>ss: Initialize rotating call lists when configured, not when first
+     alert is sent.
+ <LI>ss: Implement module serialization
+ <LI>ss: Implement Transient Failure Scheduling to work around transient
+     check failures.  (#386)
+ <LI>util: Add stalled check detection to <TT>watcher.pl</TT>.
+ </UL>
+
+ <A ID="v096b"></A>
+ <H4>v0.9.6b (11 August 2005)</H4>
+
+ <UL>
+ <LI>libsrv: Fix bug computing intervals in <TT>Schedule.C</TT>, resulting
+     in misrotation of weekly rotating call lists.
+ <LI>libsrv: Fix bug calculating call list substitutions.
+ <LI>mod: Fix <TT>tunnel</TT> module (broken after switch to XML based args).
+     <I>Reported by David Filion.</I>
+ <LI>mod: Fix bug in <TT>protocol</TT> check and <TT>plaintext</TT>
+     transport modules preventing connection to localhost.<BR>
+     <I>Reported by David Filion.</I>
+ <LI>mod: Stricter adherence to POP RFC in <TT>protocol</TT> check module.
+ <LI>mod: Fix reference to undefined variable in <TT>exports</TT> check
+     module.
+ <LI>mod: Uppercase hostname when constructing DSN for Sybase in
+     <TT>database</TT> check module.
+     <I>Reported by David Filion.</I>
+ <LI>ss: Fix bug (#200) where sending <TT>SIGHUP</TT> or <TT>SIGTERM</TT>
+     would cause the scheduler to crash.
+ <LI>ss: Fix bug (#197) where excepted hosts were ignored in checking
+     dependencies.
+ <LI>ss: Fix bug where scheduler would dump core on exit due to misordered
+     cleanup.
+ <LI>ss: Fix bug (#178) where composite checks would incorrectly time out
+     under certain circumstances.
+ </UL>
+ 
+ <A ID="v096a"></A>
+ <H4>v0.9.6a (1 May 2005)</H4>
+
+ <UL>
+ <LI>mod: Work around bug where modules time out sporadically on some
+     platforms.
+ </UL>
+
+ <A ID="v096"></A>
+ <H4>v0.9.6 (27 April 2005)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>mod: Remove <TT>parallel</TT> check module.
+ <LI>mod: Convert check, fix, and transport modules to accept arguments
+     via XML documents.
+ <LI>mod: <TT>apc</TT> check module renamed <TT>ups</TT>.
+ </UL>
+    
+ <I>In addition, the following changes were also made:</I>
+  
+ <UL>
+ <LI>cf: Fix bug in processing <TT>helpfile</TT> that prevented helpfiles
+     from being transmitted.
+ <LI>doc: Revamp <TT>bug-report.html</TT> and fix link to mailing lists.
+ <LI>doc: Revise <TT>sr.html</TT>.
+ <LI>doc: Add <TT>util-xmlmaker.html</TT>.
+ <LI>libsrv: Fix bug preventing reschedule when <TT>checkstatus</TT> file
+     was missing.
+ <LI>libsrv: Fix bug in <TT>compose_rc()</TT> that did not compose all
+     return values.
+ <LI>mod: Add <TT>cksum</TT> check module.
+ <LI>mod: Improve handling of <TT>fping</TT> output in <TT>ping</TT>
+     check module.
+ <LI>mod: Improve error reporting in <TT>imap</TT> check module.
+ <LI>mod: Add support for Liebert UPS to <TT>ups</TT> check module.
+ <LI>mod: Modify <TT>ping</TT> module to ignore <TT>ICMP Time Exceeded</TT>
+     errors.
+ <LI>mod: Fix bug where <TT>sysfs</TT> was considered a real filesystem,
+     causing spurious warnings in <TT>disk</TT> check module.
+ <LI>sg: Overhaul internals.
+ <LI>sg: Add support for relaying messages to Persons and CallLists.
+ <LI>ss: Fix bug where second person in a rotating calllist became active
+     instead of the first if the active person was removed.
+ <LI>sw: Fix potential cross site scripting exploit.
+ <LI>sw: Fix escaping of HTML special characters.
+ <LI>sw: Fix bug in <TT>view-service.html.in</TT> where hosts would appear
+     once for each group membership rather than just once.
+ </UL>
+
+ <A ID="v095a"></A>
+ <H4>v0.9.5a (25 October 2004)</H4>
+
+ <UL>
+ <LI>mod: Fix bug handling undefined mount options.
+ <LI>mod: Fix bug interpreting numbers and strings in <TT>RelationCompare</TT>.
+ <LI>libsrv: Fix memory allocation bug causing segmentation faults in state
+     consistency on RedHat and Fedora Linux.
+ <LI>sw: Fix cookie parsing bug causing inability to login even after
+     successful authentication.
+ <LI>sw: Remove superfluous "Subject" when sending Clipboards.
+ <LI>util: Convert <TT>acknowledge</TT>, <TT>escalate</TT>, and
+     <TT>noalert</TT> state files in <TT>convert-state.pl</TT>.
+ </UL>
+ 
+ <A ID="v095"></A>
+ <H4>v0.9.5 (20 September 2004)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>libsrv: Convert state records to XML based formats.
+ </UL>
+    
+ <I><B>The following changes were made that, while not incompatible
+    with previous versions, may be easily overlooked and cause
+    problems following an upgrade (see <A HREF=upgrading.html>Upgrading</A>
+    for detailed information):</B></I>
+
+ <UL>
+ <LI>cf: Add <TT>tmpdir</TT> to <TT>instance.cf</TT>.
+ </UL>
+    
+ <I>In addition, the following changes were also made:</I>
+  
+ <UL>
+ <LI>cf: Add <TT>result text significant</TT> to <TT>check.cf</TT>
+     to permit log file monitoring.
+ <LI>cf: Add <TT>tmpdir</TT> to <TT>instance.cf</TT>.
+ <LI>gateway: Change syslog level to <TT>info</TT> from <TT>debug</TT>.
+ <LI>libsrv: Add support for reading history backwards with reasonable
+     efficiency.
+ <LI>libui: Fix bug where <TT>inhibit</TT> commands would be recorded as
+     <TT>acknowledge</TT> commands in <TT>commandhistory</TT> file.
+ <LI>mod: Add <I>extraction</I> argument type.
+ <LI>mod: Add <TT>extract</TT>, <TT>replyattribute</TT>,
+     <TT>replytest</TT>, and <TT>replyvalue</TT> to the
+     <TT>ldap</TT> check module.
+ <LI>mod: Add <TT>smtps</TT> support to the <TT>protocol</TT> check
+     module.
+ <LI>mod: In <TT>mailq</TT> check module, only count a given message
+     once for a given server.
+ <LI>mod: Add <TT>showline</TT> argument to <TT>filetest</TT> check
+     module for log file monitoring.
+ <LI>mod: Add <TT>port</TT> argument to <TT>named</TT> check module.
+ <LI>mod: Add report modules, to dynamically generate reports based on
+     history records.
+ <LI>mod: Add <TT>imap</TT> check module.
+ <LI>mod: Fix bug in <TT>apc</TT> module when empty response received.
+ <LI>mod: Allow <TT>port</TT> argument in <TT>protocol</TT> module to
+     override default port looked up via <TT>service</TT> argument.
+ <LI>mod: Add <TT>deadwarn</TT> and <TT>deadprob</TT> to <TT>mailq</TT>
+     check module to look for undeliverable messages.
+ <LI>mod: Return <TT>MODEXEC_NOTICE</TT> in <TT>disk</TT> check module
+     if no local filesystems found.
+ <LI>mod: Remove inaccurate mount at boot check from
+     <TT>ShouldBeMountedFilesystems</TT>, used by <TT>disk</TT> and
+     <TT>mount</TT> check modules.
+ <LI>sc: <TT>acknowledge</TT> and <TT>unacknowledge</TT> commands accept
+     multiple service, host, and service@host arguments.
+ <LI>sc: Add <TT>clunsub</TT> to remove a pending substitution.
+ <LI>sc: Add <TT>-o reverse</TT> to <TT>history</TT> commands.
+ <LI>sc: Add <TT>-o person</TT> to <TT>clcal</TT> command.
+ <LI>sc: Add support for report modules.
+ <LI>sc: Less spewage when running a command for service@host that does
+     not apply.
+ <LI>ss: Fix bug where acknowledgement would be cleared if a problem
+     had been detected but no alert had yet been transmitted.
+ <LI>sw: Fix bug where inaccurate parse errors would be reported
+     under certain circumstances (eg: <TT>check.cf</TT> unreadable).
+ <LI>sw: Add support for report modules.
+ <LI>sw: Add <TT>INSTALLEDMODULES</TT> type to <TT>FOREACH</TT> tag.
+ <LI>sw: Add sort option when building custom views, via <TT>sort</TT>
+     flag and <TT>SORT</TT> option to <TT>FOREACH</TT> tag.
+ <LI>sw: Add <TT>field</TT> and <TT>offset</TT> parameters to <TT>TIME</TT>
+     tag.
+ <LI>sw: Fix bug preventing <TT>uninhibit</TT> command from working.
+ <LI>sw: Add <TT>exec</TT> authorization.
+ </UL>
+ 
+ <A ID="v094b"></A>
+ <H4>v0.9.4b (27 April 2004)</H4>
+
+ <UL>
+ <LI>libparsecgi: Add missing <TT>;</TT> to end of line when sending
+     cookies.
+ <LI>libsrv: Fix several memory leaks.
+ <LI>sw: Add <TT>ADDRESSED</TT>, <TT>ALLACTIVE</TT>, <TT>ERRORSTATE</TT>,
+     <TT>ESCALATED</TT>, and <TT>SERVICEHOST</TT> arguments to
+     <TT>FOREACH</TT> tag.
+ <LI>sw: Add <TT>SPLIT</TT> tag.
+ <LI>sw: Update <TT>view-long.html.in</TT> to use new <TT>FOREACH</TT>
+     tags for greater efficiency.
+ <LI>sw: Restore support for <TT>status</TT> flag, lost in rewrite.
+ </UL>
+
+ <A ID="v094a"></A>
+ <H4>v0.9.4a (7 April 2004)</H4>
+
+ <UL>
+ <LI>mod: Disable threading in <TT>krb5</TT> check module.
+ <LI>mod: Fix bug in <TT>sms</TT> format module when processing
+     long messages.
+ <LI>sw: Fix bug where stacked authmodules were not handled correctly.
+ <LI>sw: Fix bug where post-processing redirect following Clipboard
+     actions were issued incorrectly.
+ <LI>sw: Display informative messages when no matching entries are
+     found by <TT>view-long.html</TT>.
+ <LI>sw: Allow multiple calllists and individuals to be specified
+     when sending clipboards.
+ <LI>sw: Remove non-existant <TT>check</TT> action from
+     <TT>view-details.html.in</TT>.
+ <LI>sw: Fix bug when running <TT>make install</TT> where the source
+     directory is not the same as the build directory.
+ <LI>util: <TT>convert-history.pl</TT> warns on poorly formatted
+     entries instead of exiting.
+ </UL>
+ 
+ <A ID="v094"></A>
+ <H4>v0.9.4 (3 March 2004)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>libsrv: Overhaul history recording mechanism.
+ <LI>sc: Add <TT>archivehistory</TT> command to allow history records
+     to be rotated in a safe, non-intrusive fashion.
+ <LI>sw: Overhaul authentication and authorization infrastructure,
+     introducing Web Authentication modules.
+ </UL>
+
+ <I><B>The following changes were made that, while not incompatible
+    with previous versions, may be easily overlooked and cause
+    problems following an upgrade (see <A HREF=upgrading.html>Upgrading</A>
+    for detailed information):</B></I>
+
+ <UL>
+ <LI>doc: Move installed documentation from <TT>$INSTDIR/html</TT> to
+     <TT>$INSTDIR/html/doc</TT>.
+ <LI>sc: Disable, by default, usage by the root user.
+ <LI>sc: Change usage for <TT>clsub</TT> and <TT>trip</TT> commands.
+ <LI>sw: Cookies are now required for authenticated sessions.
+ </UL>
+
+ <I>In addition, the following changes were also made:</I>
+  
+ <UL>
+
+ <LI>all: Write history records for state modification actions
+     (<TT>acknowledge</TT>, <TT>inhibit</TT>, etc).
+ <LI>doc: Document history record format.
+ <LI>doc: Revise <TT>sc.html</TT>.
+ <LI>doc: Revise <TT>cf-instance.html</TT>.
+ <LI>doc: Revise <TT>cg-cgi.html</TT>.
+ <LI>doc: Revise module specifications and documentation.
+ <LI>doc: Revise <TT>ss.html</TT>.
+ <LI>doc: Revise <TT>sw.html</TT> and <TT>spec-sw.html</TT>.
+ <LI>libparsexml: Fix bug in <TT>Survivor::XML.pm</TT> where parsing
+     errors would be generated when an alert message contains <TT>&lt;</TT>
+     or <TT>&gt;</TT>.
+ <LI>libsrv: Fix off-by-one error when parsing results in CheckState.
+     This would manifest as <TT>write_results did not find 'x' in expected
+     list of hosts</TT>.
+ <LI>mod: Better handling of SSL read errors in <TT>protocol</TT> check
+     module.
+ <LI>mod: Add <TT>exittext</TT> to <TT>test</TT> check module.
+ <LI>mod: Fix bug in <TT>Survivor::XML.pm</TT> where parsing errors
+     would be generated when an alert message contains <TT>&lt;</TT>
+     or <TT>&gt;</TT>.
+ <LI>mod: Fix bug in <TT>ping</TT> check module where ICMP Network
+     unreachable errors were misreported.
+ <LI>mod: Suppress apparently superfluous "duplicate for" errors
+     reported by fping.
+ <LI>mod: <TT>ShouldBeMountedFilesystems</TT> (used by <TT>disk</TT>
+     and <TT>mounts</TT> check modules) no longer returns file
+     systems marked as "no mount at boot-time".
+ <LI>mod: Add version specification support to <TT>ldap</TT> check module.
+ <LI>sc: Add <TT>history</TT> commands to retrieve history records.
+ <LI>sc: Add option, via <TT>instance.cf</TT>, to require comments for
+     commands that accept them.
+ <LI>sc: Overhaul internals for easier addition of new commands.
+ <LI>ss: Fix bug where alertplans with multiple calllists via more than
+     one alert module would notify all recipients from all calllists via
+     all modules.  (Implemented in <TT>libsrv</TT> and <TT>libparsexml</TT>.)
+ <LI>ss: Recheck alertstate quietness so alerts are not transmitted when
+     they have been acknowledged or inhibited after being queued but
+     before they are transmitted.
+ <LI>ss: Add staggered scheduling, to distribute the checking of multiple
+     hosts for the same check over the full check period.  For larger
+     installations, this should reduce check timeouts.
+ <LI>ss: Fix bug where <TT>using <I>x</I> schedule</TT> was ignored
+     for <TT>allow <I>n</I> failures</TT>.
+ <LI>sw: Overhaul internals, breaking page design into plain text files
+     (PageSets).
+ <LI>sw: Initial support for localization.
+ </UL>
+
+ <A ID="v093a"></A>
+ <H4>v0.9.3a (14 October 2003)</H4>
+
+ <UL>
+ <LI>libsrv: Fix bug preventing parse of <TT>service@host</TT> dependencies
+     in <TT>dependency.cf</TT>.
+ <LI>mod: Fix bug where <TT>make install-remote</TT> would fail trying
+     to install format modules remotely.
+ <LI>ss: Fix bug permitting Type I Dependencies to get in deadlocked state.
+ </UL>
+
+ <A ID="v093"></A>
+ <H4>v0.9.3 (8 October 2003)</H4>
+
+ <I><B>The following change was made that is incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>cf: Overhaul dependency configuration.
+ </UL>
+ 
+ <I><B>The following change was made that, while not incompatible
+    with previous versions, may be easily overlooked and cause
+    problems following an upgrade (see <A HREF=upgrading.html>Upgrading</A>
+    for detailed information):</B></I>
+
+ <UL>
+ <LI>mod: Use <TT>Mail::Mailer</TT> in <TT>mail</TT> transmit module.
+ </UL>
+
+ <I>In addition, the following changes were also made:</I>
+ 
+ <UL>
+ <LI>cf: Fix bug where spaces were required before stanza definitions.
+     (eg: <TT>check foo{}</TT> would not parse correctly.)
+ <LI>cf: Add <TT>attempt fix if defined</TT> to indicate that
+     Checks without Fixes defined should not report misconfiguration
+     when used with an Alert Plan that specifies it.
+ <LI>cf: Add <TT>alias alertplan to alertplan2 adding calllist</TT>
+     to allow an AlertPlan to be redefined with an additional calllist
+     instead of a replacement calllist.
+ <LI>doc: Revise <TT>cf-schedule.html</TT>.
+ <LI>doc: Add <TT>ReplyOK</TT> to DTDs in <TT>survivor.dtd</TT> to
+     indicate when the scheduler is sending a message suitable for
+     a two way reply, and update <TT>spec-fmm.html</TT> and
+     <TT>spec-tmm.html</TT> with requirements to honor this tag.
+ <LI>libparsexml: Support <TT>ReplyOK</TT> attribute.
+ <LI>libsrv: Better checking for filehandle availability when executing
+     Composite Checks.
+ <LI>libsrv: Use unbuffered I/O when reading CheckResults to avoid buffering
+     problems.
+ <LI>mod: Add <TT>rtsp</TT> check module.
+ <LI>mod: Add <TT>telnet</TT> check module.
+ <LI>mod: Support <TT>ReplyOK</TT> attribute.
+ <LI>mod: Add <TT>ndd</TT> check module.
+ <LI>ss: Allow fixes to depend on Type II dependencies.
+ <LI>ss: Fix bug where check modules producing empty comments were
+     reported as misconfigured.
+ <LI>sw: Clipboards are sent via appropriate transmit modules rather
+     than exclusively by mail.  Note that clipboards will now be from
+     INSTUSER rather than "Clipboard Manager".
+ <LI>util: Add <TT>watcher</TT> meta-monitor.
+ </UL>
+
+ <A ID="v092c"></A>
+ <H4>v0.9.2c (1 August 2003)</H4>
+
+ <UL>
+ <LI>libsrv: Fix length calculation bug in <TT>xstrncat</TT>.
+ <LI>mod: Fix error checking in <TT>tftpd</TT> check module.
+ <LI>mod: Use <TT>IO::Select</TT> in <TT>Check.pm</TT> for more
+     reliable result processing.
+ <LI>mod: Use <TT>IO::Select</TT> in <TT>init.d</TT> module for more
+     reliable process restarting.
+ <LI>mod: Fix spurious output in <TT>ftpd</TT> check module.
+ <LI>ss: Fix cleanup order on exit to prevent segmentation fault.
+ <LI>ss: Fix LockManager cleanup bug to prevent segmentation fault on
+     cache restart (at SIGHUP).
+ </UL>
+
+ <A ID="v092b"></A>
+ <H4>v0.9.2b (26 June 2003)</H4>
+
+ <UL>
+ <LI>doc: Copy <TT>gif</TT> and <TT>dtd</TT> files at <TT>make install</TT>.
+ <LI>libcm: Fix compile error under gcc 3.3.
+ <LI>libsrv: Fix bug where composite check results are recorded as
+     MODEXEC_INVALID instead of real error code.
+ <LI>mod: Work around "scalars leaked" warning in <TT>namedSerial</TT>
+     check module.
+ </UL>
+ 
+ <A ID="v092a"></A>
+ <H4>v0.9.2a (17 June 2003)</H4>
+
+ <UL>
+ <LI>libsrv: Fix bug where a single timed out host would
+     time out a set of hosts when monitored with a composite check.
+ <LI>libsrv: Remove 1024 character limitation on results
+     from Type III CheckStates.
+ <LI>libsrv: Fix bug where <TT>config.l</TT> would not compile using
+     Sun <TT>lex</TT>.
+ <LI>libui: Report "Reschedule request pending" rather than OK when a
+     check has been rescheduled.
+ <LI>mod: Remove 1024 character limitation on results read by the
+     <TT>parallel</TT> module.
+ <LI>mod: Do not include calllist with upalert message generated by the
+     <TT>full</TT> format module.
+ </UL>
+
+ <A ID="v092"></A>
+ <H4>v0.9.2 (29 May 2003)</H4>
+
+ <I><B>The following change was made that is incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>mod: Overhaul alert module infrastructure, splitting into separate
+     <I>format</I> modules to determine the contents of an alert and
+     <I>transmit</I> modules that handle the actual delivery.
+ </UL>
+
+ <I>In addition, the following changes were also made:</I>
+ 
+ <UL>
+ <LI>all: Overhaul debugging and warning infrastructure for better
+     stability and greater flexibility.
+ <LI>all: Discontinue use of C++ <TT>string</TT> type.
+ <LI>Configure: Replace with <TT>autoconf</TT> generated <TT>configure</TT>
+     script.
+ <LI>cf: Do not permit redefinition using the same name within the
+     same type of definition.
+ <LI>doc: Revise <TT>cf-calllist.html</TT>.
+ <LI>libsrv: Sanity checking of data when exec'ing alerts to reduce
+     spurious alerts.
+ <LI>libsrv: Comparison of hosts against expected list when writing
+     check state.
+ <LI>libsrv: Rescheduling of a check no longer deletes prior comment
+     and consecutive count.
+ <LI>mod: Remove <TT>/tmp</TT> file dependency in <TT>init.d</TT> module.
+ <LI>mod: Add <TT>hplj</TT> check module.
+ <LI>mod: Fix numeric uid comparison bug in <TT>process</TT> module.
+ <LI>mod: Add <TT>apc</TT> check module.
+ <LI>sc: Display help statement rather than parse error when called
+     with no arguments on a multi-instance installation.
+ <LI>sc: Add <TT>-L</TT> flag to allow optional syslog based logging.
+ <LI>sc: <TT>unacknowledge</TT> and <TT>uninhibit</TT> commands
+     automatically reschedule the check to prevent spurious alerts
+     when a problem has been corrected but the scheduler has not yet
+     noticed.
+ <LI>sc: Add <TT>dtest</TT> command for regression testing.
+ <LI>sr: Remove <TT>/tmp</TT> file dependency.
+ <LI>sr: Less permissive security by using <TT>fork()/exec()</TT> instead
+     of <TT>system()</TT>.
+ <LI>ss: Add <TT>-L</TT> flag to allow optional syslog based logging.
+ <LI>ss: Add caching of alert, check, and fix state to decrease disk I/O
+     without compromising data validity.
+ <LI>ss: Fix bug causing premature clearing of state after a fix runs
+     but before the service is rechecked.  This bug also sent
+     <TT>exec_alert</TT> an implausible values of <TT>checktime=0</TT>.
+ <LI>sw: Unacknowledge and uninhibit operations automatically reschedule
+     the check to prevent spurious alerts when a problem has been
+     corrected but the scheduler has not yet noticed.
+ <LI>sw: Fix bug preventing acknowledgement before first alert is
+     transmitted.
+ </UL>
+
+ <A ID="v091a"></A>
+ <H4>v0.9.1a (19 March 2003)</H4>
+
+ <UL>
+ <LI>mod: Fix incorrect handling of <TT>getnext()</TT> in <TT>snmp</TT>
+     check module.
+ <LI>ss: Fix incorrect handling of <TT>SIGHUP</TT> causing keepalive
+     to exit.
+ </UL>
+ 
+ <A ID="v091"></A>
+ <H4>v0.9.1 (6 March 2003)</H4>
+
+ <UL>
+ <LI>all: Darwin (MacOS X) port.
+ <LI>all: Add composite checks, checks defined in terms of other checks
+     to permit boolean logical operations.
+ <LI>all: Use xdelete, xadelete, IONULL, IOTF, and toss_eol.
+ <LI>all: Add new debug level <TT>DEBUG_CFERRS</TT> to only display actual
+     parse errors when debugging configuration files, and display filename
+     with line number.
+ <LI>all: Change semantics of acknowledgements to apply to a problem
+     rather than an alert.  This allows acknowledgements to be made
+     before an alert is generated.
+ <LI>cf: Trim trailing whitespace from the end of named arguments since
+     it generally isn't significant but may confuse the modules.
+ <LI>doc: Revise <TT>cf-check.html</TT>.
+ <LI>doc: Explain return codes in <TT>cm-httpurl.html</TT>.
+ <LI>doc: Revise <TT>sg.html</TT>.
+ <LI>init.d: Add <TT>reload</TT> option.
+ <LI>init.d: Determine instances via <TT>instance.cf</TT>.
+ <LI>init.d: Fix usage statement.
+ <LI>libsrv: Fix bug when parsing <TT>allow <I>x</I> failure[s]</TT>
+     in <TT>schedule.cf</TT>.
+ <LI>libsrv: Fix bug when parsing Dependency exceptions where the
+     requested exceptions are ignored.  This also caused reparsing
+     on SIGHUP to fail when <TT>dependency.cf</TT> included such an
+     exception specification.
+ <LI>libsrv: Fix bug in command line argument parsing where flags of the
+     form <TT>--help</TT> are treated as <TT>--</TT> rather than produce
+     an error.
+ <LI>libsrv: Flag an error when mutual Type I dependencies are defined
+     in <TT>dependency.cf</TT>.
+ <LI>libui: Fix bug permitting escalation when maximum alert level
+     has already been reached.
+ <LI>mod: Add <TT>binddn</TT>, <TT>bindpassword</TT>, <TT>searchbase</TT>,
+     and <TT>ssl</TT> arguments to <TT>ldap</TT> check module.
+ <LI>mod: Add <TT>matchone</TT> argument to <TT>filetest</TT> check module.
+ <LI>mod: Add <TT>prtdiag</TT> module.
+ <LI>mod: Fix incorrect response type assumption in <TT>named</TT> module.
+ <LI>mod: Disable threading in <TT>nadisk</TT> and <TT>httpurl</TT> (when
+     using SSL) modules pending threadsafe Perl modules.
+ <LI>mod: Replace <TT>ignore</TT> with <TT>inhibit</TT> in Nextel mode
+     for <TT>mail</TT> alert module.
+ <LI>mod: Add SMS mode to <TT>mail</TT> alert module.
+ <LI>sc: Revise message when <TT>clprune</TT> has nothing to do.
+ <LI>sg: Delete unnecessary <TT>ignore</TT> command.
+ <LI>sg: Add <TT>inhibit</TT> command.
+ <LI>sg: Add support for replies via SMS.
+ <LI>ss: Use process groups when forking children rather than depending
+     on <TT>/proc</TT> in <TT>process_kill</TT> and
+     <TT>process_kill_target</TT>.
+ <LI>ss: Better detection of misconfigured modules.
+ <LI>sw: Display configuration parse errors when configuration parse fails.
+ </UL>
+ 
+ <A ID="v09c"></A>
+ <H4>v0.9c (18 February 2003)</H4>
+
+ <UL>
+ <LI>libsrv: Fix fencepost error in <TT>Configuration.C</TT> that
+     may lead to parse errors.
+ <LI>mod: Disable threading in <TT>snmp</TT> check module pending
+     threadsafe SNMP Perl module.
+ <LI>ss: Fix fencepost error in <TT>CheckState.C</TT> that may result
+     in superfluous timeouts.
+ <LI>sr: Fix race condition that may result in superfluous timeouts.
+ </UL>
+
+ <A ID="v09b"></A>
+ <H4>v0.9b (14 February 2003)</H4>
+
+ <UL>
+ <LI>doc: Fix incorrect test in <TT>movestate.sh</TT> in
+     <TT>upgrading.html</TT>.
+ <LI>mod: Fix error with <TT>df</TT> output in <TT>disk</TT> check module.
+ <LI>mod: Return correct exit code in <TT>ping</TT> when using <TT>fping</TT>.
+ <LI>mod: Allow port numbers without corresponding <TT>services</TT>
+     definitions in <TT>protocol</TT> module.
+ <LI>mod: Fix Makefile for <TT>plaintext</TT> transport <TT>install
+     remote</TT> rule.
+ <LI>mod: Fix Makefile for <TT>test</TT> check module <TT>install remote</TT>
+     rule.
+ </UL>
+
+ <A ID="v09a"></A>
+ <H4>v0.9a (21 January 2003)</H4>
+
+ <UL>
+ <LI>doc: Fix incorrect documentation and examples for degraded mode.
+ </UL>
+
+ <A ID="v09"></A>
+ <H4>v0.9 (2 January 2003)</H4>
+
+ <I><B>The following changes were made that are incompatible with earlier
+    versions (see <A HREF=upgrading.html>Upgrading</A> for detailed
+    instructions):</B></I>
+
+ <UL>
+ <LI>cf: Change rotating call list time specification in <TT>calllist.cf</TT>
+     to be specified using a schedule from <TT>schedule.cf</TT> instead
+     of using an explicit time.
+ <LI>cf: Change call lists to be defined in terms of <I>persons</I>
+     instead of explicitly using addresses, to allow call lists to
+     rotate over people instead of the means by which they are reached.
+ <LI>cf: Change alertplans to simplify common scenarios and define
+     actions and escalations in terms of number of alert attempts, rather
+     than number of check failures.
+ <LI>cf: Change global notify on clear in <TT>schedule.cf</TT> and
+     global timeout in <TT>check.cf</TT> to instead be default values that can
+     be changed throughout the file.
+ <LI>doc: Rewrite check module documentation.
+ <LI>libsrv: Combine last and status state files for AlertState and
+     CheckState and improve caching to reduce the number of disk accesses
+     required.
+ <LI>mod: Introduce transport modules, convert former check module
+     <TT>remote</TT> to transport module.
+ <LI>mod: Use names to identify arguments instead of positions.
+ <LI>mod: Add multithreading to Survivor.pm for reduced dependency on
+     the <TT>parallel</TT> module to improve performance.
+ <LI>sr: Convert protocol to support named arguments and fixes.
+ </UL>
+
+ <I>In addition, the following changes were also made:</I>
+ 
+ <UL>
+ <LI>all: Introduce fix modules, to allow integrated execution of
+     corrective actions.
+ <LI>cf: Allow multiple call lists to be notified in an alertplan action.
+ <LI>cf: Allow specification of when a problem is considered escalated.
+ <LI>doc: Add documentation for <TT>message</TT> and <TT>oncall</TT>
+     check modules.
+ <LI>doc: Add documentation for <TT>clcal</TT> and <TT>clprune</TT>
+     commands in sc.html.
+ <LI>libsrv: Fix several minor bugs in call list substitutions and aliases.
+ <LI>libsrv: Remove potential race condition when reading results via
+     Type I CheckStates.
+ <LI>mod: Add <TT>tunnel</TT> module for more secure communication with
+     <TT>sr</TT>.
+ <LI>mod: Remove incorrect 1024 character response limitation from
+     <TT>remote</TT> module.
+ <LI>mod: Add HTTP/1.1 and "Host:" support to <TT>httpurl</TT> module
+     to enable checking of virtual hosts.
+ <LI>sc: Fix bug when a module can't be found (eg: -m /dev/null), sc would
+     hang rather than exit.
+ <LI>sc: Add <TT>clprune</TT> command to remove old substitutions.
+ <LI>sc: Add support for comments in acknowledgements and inhibitions via
+     <TT>-c</TT> option.
+ <LI>sr: Add host-based access controls and logging, like TCP wrappers.
+ <LI>sr: Add privileged vs non-privileged module execution.
+ <LI>ss: Fix bug causing spurious alerts for at schedules at reversion
+     to standard time.
+ <LI>ss: Change notify on clear to notify whoever received the latest problem
+     notification rather than whoever is next to receive notification.
+ <LI>ss: Fix bug introduced in v0.8.3 where alert state is not cleared out
+     (or more accurately, is created) after notify on clear.
+ <LI>ss: Fix bug in degraded mode to verify minimum number of check failures
+     on each host.
+ <LI>ss: Create lastcheck file during state directory consistency
+     verification to reduce spurious warning messages.
+ <LI>ss: Throttle keepalive to prevent continual restarting scheduler
+     on configuration or other error.
+ <LI>sw: Add support for comments in acknowledgements and inhibitions.
+ </UL>
+
+ <A ID="v083a"></A>
+ <H4>v0.8.3a (30 September 2002)</H4>
+
+ <UL>
+ <LI>doc: Fix bug in <TT>cm-filetest.html</TT> where warning vs problem
+     results were not clearly documented.
+ <LI>doc: Describe additional version dependency for <TT>ldap</TT> module.
+ <LI>mod: Add numeric uid support to <TT>process</TT> module.
+ <LI>mod: Failure to read result after retry is now a warning for
+     <TT>parallel</TT> module, not a problem.
+ <LI>mod: Fix bug in <TT>filetest</TT> module preventing warnings
+     from being generated when both a warn time and prob time are
+     specified.
+ </UL>
+ 
+ <A ID="v083"></A>
+ <H4>v0.8.3 (10 September 2002)</H4>
+
+ <UL>
+ <LI>doc: Convert <TT>cm-protocol.html</TT> to new format.
+ <LI>libsrv: Retry on transient fopen errors.
+ <LI>mod: Add <TT>wins</TT> check module.
+ <LI>mod: <TT>mounts</TT> module skips "noauto" mounts.
+ <LI>mod: Fix comment handling in <TT>mounts</TT>.
+ <LI>mod: <TT>snmp</TT> and <TT>nadisk</TT> modules uses Perl SNMP instead
+     of <TT>snmpwalk</TT>.
+ <LI>mod: <TT>MountedFilesystems</TT> and <TT>ShouldBeMountedFilesystems</TT>
+     added to <TT>Survivor.pm</TT>.
+ <LI>mod: Add <TT>time</TT> check module.
+ <LI>mod: Convert <TT>ldap</TT> check module to use <TT>Net::LDAP</TT>.
+ <LI>mod: Cleanup <TT>daytime</TT> check module.
+ <LI>mod: Add <TT>smbd</TT> check module.
+ <LI>mod: Add <TT>flexlm</TT> check module.
+ <LI>mod: Fix ambiguous host bug in <TT>httpurl</TT> module, use URI module.
+ <LI>mod: Fix output bug in <TT>message</TT> check module.
+ <LI>mod: Fix output bug in <TT>test</TT> check module.
+ <LI>mod: Add Multithreaded Perl support add to <TT>Survivor.pm</TT> with new
+     <TT>SurvivorMT.pm</TT> module.
+ <LI>mod: Add filesystem enumeration to <TT>Survivor.pm</TT> for <TT>disk</TT>
+     and <TT>mounts</TT> check modules.
+ <LI>mod: Delete <TT>router</TT> keyword from <TT>ping</TT> module.
+ <LI>mod: <TT>mailq</TT> module is case insensitive for addresses.
+ <LI>mod: Add "none" to <TT>protocol</TT> module.
+ <LI>mod: Add named argument parser to <TT>Survivor.pm</TT>.
+ <LI>mod: Add <TT>mon</TT> module.  (See also <TT>doc/cm-protocol.html</TT>.)
+ <LI>mod: <TT>Bundle::Survivor.pm</TT> to facilitate Perl module installation.
+ <LI>mod: Modify <TT>mailq</TT> module to ignore extraneous junk in addresses.
+ <LI>mod: Fix undefined variable bug in <TT>ntpc</TT> module.
+ <LI>mod: Use reference name server in <TT>namedSerial</TT> module.
+ <LI>ss: Write alerthistory for upalerts.
+ <LI>sw: Convert multi-line strings to more compiler-friendly single-line
+     strings.
+ <LI>sw: Add <TT>authservice</TT> keyword for specifying service name.
+ <LI>sw: Clipboards sent by mail include name of Clipboard in subject.
+ <LI>sw: Fix bug where "Back to" links immediately after login point to
+     the wrong place.
+ <LI>sw: Proxy authentication for WIND now closer to advertised compatibility
+     with CAS.
+ <LI>sw: Fix logout bug when cookies used with proxy authentication services.
+ <LI>sw: Fix cookie parsing assumption bug.
+ </UL>
+
+ <A ID="v082a"></A>
+ <H4>v0.8.2a (11 July 2002)</H4>
+
+ <UL>
+ <LI>doc: Clarify default record type retrieval in <TT>cm-named.html</TT>.
+ <LI>mod: Fix "permission denied" error in <TT>mailq</TT>.
+ <LI>mod: Add recursion to <TT>named</TT>.
+ <LI>mod: Fix erroneous unavailability in <TT>tty</TT>.
+ <LI>mod: Fix stat assumption in <TT>mailq</TT>.
+ <LI>mod: Fix empty string misinterpretation in <TT>filetest</TT>.
+ </UL>
+ 
+ <A ID="v082"></A>
+ <H4>v0.8.2 (8 July 2002)</H4>
+
+ <UL>
+ <LI>all: Package and build version information encoded in each executable.
+ <LI>all: Fix ordering bug in <TT>verify_directory</TT> macro.
+ <LI>doc: <TT>cm-nadisk.html</TT> missing <I>opts</I> spec.
+ <LI>libsrv: Better fix via <TT>unlink()</TT> or ignoring for spurious
+      <TT>verify_file</TT> errors generated when a different user than
+      the owner tried to verify a file.
+ <LI>libsrv: Fix time_t formatting in <TT>fprintf</TT>. 
+ <LI>mod: <TT>swap</TT> requires warning <I>or</I> problem threshold as
+      documented.
+ <LI>mod: <TT>tty</TT> module now scripted instead of compiled.
+ <LI>mod: <TT>Survivor.pm</TT> replaces <TT>survivor.pl</TT>, perl based
+      modules rewritten to use new common module.
+ <LI>mod: OS tests moved from modules into <TT>Survivor.pm</TT>.
+ <LI>mod: <TT>named</TT> modules uses <TT>Net::DNS</TT> instead of
+      <TT>host</TT> or <TT>nslookup</TT>.
+ <LI>mod: Better <TT>process</TT> module compatibility.
+ <LI>sc: Add automatic escalation information to output.
+ <LI>sc: Fix bug preventing <TT>clstat</TT> from working.
+ <LI>ss: Fix incorrect indication of escalation when AlertPlan not in effect.
+ <LI>sw: Fix time_t formatting in <TT>sprintf</TT>.
+ <LI>sw: Add "Back to" link.
+ <LI>sw: Fix session expiry encoding bug in calling Session.C constructor.
+ <LI>sw: Fix time conversions in SessionState.
+ <LI>sw: Add optional cookie support.
+ </UL>
+
+ <A ID="v081b"></A>
+ <H4>v0.8.1b (22 May 2002)</H4>
+
+ <UL>
+ <lI>sw: Fix broken close braces in HTML.C.
+ <LI>sw: Fix bad buffer size in Clipboard.C.
+ </UL>
+ 
+ <A ID="v081a"></A>
+ <H4>v0.8.1a (20 May 2002)</H4>
+
+ <UL>
+ <LI>all: Fix <TT>chmod</TT> ordering bug in <TT>verify_file</TT> macro.
+ <LI>Configure: Force rm to prevent "override protection?" messages.
+ </UL>
+
+ <A ID="v081"></A>
+ <H4>v0.8.1 (14 May 2002)</H4>
+
+ <UL>
+ <LI>all: Linux port
+ <LI>doc: Improve various documentation
+ <LI>mod: New database, mailq modules
+ <LI>mod: named module accepts optional type of record to retrieve
+ <LI>mod: ping no longer fully dependent on <TT>fping</TT>
+ </UL>
+
+ <A ID="v08"></A>
+ <H4>v0.8 (4 Apr 2002)</H4>
+
+ <UL>
+ <LI>Initial pre-release (Solaris only).
+ </UL>
+
+<HR>
+<I>$Date: 2007/04/04 00:26:32 $</I><BR>
+<I>$Revision: 0.14 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

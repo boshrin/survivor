@@ -1,0 +1,88 @@
+#!/usr/bin/perl -w
+
+# Check for failed services as reported by mon.
+
+# Version: $Revision: 0.1 $
+# Author: David Filion
+# Date: $Date: 2006/01/25 02:57:25 $
+
+# Copyright (c) 2005
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Parameters:
+#	port	=>	Optional port number.
+#	warn	=>	Number of failed services at a warning is issued
+#	prob	=>	Number of failed services at a problem is issued
+#
+# If warn of prob are set to 0, or not set at all, then the 
+# parameter is ignored.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+use Mon::Client;
+
+my %argfmt = ("port" => "optional number",  # Omit to use default port, 2583
+	      "username" => "optional string",	# Omited for anonymous/nonlogin  query
+	      "password" => "optional password",	# Omited for anonymous/nonlogin  query
+	      "warn" => "number",			# Set to 0 to disable check
+	      "prob" => "number");			# Set to 0 to disable check
+
+my $sc = new Survivor::Check();
+$sc->GetOpt(\%argfmt, \&Validate);
+my $rc = $sc->Exec(\&Check);
+exit($rc);
+
+
+sub Validate {
+    return(MODEXEC_OK, 0, "MonFail OK");
+}
+
+
+sub Check {
+	my $self = shift;
+	my $host = shift;
+	
+	my $port = $self->Arg('port');
+	my $user = $self->Arg('username');
+	my $pass = $self->Arg('password');
+	
+	my %params;
+	$params{host} = $host;
+	$params{port} = $port if (defined($port));
+	$params{username} = $user if (defined($user));
+	$params{password} = $pass if (defined($pass));
+
+	my $monclient = new Mon::Client (%params);
+	
+	$monclient->connect
+		or return(MODEXEC_PROBLEM, 0, "Unable to connect to mon server $host");
+	
+	if ($monclient->connected == 0) {
+		return(MODEXEC_PROBLEM, 0, "Unable to connect to mon server $host");
+	}
+
+	my $msg;
+	my %s = $monclient->list_failures;
+	my $cnt = scalar(%s);
+	my $rc = MODEXEC_OK;
+	
+	if ($cnt > 0) {
+		$msg = scalar(%s) . " failues reported by mon";
+		if ($self->Arg("prob") > 0 && $cnt >= $self->Arg('prob')) {
+			$rc = MODEXEC_PROBLEM;
+		} elsif ($self->Arg('warn') > 0 && $cnt >= $self->Arg('warn')) {
+			$rc = MODEXEC_WARNING;
+		}
+	} else {
+		$msg =  "No failed services";
+	}
+
+
+	$monclient->disconnect;
+#		or return(MODEXEC_PROBLEM, 0, "Unable to disconnect from mon server $host");
+
+	return($rc, $cnt, $msg);	
+}

@@ -1,0 +1,646 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HEAD>
+<TITLE>survivor: Command Interface (sc)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Command Interface</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>sc</TT></A>
+  <UL>
+  <LI><A HREF=#commands>Commands</A>
+  <LI><A HREF=#depend>Dependencies</A>
+  <LI><A HREF=#examples>Examples</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>sc</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    sc [-sV] [-c comment] [-d debuglevel] [-f fromtime] [-i instance]
+       [-I instcf] [-L logmethod] [-m moddir] [-o commandflags] [-u untiltime]
+       command [commandargs]
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>-s</B>: Generates timestamps for each line of debugging output.
+ <LI><B>-V</B>: Outputs the package version information and exits.
+ <LI><B>comment</B>: For <TT>acknowledge</TT> and <TT>inhibit</TT>
+     commands, record <I>comment</I> with the acknowledgement or
+     inhibition.  (Comments are deleted when the acknowledgement or
+     inhibition is cleared.)  This option can be required by editing
+     <A HREF=cf-instance.html><TT>instance.cf</TT></A>.
+ <LI><B>debuglevel</B>: Output debugging at the specified level (if
+     enabled, see <TT>include/debug.H</TT> for level definitions).  Note that
+     debugging at level <TT>DEBUG_CONFIG</TT> may generate numerous warnings
+     about undefined hosts in the configuration file.  These warnings may be
+     suppressed by also debugging at level <TT>DEBUG_CFLESS</TT>.
+     <TT>DEBUG_CFERRS</TT> may be used to only display the actual parse
+     errors.
+ <LI><B>fromtime</B>: For <TT>history</TT>, <TT>clsub</TT>, and
+     <TT>archivehistory</TT> commands, specify the beginning of the
+     relevant time period.  The format is <TT>[HHMM]MMDDYYYY</TT>,
+     where the time, if omitted, is midnight.
+ <LI><B>instance</B>: The <A HREF=cf-instance.html>Instance</A> to use.
+ <LI><B>instcf</B>: The instance configuration file (default:
+     <TT>/etc/survivor/instance.cf</TT>).
+ <LI><B>logmethod</B>: The method for logging debugging and warning
+     information.  <TT>std</TT> is the default, and uses stderr.
+     <TT>syslog</TT> logs to the syslog <TT>user.debug</TT> facility.
+     <TT>none</TT> disables all debugging and warning information.
+     Specifying this switch before the <TT>-d</TT> switch may prevent
+     initial debugging logs from being written to stderr.
+ <LI><B>moddir</B>: The location where modules may be found.
+ <LI><B>commandflags</B>: Command specific flags.
+ <LI><B>untiltime</B>: For <TT>history</TT>, <TT>clsub</TT>, <TT>clunsub</TT>,
+     and <TT>archivehistory</TT> commands, specify the end of the relevant
+     time period (up to, but not including, the <I>untiltime</I>).
+     The format is <TT>[HHMM]MMDDYYYY</TT>, where the time, if omitted,
+     is midnight.
+ </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Survivor Command Interface allows for examination and
+ manipulation of system state.  The user running <TT>sc</TT> must be a
+ member of the group specified by the <TT>--enable-group</TT> option
+ to <A HREF=building.html><TT>configure</TT></A> in order to change
+ state.  By default, anybody may view state who otherwise has access
+ to the file systems maintaining the state.
+
+ <P>
+
+ By default, the root user is not permitted to use the command interface.
+ To change this, edit <A HREF=cf-instance.html><TT>instance.cf</TT></A>.
+
+ <A ID="commands"></A>
+ <H3>Commands</H3>
+
+ Only the first unique letter(s) are required.
+
+ <P>
+
+ <I>multiple</I> indicates the command accepts arguments of the form
+ <TT>[ service | host | service@host ]</TT>, in any combination.
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-status"></A>
+  <B>status</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Get all available current status information.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-statusm"></A>
+  <B>status</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>-o <B>match</B>=<B>addressed</B>|<B>error</B>|<B>escalated</B>|<B>stalled</B></TT>
+  <P>
+
+  Obtain the <I>service@host</I> pairs whose status is of the specified
+  type.  <I>Addressed</I> will match all those acknowledged or inhibited,
+  <I>error</I> will match all those not <TT>MODEXEC_OK</TT>,
+  <I>escalated</I> will match all those escalated, whether automatically
+  or manually, <I>stalled</I> will match any pair that has not been checked
+  within a reasonable time of its next scheduled check.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-check"></A>
+  <B>check</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Perform an immediate Check and display the results.  State and
+  history are not updated.
+
+  <P>
+
+  While this command is executing, <TT>^C</TT> will terminate the current
+  Check and <TT>^Z</TT> will terminate the entire command.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkcf"></A>
+  <B>checkcf</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Attempt to parse the configuration files.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-reschedule"></A>
+  <B>reschedule</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Schedule a Check at the next run of the scheduler.  When rechecked,
+  state and history are updated.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-acknowledge"></A>
+  <B>acknowledge</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Acknowledge the current problem, preventing new alert notifications
+  from being generated until unacknowledged or the underlying problem
+  clears or otherwise changes return code.
+  <P>
+
+  The Alert Plan keywords <TT><A HREF="cf-schedule.html#kw-noclear">do
+  not clear state</A></TT> and <TT><A
+  HREF="cf-schedule.html#kw-clearrg">clear state honors</A></TT> can
+  be used to adjust which return codes cause acknowledgements to be
+  cleared.
+  <P>
+
+  If <TT> <A HREF="cf-check.html#kw-resulttext">result text
+  significant</A></TT> is defined for the check, a comment change will
+  also clear the acknowledgement.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-unacknowledge"></A>
+  <B>unacknowledge</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Remove an existing acknowledgement.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-escalate"></A>
+  <B>escalate</B> &lt;service@host>
+ </TD>
+ <TD CLASS=kwdef>
+  Escalate the current Alert Plan to the next <A
+  HREF=cf-schedule.html>Alert Plan</A> notification level, if one is
+  defined.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-inhibit"></A>
+  <B>inhibit</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Silence all alert notifications.  Unlike acknowledgements,
+  inhibitions must be manually removed (by the <TT>uninhibit</TT>
+  command).
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-uninhibit"></A>
+  <B>uninhibit</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Remove the existing inhibition, allowing alert notifications to
+  again be generated.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fix"></A>
+  <B>fix</B> &lt;service@host>
+ </TD>
+ <TD CLASS=kwdef>
+  Execute the predefined Fix.  There need not be an outstanding error,
+  but if there is, the Check will be automatically rescheduled upon
+  successful execution of the Fix.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alerthistory"></A>
+  <B>alerthistory</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>[-o reverse]</TT>
+  <P>
+ 
+  Retrieve the alert history records, optionally limited by <I>fromtime</I>
+  and <I>untiltime</I>.  If the <I>reverse</I> flag is provided, retrieve
+  most recent history first.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkhistory"></A>
+  <B>checkhistory</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>[-o reverse]</TT>
+  <P>
+ 
+  Retrieve the check history records, optionally limited by <I>fromtime</I>
+  and <I>untiltime</I>.  If the <I>reverse</I> flag is provided, retrieve
+  most recent history first.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-commandhistory"></A>
+  <B>commandhistory</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>[-o reverse]</TT>
+  <P>
+ 
+  Retrieve the command history records, optionally limited by <I>fromtime</I>
+  and <I>untiltime</I>.  If the <I>reverse</I> flag is provided, retrieve
+  most recent history first.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fixhistory"></A>
+  <B>fixhistory</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>[-o reverse]</TT>
+  <P>
+ 
+  Retrieve the fix history records, optionally limited by <I>fromtime</I>
+  and <I>untiltime</I>.  If the <I>reverse</I> flag is provided, retrieve
+  most recent history first.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-report"></A>
+  <B>report</B> &lt;services> &lt;hosts>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>-o <B>module</B>=&lt;module>,<B>type</B>=<B>alert</B>|<B>check</B>|<B>command</B>|<B>fix</B>[,<B>reverse</B>]</TT>
+  <P>
+ 
+  Execute the <A HREF="rm-about.html">report module</A> <I>module</I>
+  for the data <I>type</I> specified.  The report will be generated for
+  each of the specified services on each of the specified hosts for the
+  time period specified by the <TT>-f</TT> and <TT>-u</TT> flags, or for
+  all available history if neither flag is specified.  If the <I>reverse</I>
+  flag is provided, the most recent history will be processed first.
+
+  <P>
+
+  At least one service and at least one host must be provided.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-trip"></A>
+  <B>trip</B> &lt;service@host>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>-o <B>rc</B>=&lt;returncode></TT>
+  <P>
+ 
+  Set <I>service@host</I> to have the specified <I>returncode</I>,
+  as if the check failed or exited with that value.  If a comment
+  was provided via <TT>-c</TT>, the human readable comment will be
+  set to it.  This command is intended primarily for debugging.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clstat"></A>
+  <B>clstat</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+  Obtain the current status for the specified <I>calllist</I>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clcal"></A>
+  <B>clcal</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>[-o <B>person</B>=&lt;person>]</TT>
+  <P>
+ 
+  Obtain the calendar for the specified <I>calllist</I>, showing
+  who is on call, including any substitutions.  Note that Broadcast
+  Call Lists do not have calendars.
+  <P>
+
+  If <I>person</I> is provided, only information for that Person will
+  be displayed.  If no begin time is provided with <TT>-f</TT>, the
+  current time will be used.  If no end time is provided with <TT>-u</TT>,
+  the calendar will continue until the Call List cycles.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clprune"></A>
+  <B>clprune</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+  Remove any old substitution information (where the scheduled end
+  time of the substitution has passed) from <I>calllist</I>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clsub"></A>
+  <B>clsub</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+   Flags: <TT>-o <B>replace</B>=&lt;substitutee>,<B>with</B>=&lt;substitutor></TT>
+   <P>
+ 
+   Add a substitution, having <I>substitutor</I> replace <I>substitutee</I>.
+   The beginning and end times of the substitution must be specified using
+   the <TT>-f</TT> and <TT>-u</TT> flags.
+   <P>
+
+   The substitutor must be defined as a member of the Call List.
+   The substitutee need not be on call during the exact time of the
+   substitution.  The replacement will only take effect while the
+   substitutee is on call.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clunsub"></A>
+  <B>clunsub</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+  Remove any substitution that falls within beginning and end times specified
+  using the <TT>-f</TT> and <TT>-u</TT> flags.
+  <P>
+
+  To remove all past substitutions, use <I>clprune</I>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clset"></A>
+  <B>clset</B> &lt;calllist>
+ </TD>
+ <TD CLASS=kwdef>
+  Flags: <TT>-o <B>person</B>=&lt;person></TT>
+  <P>
+
+  Set <I>person</I> to be the currently on call Person for the Call List.
+  For Simple Call Lists, <I>person</I> will be considered the last
+  Person notified.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-archivehistory"></A>
+  <B>archivehistory</B>
+ </TD>
+ <TD CLASS=kwdef>
+   Flags: <TT>-o [<B>stale</B>|<B>all</B>],[<B>directory</B>=&lt;dir>|<B>file</B>=&lt;file>]</TT>
+   <P>
+
+   When the <TT>all</TT> flag is used, all history is archived.
+   For active history, the time period specified by <TT>-f</TT> and
+   <TT>-u</TT> applies.  If either is omitted, then archiving begins
+   at the beginning or ends at the end, respectively.  If both are
+   omitted, all available history is archived.  The <TT>all</TT>
+   flag also implies the <TT>stale</TT> flag.
+   <P>
+
+   When the <TT>stale</TT> flag is used, all history for services
+   or hosts that are no longer actively defined in the configuration
+   files (hosts must be in a HostClass, services must be defined as
+   Checks, and the hosts must be a member of the Group with the same
+   name as the service in order to be considered actively defined)
+   are archived.  Time period specification via <TT>-f</TT> and
+   <TT>-u</TT> does not apply.
+   <P>
+
+   Note that there is a minor race condition when archiving stale
+   history.  If the configuration files are updated while archiving,
+   what was stale could become valid again, and what was valid could
+   become stale.  For this reason, it is recommended that configuration
+   files not be updated while archiving stale history.
+   <P>
+
+   Note also that when archiving stale history, the old history files
+   will be removed.  The old directories in which these files resided
+   will only be removed if the <TT>archivehistory</TT> command is run
+   by the survivor user or by root.
+   <P>
+      
+   When history is archived, all entries within the requested time
+   range are transferred from the history files to the specified
+   destination.  If the destination given is <I>directory</I>, a new tree
+   is created under the path named.  If the destination given is
+   <I>file</I>, all records are appended to that file, prefixed with
+   the type of history record, the service, and the host.
+   <P>
+
+   Note that when history is archived to a file, archiving is subject
+   to operating system imposed file size limits.  Ordinarily, this
+   limit is 2GB.  (If the package is built using a 64-bit compiler,
+   this limit would not apply.  This is not the default and has not
+   been tested.)  When large amounts of history are to be archived,
+   using a directory tree is recommended.  The system should detect
+   when the file size limit has been reached, and fail gracefully.
+   <P>
+
+   Any history records not archived remain in their existing history
+   files.
+   <P>
+
+   By default, this command is disabled.  To enable it, edit
+   <A HREF=cf-instance.html><TT>instance.cf</TT></A>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-archivehistorym"></A>
+  <B>archivehistory</B> &lt;multiple>
+ </TD>
+ <TD CLASS=kwdef>
+   Flags: <TT>-o [<B>directory</B>=&lt;dir>|<B>file</B>=&lt;file>]</TT>
+   <P>
+   
+   Archive the history for the specified services and/or hosts.
+   The period archived is specified by <TT>-f</TT> and <TT>-u</TT>.
+   If either is omitted, then archiving begins at the beginning or
+   ends at the end, respectively.  If both are omitted, all available
+   history is archived.
+   <P>
+
+   When history is archived, all entries within the requested time
+   range are transferred from the history files to the specified
+   destination.  If the destination given is <I>directory</I>, a new tree
+   is created under the path named.  If the destination given is
+   <I>file</I>, all records are appended to that file, prefixed with
+   the type of history record, the service, and the host.
+   <P>
+
+   Note that when history is archived to a file, archiving is subject
+   to operating system imposed file size limits.  Ordinarily, this
+   limit is 2GB.  (If the package is built using a 64-bit compiler,
+   this limit would not apply.  This is not the default and has not
+   been tested.)  When large amounts of history are to be archived,
+   using a directory tree is recommended.  The system should detect
+   when the file size limit has been reached, and fail gracefully.
+   <P>
+
+   Any history records not archived remain in their existing history
+   files.
+   <P>
+
+   By default, this command is disabled.  To enable it, edit
+   <A HREF=cf-instance.html><TT>instance.cf</TT></A>.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The command interface must run on the same host as the scheduler.
+ </UL>
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To archive all history for the Check <TT>ping</TT> prior to
+     1 January 2004, to a new tree under <TT>/spare/archive</TT>:
+
+     <PRE>
+     sc -u 01012004 -o directory=/spare/archive archivehistory ping
+     </PRE>
+
+ <LI>To archive all history for the host <TT>hal</TT> from 1 July 2003
+     through 23:59:59 14 July 2003, to the file
+     <TT>/export/history/hal.txt</TT>:
+
+     <PRE>
+     sc -f 07012003 -u 07152003 -o file=/export/history/hal.txt \
+     archivehistory hal
+     </PRE>
+
+ <LI>To archive all stale history, as of the time the command is run,
+     to the tree <TT>/spare/archive/stale</TT>:
+
+     <PRE>
+     sc -o stale -o directory=/spare/archive/stale archivehistory
+     </PRE>
+ </OL>
+ 
+ <P>
+ 
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The command interface is installed in <TT>$INSTDIR/bin/sc</TT>.  The
+ modules it expects to run are installed under <TT>$INSTDIR/mod</TT>.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 17:31:50 $</I><BR>
+<I>$Revision: 0.24 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-acknowledge>acknowledge</A><BR>
+ <A CLASS="keywords" HREF=#kw-alerthistory>alerthistory</A><BR>
+ <A CLASS="keywords" HREF=#kw-archivehistory>archivehistory</A><BR>
+ <A CLASS="keywords" HREF=#kw-archivehistorym>archivehistory (multiple)</A><BR>
+ <A CLASS="keywords" HREF=#kw-check>check</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkcf>checkcf</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkhistory>checkhistory</A><BR>
+ <A CLASS="keywords" HREF=#kw-clcal>clcal</A><BR>
+ <A CLASS="keywords" HREF=#kw-clprune>clprune</A><BR>
+ <A CLASS="keywords" HREF=#kw-clset>clset</A><BR>
+ <A CLASS="keywords" HREF=#kw-clstat>clstat</A><BR>
+ <A CLASS="keywords" HREF=#kw-clsub>clsub</A><BR>
+ <A CLASS="keywords" HREF=#kw-clunsub>clunsub</A><BR>
+ <A CLASS="keywords" HREF=#kw-commandhistory>commandhistory</A><BR>
+ <A CLASS="keywords" HREF=#kw-escalate>escalate</A><BR>
+ <A CLASS="keywords" HREF=#kw-fix>fix</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixhistory>fixhistory</A><BR>
+ <A CLASS="keywords" HREF=#kw-inhibit>inhibit</A><BR>
+ <A CLASS="keywords" HREF=#kw-reschedule>reschedule</A><BR>
+ <A CLASS="keywords" HREF=#kw-report>report</A><BR>
+ <A CLASS="keywords" HREF=#kw-status>status</A><BR>
+ <A CLASS="keywords" HREF=#kw-statusm>status (match)</A><BR>
+ <A CLASS="keywords" HREF=#kw-trip>trip</A><BR>
+ <A CLASS="keywords" HREF=#kw-unacknowledge>unacknowledge</A><BR>
+ <A CLASS="keywords" HREF=#kw-uninhibit>uninhibit</A><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

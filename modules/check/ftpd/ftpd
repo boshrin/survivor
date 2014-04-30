@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+# ftpd check module
+
+# Version: $Revision: 0.9 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/07/30 04:57:14 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::FTP;
+use File::Basename;
+
+my %argfmt = ("login" => "string",
+	      "password" => "password",
+	      "filename" => "string",
+	      "passive" => "optional boolean default(0)",
+	      "port" => "optional number between(1,65535) default(21)");
+
+my $sc = new Survivor::Check;
+
+$sc->GetOpt( \%argfmt, \&FtpdValidate);
+
+my $dir = dirname $sc->Arg("filename");
+my $file = basename $sc->Arg("filename");
+
+my $r = $sc->Exec( \&FtpdCheck);
+
+exit($r);
+
+sub FtpdValidate {
+    return(MODEXEC_OK, 0, "Ftpd OK");
+}
+
+sub FtpdCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $problem;
+    my $ftp = Net::FTP->new( $host,
+			     Port => $self->Arg("port"),
+			     Passive => $self->Arg("passive") );
+    if( !defined $ftp ) {
+	$problem = &cleanupError( $@ );
+	return(MODEXEC_PROBLEM, 0, $problem);
+    }
+    elsif( !$ftp->login( $self->Arg("login"), $self->Arg("password")) ) {
+	$problem = &cleanupError( $ftp->message );
+	return(MODEXEC_PROBLEM, 0, "Login failed - $problem");
+    }
+    elsif( !$ftp->cwd( $dir ) ) {
+	$problem = &cleanupError( $ftp->message );
+	return(MODEXEC_PROBLEM, 0, "CWD failed - $problem");
+    }
+    elsif( !$ftp->get( $file, '/dev/null' ) ) {
+	$problem = &cleanupError( $ftp->message );
+	return(MODEXEC_PROBLEM, 0, "GET failed - $problem");
+    }
+    elsif( !$ftp->quit ) {
+	$problem = &cleanupError( $ftp->message );
+	return(MODEXEC_PROBLEM, 0, "QUIT failed - $problem");
+    }
+    else {
+	return(MODEXEC_OK, 1, 'File retrieved successfully');
+    }
+}
+
+sub cleanupError {
+    my $message = shift || return '';
+
+    $message =~ s/[:\n]//g;
+
+    return $message;
+}

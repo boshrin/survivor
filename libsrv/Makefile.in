@@ -1,0 +1,141 @@
+# Makefile for Survivor library.
+
+# Version: $Revision: 0.20 $
+# Date: $Date: 2006/10/15 14:19:04 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../Makefile.inc
+
+# Set the paths to the source
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# Where to find install
+INSTALL=@INSTALL@
+
+OBJS=lex.yy.o \
+ utils.o \
+ Acknowledgement.o \
+ Alert.o \
+ AlertHistory.o \
+ AlertHistoryRecord.o \
+ AlertModule.o \
+ AlertPlan.o \
+ AlertReturnGroup.o\
+ AlertSchedule.o \
+ AlertState.o \
+ AlertStateData.o \
+ AlertTry.o \
+ Args.o \
+ Argument.o \
+ Array.o \
+ CallList.o \
+ CallListState.o \
+ CallListStateData.o \
+ CGIAuthModule.o \
+ CGIAuthRequest.o \
+ CGIAuthResult.o \
+ CGIAuthorization.o \
+ CGIConfiguration.o \
+ CharBuffer.o \
+ CharHandler.o \
+ Check.o \
+ CheckHistory.o \
+ CheckHistoryRecord.o \
+ CheckRequest.o \
+ CheckResult.o \
+ CheckState.o \
+ CommandHistory.o \
+ CommandHistoryRecord.o \
+ CommonStateData.o \
+ ComponentCheckResult.o \
+ ComponentResults.o \
+ Configuration.o \
+ Contact.o \
+ Counter.o \
+ Dependency.o \
+ Escalation.o \
+ Executor.o \
+ FileHandler.o \
+ Fix.o \
+ FixHistory.o \
+ FixHistoryRecord.o \
+ FixRequest.o \
+ FixState.o \
+ FixStateData.o \
+ FormattedAlert.o \
+ GatewayConfiguration.o \
+ HashUnit.o \
+ Hashtable.o \
+ History.o \
+ HistoryRecord.o \
+ HistorySet.o \
+ HostClass.o \
+ Inhibition.o \
+ Instance.o \
+ List.o \
+ ModuleConfigError.o \
+ Person.o \
+ PidPair.o \
+ PRNG.o \
+ Queue.o \
+ QueueUnit.o \
+ RecipientMethod.o \
+ RecipientSet.o \
+ RelayTarget.o \
+ ReportFormatting.o \
+ RunningState.o \
+ Schedule.o \
+ ScheduleAsOf.o \
+ SHPair.o \
+ StalledCheck.o \
+ StatCounter.o \
+ State.o \
+ Substitution.o \
+ SurvivorStatus.o \
+ TimerUnit.o \
+ Transport.o \
+ TransportRequest.o \
+ Warehouse.o
+
+all: libsrv.a
+
+install-remote:
+
+install:
+	echo Nothing to install for libsrv
+
+libsrv.a: ${OBJS}
+	${AR} -rv libsrv.a ${OBJS}
+	${RANLIB} libsrv.a
+
+# args needs DEFAULT_DIR, DEFAULT_MDIR, INSTUSER, and INSTGROUP.
+# Easiest to set them here to not make them visible everywhere else
+Args.o: Args.C
+	${CCC} -DDEFAULT_DIR=\"@prefix@\" \
+	-DDEFAULT_MDIR=\"@prefix@/mod\" \
+	-DINSTGROUP=\"@INST_GROUP@\" \
+	-DINSTUSER=\"@INST_USER@\" \
+	-DPKGVERSION=\"@PACKAGE_VERSION@\" \
+	-DBUILDVERSION="\"@PACKAGE_STRING@ `date` `whoami`@`hostname`\"" \
+	${CCFLAGS} -c @srcdir@/Args.C
+
+lex.yy.o: lex.yy.C
+	${CCC} -D__EXTERN_C__ ${CCFLAGS} -c lex.yy.C
+
+# Sun lex doesn't specify a return type for yylex, which confuses gcc 2.95.2
+lex.yy.C: config.l
+	${LEX} -t @srcdir@/config.l | \
+	sed 's/^yylex()/int yylex\(\)/' > lex.yy.C
+
+veryclean: clean
+	rm -f *.o *~
+
+clean:
+	rm -f libsrv.a ${OBJS} lex.yy.C

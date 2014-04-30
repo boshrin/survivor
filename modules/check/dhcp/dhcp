@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+
+# dhcp check module
+
+# Version: $Revision: 0.11 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/01/29 01:10:24 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Socket;
+use Net::Domain qw(hostname);
+
+my %argfmt = ();
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&DhcpValidate);
+
+my $DHCPING = $sc->Which('dhcping');
+
+unless(defined $DHCPING) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, "dhcping executable not found");
+}
+
+my $my_ip = inet_ntoa( scalar gethostbyname( hostname() ));
+
+# XXX should we let scheduler kill us after timeout?
+my $timeout = $sc->Timeout() || 5;
+
+# Cannot parallelize since client port/server port combo is not unique
+$sc->UseThreads(0);
+$sc->UseFork(0);
+
+my $r = $sc->Exec( \&DhcpCheck);
+
+exit($r);
+
+sub DhcpValidate {
+    return(MODEXEC_OK, 0, "Dhcp OK");
+}
+
+sub DhcpCheck {
+    my $self = shift;
+    my $host = shift;
+
+    open(ANSWER, "$DHCPING -t $timeout -i -c $my_ip -s $host 2>&1 |");
+
+    my $comment = '';    
+    while(<ANSWER>) {
+	chomp;
+	# dhcping output contains ':'
+	s/://g;
+	if( length($comment) ) {
+	    $comment .= ', '.$_;
+	} else {
+	    $comment .= $_;
+	}
+    }
+    close(ANSWER);
+
+    if( $? == 0 ) {
+	return(MODEXEC_OK, 1, $comment);
+    }
+    else {
+	return(MODEXEC_PROBLEM, 0, $comment);
+    }
+}

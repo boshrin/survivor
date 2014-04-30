@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Ftpd Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>ftpd</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>ftpd</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>ftpd</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module ftpd {</B>
+       <B>login</B> &lt;string>
+       <B>password</B> &lt;password>
+       <B>filename</B> &lt;string>
+       [<B>passive</B> &lt;boolean>]
+       [<B>port</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libnet"><TT>Net::FTP</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-login"></A><B>login</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Username to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>password</TD>
+ <TD CLASS=kwdef>
+   Password to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-filename"></A><B>filename</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Full path to file to be retrieved.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-passive"></A><B>passive</B></TD>
+ <TD CLASS=kwref>optional boolean, default is false</TD>
+ <TD CLASS=kwdef>
+   Whether or not passive-mode FTP should be used.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-port"></A><B>port</B></TD>
+ <TD CLASS=kwref>optional number between 1 and 65535, default is 21</TD>
+ <TD CLASS=kwdef>
+   Port number on which FTP server is listening.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>ftpd</TT> module downloads the file requested in order to
+ determine if the FTP server being contacted is returning expected
+ results.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI><B>Anonymous FTP</B> requests require a <TT>login</TT> of
+     &quot;ftp&quot; or &quot;anonymous&quot; and an email address to
+     be used as the <TT>password</TT>:
+     <PRE>
+     module ftpd {
+       login ftp
+       password survivor@
+       filename /welcome.msg
+     }
+     </PRE>
+
+ <LI>An example using "anonymous" and passive mode:
+     <PRE>
+     module ftpd {
+       login anonymous
+       password survivor@foo.university.edu
+       filename /pub/linux-2.4/linux-2.4.18.tgz
+       passive true
+     }
+     </PRE>
+     
+ <LI><B>Authenticated FTP</B> requests require a <TT>login</TT> and
+     <TT>password</TT> that are valid on the FTP to be checked:
+     <PRE>
+     module ftpd {
+       login bob
+       password secretCode
+       filename /pub/dist/survivor-0.9.0.tgz
+       port 8021
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:06:17 $</I><BR>
+ <I>$Revision: 0.8 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-filename">filename</A><BR>
+ <A CLASS="keywords" HREF="#kw-login">login</A><BR>
+ <A CLASS="keywords" HREF="#kw-passive">passive</A><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-port">port</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

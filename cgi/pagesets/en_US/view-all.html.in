@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=View All}
+@{INCLUDE header.html}
+
+<!-- view-all.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI file=}">@{ECHO $instance}</A>
+ > View All
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="infobody">
+ <TR CLASS="infobody">
+ <TH CLASS="infobody"></TH>
+ @{FOREACH $sort s SERVICE}
+ <TH CLASS="infobody">@{ECHO $s}</TH>
+ @{ENDEACH}
+ </TR>
+
+ @{FOREACH $sort hc HOSTCLASS}
+  <!-- iterate over each host in each hc -->
+  @{FOREACH $sort h HOSTCLASSMEMBER $hc}
+  <TR CLASS="infobody">
+  <TH CLASS="infobody">@{ECHO $h}</TH>
+
+   @{FOREACH $sort s SERVICE}
+   @{SET quiet=@[ALERTSTATUS type=quiet service=$s host=$h]}
+   @{SET rc=@[CHECKSTATUS type=rc service=$s host=$h]}
+   @{SET esc=@[ALERTSTATUS type=escalated service=$s host=$h]}
+   @{SET rcclass=$rc}
+   @{IF NUMBER $quiet = 1}
+   @{SET rcclass=q}
+   @{ELSE}
+    @{IF NUMBER $esc > 0}
+    @{SET rcclass=e}
+    @{ENDIF}
+   @{ENDIF}
+   <TD CLASS="rc@{ECHO $rcclass}">
+    @{IF NUMBER $rc != -1}
+    <A HREF="@{URI file= file=view-details.html s=$s h=$h hc= vt=}">@{ECHO $rc}</A>
+    @{ENDIF}
+   </TD>
+   @{ENDEACH}
+  </TR>
+  @{ENDEACH}
+ @{ENDEACH}
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+
+@{INCLUDE key.html}
+
+@{INCLUDE footer.html}
+</HTML>

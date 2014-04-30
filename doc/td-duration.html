@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Technical Document: Execution Duration Measurements</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR Technical Document: Execution Duration
+ Measurements</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About This Document</A>
+ <LI><A HREF=#duration>Execution Duration Measurements</A>
+  <UL>
+  <LI><A HREF=#check>Standard Check Modules</A>
+  <LI><A HREF=#composite>Composite Checks</A>
+  <LI><A HREF=#other>Other Modules</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About This Document
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ This document contains details of the SURVIVOR implementation.  It
+ contains no information necessary for the operation of the systems
+ monitor that is not available in the general sections of this
+ manual.
+
+ <P>
+ 
+ <A ID="duration"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Execution Duration Measurements
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ SURVIVOR provides a mechanism for measuring the duration of module
+ execution.  This can be useful for, as an example, measuring the
+ response time of services.
+
+ <A ID="check"></A>
+ <H3>Standard Check Modules</H3>
+
+  Standard check modules are responsible for performing their own
+  duration measurement, as described <A HREF="spec-cm.html">here</A>.
+  Routines are provided with the standard module libraries to
+  transparently handle duration measurement in most circumstances, as
+  described <A HREF="cm-about.html#custom">here</A>.
+
+  <P>
+ 
+ <A ID="composite"></A>
+ <H3>Composite Checks</H3>
+
+  Duration measurements for composite checks are calculated by adding
+  together the duration measurements for each component check.  (This
+  is subject to change in a future release.)
+
+  <P>
+  
+ <A ID="other"></A>
+ <H3>Other Modules</H3>
+
+  Other types of modules do not currently support duration measurement.
+ 
+  <P>
+  
+<HR>
+<I>$Date: 2006/11/20 02:47:21 $</I><BR>
+<I>$Revision: 0.2 $</I>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
+

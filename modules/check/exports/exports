@@ -1,0 +1,198 @@
+#!/usr/bin/perl -w
+
+# exports check module
+
+# Version: $Revision: 0.8 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2005/06/06 01:24:51 $
+#
+# Copyright (c) 2002 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("filesystem" => "optional string list");
+
+my $sc = new Survivor::Check();
+
+my(%are,@should);
+
+$sc->GetOpt(\%argfmt, \&ExportsValidate);
+
+my $r = $sc->Exec( \&ExportsCheck);
+
+exit($r);
+
+sub ExportsValidate {
+    my $self= shift;
+
+    my($rc,$found,$errors);
+
+    # Read system files.
+    ($rc, $found, $errors) = &read_dfstab();
+    return($rc, $found, $errors) unless ($rc == MODEXEC_OK);
+
+    ($rc, $found, $errors) = &read_sharetab();
+    return($rc, $found, $errors) unless ($rc == MODEXEC_OK);
+
+
+    return(MODEXEC_OK, 0, "Exports OK");
+}
+
+sub ExportsCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my @filesystems;
+
+    my($rc,$found,$errors);
+
+    # Read system files.
+    ($rc, $found, $errors) = &read_dfstab();
+    return($rc, $found, $errors) unless ($rc == MODEXEC_OK);
+
+    ($rc, $found, $errors) = &read_sharetab();
+    return($rc, $found, $errors) unless ($rc == MODEXEC_OK);
+
+    # Set up variables for later
+    ($rc, $found, $errors) = (MODEXEC_OK, 0, '');
+
+    if(scalar $self->Arg('filesystem')) {
+	@filesystems = $self->Arg('filesystem');
+    } else {
+	# Use everything in dfstab
+	push(@filesystems, @should);
+    }
+
+    foreach my $fs (@filesystems) {
+	if($fs =~ /^\/cdrom\//) {
+	    # cdrom in export file is a warning
+	    $errors .= "$fs is exported,";
+	    if($rc != MODEXEC_PROBLEM) {
+		$rc = MODEXEC_WARNING;
+	    }
+	} else {
+	    if(exists $are{$fs}) {
+		# $fs is mounted on $are{$fs}, but for brevity's sake we don't
+		# note it in the return string (though we could)
+		$found++;
+	    } else {
+		$errors .= "$fs not shared,";
+		$rc = MODEXEC_PROBLEM;
+	    }
+	}
+    }
+    
+    if($rc == MODEXEC_OK) {
+	if(scalar(@should)==0) {
+	    $errors = 'No filesystems to export';
+	} else {
+	    $errors = 'All shared filesystems are exported';
+	}
+    } else {
+	chop($errors);
+    }
+    
+    return($rc, $found, $errors);
+}
+
+sub read_dfstab {
+    # Look for /etc/dfs/dfstab or /etc/exports. If neither exist, return error.
+    if(-r '/etc/dfs/dfstab') {
+	open(IN, '/etc/dfs/dfstab') ||
+	    return(MODEXEC_MISCONFIG, 0, 'Unable to read /etc/dfs/dfstab');
+
+	while(<IN>) {
+	    chomp;
+	    s/#.*$//;
+
+	    # This is a series of share commands.  The last space separated
+	    # item is the filesystem to export.
+	    s/^.* //;
+
+	    push(@should, $_);
+	}
+
+	close(IN);
+    } elsif(-r '/etc/exports') {
+	open(IN, '/etc/exports') ||
+	    return(MODEXEC_MISCONFIG, 0, 'Unable to read /etc/exports');
+
+	while(<IN>) {
+	    chomp;
+	    s/#.*$//;
+
+	    # For now, we only check mount point
+	    my($mount, $options) = split;
+
+	    if(defined $mount) {
+		push(@should, $mount);
+	    }
+	}
+	
+	close(IN);
+    }
+
+    return(MODEXEC_OK, 1, 'Success reading dfstab');
+}
+
+sub read_sharetab {
+    # Look for /etc/dfs/sharetab, /etc/xtab, or /var/lib/nfs/etab.  If
+    # none exist, return error.
+    if(-r '/etc/dfs/sharetab') {
+	open(IN, '/etc/dfs/sharetab') ||
+	    return(MODEXEC_MISCONFIG, 0, 'Unable to read /etc/dfs/sharetab');
+
+	while(<IN>) {
+	    chomp;
+	    s/#.*$//;
+
+	    # For now, we only check mount point
+	    my($mount, $resource, $fstype, $options) = split;
+
+	    $are{$mount} = $options;
+	}
+	
+	close(IN);
+    } elsif(-r '/etc/xtab') {
+	open(IN, '/etc/xtab') ||
+	    return(MODEXEC_MISCONFIG, 0, 'Unable to read /etc/xtab');
+
+	while(<IN>) {
+	    chomp;
+	    s/#.*$//;
+
+	    # For now, we only check mount point
+	    my($mount, $options) = split;
+
+	    $are{$mount} = $options;
+	}
+	
+	close(IN);
+   } elsif(-r '/var/lib/nfs/etab') {
+	open(IN, '/var/lib/nfs/etab') ||
+	    return(MODEXEC_MISCONFIG, 0, 'Unable to read /var/lib/nfs/etab');
+
+	while(<IN>) {
+	    chomp;
+	    s/#.*$//;
+
+	    # For now, we only check mount point
+	    my($mount, $options) = split;
+
+	    $are{$mount} = $options;
+	}
+	
+	close(IN);
+    } elsif(scalar(@should) > 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to read /etc/dfs/sharetab, /etc/xtab, or /var/lib/nfs/etab');
+    }
+
+    return(MODEXEC_OK, 1, 'Success reading shares');
+}

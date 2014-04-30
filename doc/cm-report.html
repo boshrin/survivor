@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Report Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>report</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>report</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>report</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module report {</B>
+       <B>module</B> &lt;string>
+       [<B>instance</B> &lt;string>]
+       <B>service</B> &lt;string>
+       <B>source</B> &lt;string>
+       [<B>recordspan</B> &lt;relation>]
+       [<B>warn</B> &lt;relation>]
+       [<B>problem</B> &lt;relation>]
+       [<B>extraction</B> &lt;extraction>]
+       [<B>tmpdir</B> &lt;directory>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+   
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-module"></A><B>module</B></TD>
+ <TD CLASS=kwref>required string</TD>
+ <TD CLASS=kwdef>
+   <A HREF="rm-about.html">Report module</A> to execute.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-instance"></A><B>instance</B></TD>
+ <TD CLASS=kwref>optional string, default is 'default'</TD>
+ <TD CLASS=kwdef>
+   <A HREF="cf-instance.html#kw-instance">Instance</A> to invoke module for.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-service"></A><B>service</B></TD>
+ <TD CLASS=kwref>required string</TD>
+ <TD CLASS=kwdef>
+   Service (check) to examine history of.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-source"></A><B>source</B></TD>
+ <TD CLASS=kwref>required string any of 'alert', 'check', 'command', 'fix'</TD>
+ <TD CLASS=kwdef>
+   Type of history records to examine.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-recordspan"></A><B>recordspan</B></TD>
+ <TD CLASS=kwref>optional time relation</TD>
+ <TD CLASS=kwdef>
+   Examine history records matching the specified time relation only.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Generate a warning if relation matches module result.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-problem"></A><B>problem</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Generate a problem if relation matches module result.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-extraction"></A><B>extraction</B></TD>
+ <TD CLASS=kwref>optional extraction</TD>
+ <TD CLASS=kwdef>
+   An extraction applied to the value obtained in the reply.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-tmpdir"></A><B>tmpdir</B></TD>
+ <TD CLASS=kwref>optional directory</TD>
+ <TD CLASS=kwdef>
+   Directory passed to module for writing temporary files.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+  
+ If neither <I>warn</I> nor <I>problem</I> is specified, the module will
+ return <TT>MODEXEC_NOTICE</TT> with the full report text.
+
+ <P>
+
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>report</TT> check module
+ executes <A HREF="rm-about.html">report modules</A> in order to
+ provide automated trend analysis.  Modules generate reports based on
+ the specified <I>instance</I>, <I>service</I>, <I>source</I>,
+ and <I>recordspan</I>.  The output, the format of which is described
+ in each module's documentation, can be processed
+ with <I>extraction</I> and then compared against <I>warn</I>
+ and/or <I>prob</I> to generate alerts.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To run the <A HREF="rm-availability.html">availability</A> module for
+     the network instancew looking at ping check data records within the
+     last week (604800 seconds) where the first column of output has %
+     available and warning if less than 100% available:
+     <PRE>
+     module report {
+       module     availability
+       instance   network
+       service    ping
+       source     check
+       recordspan tnt[604800]
+       extraction column[0]
+       warn       lt[100]
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 21:29:01 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-extraction">extraction</A><BR>
+ <A CLASS="keywords" HREF="#kw-instance">instance</A><BR>
+ <A CLASS="keywords" HREF="#kw-module">module</A><BR>
+ <A CLASS="keywords" HREF="#kw-problem">problem</A><BR>
+ <A CLASS="keywords" HREF="#kw-recordspan">recordspan</A><BR>
+ <A CLASS="keywords" HREF="#kw-service">service</A><BR>
+ <A CLASS="keywords" HREF="#kw-source">source</A><BR>
+ <A CLASS="keywords" HREF="#kw-tmpdir">tmpdir</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

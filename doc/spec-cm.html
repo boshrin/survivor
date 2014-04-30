@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Check Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Check Module Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+ 
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All requirements apply to both scheduler and remote check modules,
+ unless otherwise stated.
+ <P>
+
+ <OL>
+ <LI>Check modules <B>must</B> be reentrant.  That is, if a check
+     module is run more than once simultaneously, all instances
+     <B>must</B> run to completion without interference.
+     <P>
+
+ <LI>Check modules <B>must not</B> change their process group by any
+     means, including via <TT>setsid()</TT>, <TT>setpgid()</TT>,
+     <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Check modules <B>should</B> handle their own parallelization.
+     If a module is passed more than one host name to check, it is up
+     to the module to determine the best way to handle it.  (This
+     requirement is relaxed to <I>should</I> from <I>must</I> because
+     scripted modules may be run under the <A
+     HREF=cm-parallel.html><TT>parallel</TT></A> module.)
+     <P>
+
+ <LI>Remote check modules <B>should</B> be written in a scripting
+     language such as perl to make changes easier and more transparent,
+     and to allow for easier portability.  Scheduler check modules
+     <B>may</B> also be written in a scripting language.  Compiled
+     modules are permitted when necessary, but are actively discouraged
+     for remote check modules.
+     <P>
+  
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/check/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>check/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/check</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+
+        The <TT>install-remote</TT> directive <B>should</B> be the same
+        as <TT>install</TT>, except where it does not make sense for
+        the module to be installed as part of a remote distribution.
+        <P>
+
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/cm-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+
+ <LI>Check modules <B>must</B> accept the following arguments:
+
+     <UL>
+     <LI><B>-v</B><BR>
+         A flag indicating the module should validate its configuration.
+	 The module must test for any dependencies (executables,
+	 libraries, modules, configuration files, etc) required for
+	 normal successful execution.  If valid, exit with MODEXEC_OK
+	 (using scalar value 0 and the string "<I>Module</I> OK" as
+	 the comment, where <I>Module</I> is the name of the module),
+	 otherwise exit with MODEXEC_PROBLEM, following the output
+	 format specification described below.
+	 <P>
+     </UL>
+    
+ <LI>Check modules receive the rest of their data via a
+     <A HREF="survivor.dtd">SurvivorCheckData</A> document, where
+     <P>
+
+     <UL>
+     <LI><B>Host</B><BR>
+         Host to perform the check on.  Remote check modules will still
+         be provided this argument, with the value <I>localhost</I>.
+         Absence of this argument <B>should</B> cause the check module
+         to exit immediately with an appropriate return code.
+	 <P>
+
+     <LI><B>Timeout</B><BR>
+         The timeout for this module.  After <TT>timeout</TT> seconds,
+	 the check module may be gracelessly terminated.  The check
+	 module <B>may</B> use this timeout value to exit gracefully
+	 before time expires.  If this option is not provided, the
+	 module <B>may</B> act as if there is no timeout.
+	 <P>
+	
+     <LI><B>ModuleOption</B><BR>
+	 The names and values of the arguments provided in <A
+	 HREF=cf-check.html><TT>check.cf</TT></A> or <A
+	 HREF=cf-dependency.html><TT>dependency.cf</TT></A>.
+	 This element <B>should</B> conform to the <A
+	 HREF="spec-xmlarg.html">Module XML Argument Specification</A>.
+	 <P>
+     </UL>
+    
+ <LI>Check modules <B>should not</B> write output files.
+     <P>
+
+ <LI>Check modules <B>must</B> generate output on stdout consisting of
+     an XML document consisting of a <A
+     HREF="survivor.dtd">SurvivorCheckResult</A> element for each host
+     specified.  These documents must not be interleaved.  Each host's
+     element <B>should</B> be generated as soon as information is
+     available, in case the module is timed out.  The elements defined
+     are
+     <P>
+
+     <UL>
+     <LI><B>Host</B><BR>
+         This <B>must</B> be the name of the host as provided by the
+	 SurvivorCheckData argument.
+	 <P>
+
+     <LI><B>ReturnCode</B><BR>
+         The numeric return code (as defined in <TT>include/survivor.H</TT>).
+	 Possible values include
+
+	 <UL>
+	 <LI><B><TT>MODEXEC_OK</TT></B>: No problem was found.
+	 <LI><B><TT>MODEXEC_PROBLEM</TT></B>: A critical problem was
+	     found, or the check could not be completed for critical reasons. 
+	 <LI><B><TT>MODEXEC_WARNING</TT></B>: A non-critical problem
+	     was found, and is in danger of becoming critical.
+	 <LI><B><TT>MODEXEC_NOTICE</TT></B>: A non-critical problem was
+	     found, or the check could not be completed for
+	     non-critical reasons.
+	 <LI><B><TT>MODEXEC_MISCONFIG</TT></B>: The module is
+	     misconfigured and is unable to perform its check.
+	 <LI><B><TT>MODEXEC_TIMEDOUT</TT></B>: The check timed out.
+	 </UL>
+	
+	 but ReturnCode <B>may</B> be a value of 20 through 1000 to
+	 transmit custom return information.
+	 <P>
+
+     <LI><B>Scalar</B><BR>
+         The scalar value <B>must</B> be an integer, either positive
+         or negative, indicating a value that may be used for long term
+	 monitoring. For example, the number might be a load, or a
+	 simple '0' (no) or '1' (yes) indicating that a service is
+	 responding or not.  For disk space usage, it might be between
+	 0 and 100 to indicate fullness, or it might be an actual
+	 amount of bytes in use.
+	 <P>
+
+     <LI><B>Comment</B><BR>
+         The comment <B>may</B> be an empty string, or it
+         <B>may</B> provide a human readable explanation of the return
+	 or scalar values.  The comment may be reformatted or truncated.
+	 <P>
+
+     <LI><B>Duration</B><BR>
+         The duration of the check execution, in milliseconds.  If
+	 present, this value must be an integer zero or greater.
+	 <P>
+     </UL>
+     <P>
+    
+ <LI>Check modules <B>must</B> exit with the highest return value
+     generated by any host checked, unless custom return values are in
+     use, in which case the check module <B>may</B> exit with whatever
+     value the custom specifications require.  Check modules executing
+     a Type II dependency <B>must</B> exit with a return value
+     appropriate for the results obtained from the check.
+     <P>
+ </OL>
+
+<HR>
+<I>$Date: 2006/11/20 00:05:07 $</I><BR>
+<I>$Revision: 0.11 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

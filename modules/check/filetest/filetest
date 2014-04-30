@@ -1,0 +1,510 @@
+#!/usr/bin/perl -w
+
+# filetest check module
+
+# Version: $Revision: 0.16 $
+# Author: Bill Bert, with modifications by Benjamin Oshrin
+# Date: $Date: 2005/11/28 00:51:55 $
+#
+# Copyright (c) 2002 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+## use File::stat; # can't use because of file_not_found bug
+
+my %argfmt = (# boolean and/or over tests
+	      "op" => "string one(any,all)",
+	      # shell tests to perform
+	      "type" =>
+	      "optional flags any(r,w,x,f,d,c,b,p,u,g,k,s,R,W,X,F,D,C,B,P,U,G,K,S)",
+	      # grep contents
+	      "grep" => "optional relation",
+	      "showline" => "optional boolean default(no)",
+	      # time tests
+	      "timewarn" => "optional number between(1,inf)",
+	      "timeprob" => "optional number between(1,inf)",
+	      "timemax" => "optional number between(1,inf)",
+	      # count tests
+	      "countwarn" => "optional relation",
+	      "countprob" => "optional relation",
+	      # names of files (really regexps)
+	      "name" => "string list",
+	      # test only one file
+	      "matchone" => "optional string one(newest,oldest)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&FiletestValidate);
+
+# Convert times to seconds.  If not set, these times will end up as 0.
+my $timewarn = ($sc->Arg("timewarn") || 0) * 60;
+my $timeprob = ($sc->Arg("timeprob") || 0) * 60;
+my $timemax = ($sc->Arg("timemax") || 0) * 60;
+
+my $typeflags = $sc->Arg("type") || "";
+my $xgrep = $sc->Arg("grep");
+my %grep = (defined $xgrep ? %$xgrep : ());
+my $xcwarn = $sc->Arg("countwarn");
+my %cwarn = (defined $xcwarn ? %$xcwarn : ());
+my $xcprob = $sc->Arg("countprob");
+my %cprob = (defined $xcprob ? %$xcprob : ());
+
+my $r = $sc->Exec(\&FiletestCheck);
+
+exit($r);
+
+sub FiletestValidate {
+    return(MODEXEC_OK, 0, "Filetest OK");
+}
+
+sub FiletestCheck {
+    my $self = shift;
+    my $host = shift;
+
+    # Track failures per test
+    my %testfail = ( 'test' => 0,
+		     'regex' => 0,
+		     'timewarn' => 0,
+		     'timeprob' => 0,
+		     'countwarn' => 0,
+		     'countprob' => 0);
+
+    my(%errors, %warnings, %errors_count, %warnings_count, @opfiles);
+
+    # go through each of the files or wildcards supplied as arguments,
+    # glob each, and add the results to opfiles so they are checked
+    foreach my $globber ($self->Arg("name")) {
+	my @globfiles = $self->Glob($globber);
+	if(scalar(@globfiles) > 0) {
+	    if($globfiles[0] =~ m!^/!) {
+		push(@opfiles, @globfiles);
+	    } else {
+		return(MODEXEC_MISCONFIG, 0,
+		       "Glob failure: " . $globfiles[0]);
+	    }
+	}
+    }
+
+    my $matchone = $sc->Arg("matchone");
+
+    if(defined $matchone) {
+	# Look at each file in opfiles, and note which one we want to keep
+
+	my $keepfile = "";
+	my $keeptime = -1;
+	
+	foreach my $f (@opfiles) {
+	    my $mtime = (stat($f))[9];
+
+	    if(defined $mtime) {
+		if($keeptime == -1                     # First entry, note it
+		   || ($matchone eq "newest" && $mtime > $keeptime)  # newest
+		   || ($matchone eq "oldest" && $mtime < $keeptime)) # oldest
+		{
+		    $keepfile = $f;
+		    $keeptime = $mtime;
+		}
+	    }
+	}
+
+	@opfiles = ($keepfile);
+    }
+
+    foreach my $opfile (@opfiles) {
+	if($typeflags =~ /R/ && -r $opfile) {
+	    $errors{$opfile} .= 'readable,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /r/ && !-r $opfile) {
+	    $errors{$opfile} .= 'not readable,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /W/ && -w $opfile) {
+	    $errors{$opfile} .= 'writeable,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /w/ && !-w $opfile) {
+	    $errors{$opfile} .= 'not writeable,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /X/ && -x $opfile) {
+	    $errors{$opfile} .= 'executable,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /x/ && !-x $opfile) {
+	    $errors{$opfile} .= 'not executable,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /F/ && -f $opfile) {
+	    $errors{$opfile} .= 'exists,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /f/ && !-f $opfile) {
+	    $errors{$opfile} .= 'does not exist,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /D/ && -d $opfile) {
+	    $errors{$opfile} .= 'is a directory,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /d/ && !-d $opfile) {
+	    $errors{$opfile} .= 'not a directory,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /C/ && -c $opfile) {
+	    $errors{$opfile} .= 'exists (char special),';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /c/ && !-c $opfile) {
+	    $errors{$opfile} .= 'does not exist (char special),';
+	    $errors_count{$opfile}++;
+	}	
+	
+	if($typeflags =~ /B/ && -b $opfile) {
+	    $errors{$opfile} .= 'exists (block special),';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /b/ && !-b $opfile) {
+	    $errors{$opfile} .= 'does not exist (block special),';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /p/ && -p $opfile) {
+	    $errors{$opfile} .= 'is a pipe,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /p/ && !-p $opfile) {
+	    $errors{$opfile} .= 'not a pipe,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /U/ && -u $opfile) {
+	    $errors{$opfile} .= 'setuid,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /u/ && !-u $opfile) {
+	    $errors{$opfile} .= 'not setuid,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /G/ && -g $opfile) {
+	    $errors{$opfile} .= 'setgid,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /g/ && !-g $opfile) {
+	    $errors{$opfile} .= 'not setgid,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /K/ && -k $opfile) {
+	    $errors{$opfile} .= 'sticky,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /k/ && !-k $opfile) {
+	    $errors{$opfile} .= 'not sticky,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if($typeflags =~ /S/ && -s $opfile) {
+	    $errors{$opfile} .= 'non-zero in size,';
+	    $errors_count{$opfile}++;
+	}
+	if($typeflags =~ /s/ && !-s $opfile) {
+	    $errors{$opfile} .= 'not non-zero in size,';
+	    $errors_count{$opfile}++;
+	}	
+    
+	if(exists $errors_count{$opfile}) {
+	    $testfail{'typeflags'}++;
+	}
+	
+	if($self->Arg("grep")) {
+	    if(open(INFILE, $opfile)) {
+		my $found = 0;
+		my $lineno = 0;
+		my @matchlines;
+		while(<INFILE>) {
+		    $lineno++;
+		    my($x,$y) = $self->RelationCompare($xgrep, $_);
+		    if($x && $grep{"rel"} eq "reg") {
+			$found++;
+			# Since we don't currently report where/what we
+			# found, we may as well break the loop
+			last;
+		    } elsif(!$x && $grep{"rel"} eq "regv") {
+			$found++;
+			# If we're tracking line numbers, look for all
+			# matching lines
+			if($self->Arg("showline")) {
+			    push(@matchlines, $lineno);
+			} else {
+			    last;
+			}
+		    }
+		}
+
+		close INFILE;
+
+		if($found) {
+		    if($grep{"rel"} eq "regv") {
+			$errors{$opfile} .=  $grep{"s"} . " found";
+			if($self->Arg("showline")) {
+			    $errors{$opfile} .= " at "
+				. join(',', @matchlines);
+			}
+			$errors{$opfile} .= ",";
+			$errors_count{$opfile}++;
+			$testfail{'regex'}++;
+		    }
+		} else {
+		    if($grep{"rel"} eq "reg") {
+			$errors{$opfile} .= $grep{"s"} . " not found,";
+			$errors_count{$opfile}++;
+			$testfail{'regex'}++;
+		    }
+		}
+	    } else {
+		# This is only a problem for reg op
+		if($grep{"rel"} eq "reg" && -e $opfile) {
+		    $errors{$opfile} .= 'file not available for grep,';
+		    $errors_count{$opfile}++;
+		    $testfail{'regex'}++;
+		}
+	    }
+	}
+    
+	# Test prob before warn (time)
+	if($timeprob) {
+	    my($untouchedtime,$result) = &check_mtime($opfile, $timeprob,
+						      $timemax);
+	    if($result eq 'dne') {
+		# It's ok if the file doesn't exist as far as the
+		# time check is concerned
+		#$errors{$opfile} .=
+		#    'does not exist for time check,';
+		#$errors_count{$opfile}++;
+	    } elsif($result eq 'untouched') {
+		$errors{$opfile} .= 'untouched in '
+		    .&hrtime($untouchedtime).',';
+		$errors_count{$opfile}++;
+		$testfail{'timeprob'}++;
+	    } elsif($result eq 'error') {
+		return(MODEXEC_MISCONFIG, 0, 'check_mtime returned error');
+	    }
+	}
+    
+	if($timewarn && !$testfail{'timeprob'}) {
+	    my($untouchedtime,$result) = &check_mtime($opfile, $timewarn,
+						      $timemax);
+	    if($result eq 'dne') {
+		# It's ok if the file doesn't exist as far as the
+		# time check is concerned
+		#$warnings{$opfile} .=
+		#    'does not exist for time check,';
+		#$warnings_count{$opfile}++;
+	    } elsif($result eq 'untouched') {
+		$warnings{$opfile} .= 'untouched in '
+		    .&hrtime($untouchedtime).',';
+		$warnings_count{$opfile}++;
+		$testfail{'timewarn'}++;
+	    } elsif($result eq 'error') {
+		return(MODEXEC_MISCONFIG, 0, 'check_mtime returned error');
+	    }
+	}
+    }
+
+    # Now do the count test, if requested
+    my $cnttotal = scalar(@opfiles);
+
+    if($self->Arg("countprob")) {
+	my($x,$y) = $self->RelationCompare($xcprob, $cnttotal,
+					   'files matched');
+
+	if($x) {
+	    $errors{'countprob'} = $y . ",";
+	    $errors_count{'countprob'}++;
+	    $testfail{'countprob'}++;
+	}
+    }
+
+    if($self->Arg("countwarn") && !$testfail{'countprob'}) {
+	my($x,$y) = $self->RelationCompare($xcwarn, $cnttotal,
+					   'files matched');
+
+	if($x) {
+	    $warnings{'countwarn'} = $y . ",";
+	    $warnings_count{'countwarn'}++;
+	    $testfail{'countwarn'}++;
+	}
+    }
+
+    # Now that we've finished testing, accumulate the results
+
+    my $error_message = '';
+    my $hostcount = 0;
+    my $rc = MODEXEC_OK;
+
+    # Always display all warnings and errors, but only return the "worst"
+    # return code.
+    my $total_warnings = 0;
+    my $total_errors = 0;
+
+    if(%warnings) {
+	foreach my $key (sort keys %warnings) {
+	    if($hostcount == 0) {
+		$hostcount++;
+	    } else {
+		$error_message .= ';';
+	    }
+	
+	    $error_message .= "$key ";
+	    $error_message .= $warnings{$key};
+	    $total_warnings += $warnings_count{$key};
+	
+	    if(exists $errors{$key}) {
+		# Hack so that all errors and warnings for the same
+		# file show up together
+	    
+		$error_message .= $errors{$key};
+		$total_errors += $errors_count{$key};
+	    
+		delete $errors{$key};
+	    
+		$rc = MODEXEC_PROBLEM;
+	    }
+	
+	    # Get rid of trailing comma
+	    chop($error_message);
+	}
+    
+	$rc = MODEXEC_WARNING if($rc == MODEXEC_OK);
+    }
+
+    if(%errors) {
+	foreach my $key (sort keys %errors) {
+	    if($hostcount == 0) {
+		$hostcount++;
+	    } else {
+		$error_message .= ';';
+	    }
+	    
+	    $error_message .= "$key ";
+	    $error_message .= $errors{$key};
+	    $total_errors += $errors_count{$key};
+	    
+	    # Get rid of trailing comma
+	    chop($error_message);
+	}
+    
+	$rc = MODEXEC_PROBLEM;
+    }
+
+    # If the status is MODEXEC_PROBLEM and $*warn has failed but not $*prob,
+    # drop to a warning.
+
+    if($rc == MODEXEC_PROBLEM
+       &&
+       ($timewarn && $testfail{'timewarn'}
+	&& (!$timeprob || !$testfail{'timeprob'}))
+       &&
+       ($xcwarn && $testfail{'countwarn'}
+	&& (!$xcprob || !$testfail{'countprob'}))) {
+	$rc = MODEXEC_WARNING;
+    }
+     
+    # If op is "all", we don't need to do anything more.  If op is "any", we
+    # may need to override the results.
+
+    if($self->Arg('op') eq 'any' && $rc != MODEXEC_OK) {
+	if(($typeflags && !$testfail{'typeflags'}) ||
+	   ($self->Arg('grep') && !$testfail{'regex'}) ||
+	   ($timewarn && !$testfail{'timewarn'}
+	    && (!$timeprob || !$testfail{'timeprob'})) ||
+	   ($timeprob && !$testfail{'timeprob'}
+	    && (!$timewarn || !$testfail{'timewarn'})) ||
+	   ($xcwarn && !$testfail{'countwarn'}
+	    && (!$xcprob || !$testfail{'countprob'})) ||
+	   ($xcprob && !$testfail{'countprob'}
+	    && (!$xcwarn || !$testfail{'countwarn'}))) {
+	    $rc = MODEXEC_OK;
+	}
+    }
+
+    if($rc == MODEXEC_OK) {
+	return(MODEXEC_OK, 0, 'OK');
+    } else {
+	return($rc, $total_errors + $total_warnings, $error_message);
+    }
+}
+
+##########################################################################
+# check_mtime checks to see if $file has been touched in $time
+# does NOT work the same as check_mtime in check
+
+sub check_mtime {
+# check_mtime takes three arguments, $file, $time, and $max.  It checks
+# whether $file has been modified (touched) within $time seconds, up to $max
+# seconds if $max is non-zero.  It returns
+# an array:
+# (0,"dne") if $file does not exist;
+# ($untouchedtime,"ok") if $file has been modified within $time seconds;
+# ($untouchedtime,"untouched") if $file has not been modified within $time seconds; and
+# (0,"error") if none of those conditions are met (which should never be the case).
+    my($file, $time, $max) = @_;
+
+    ## my $st = stat($file) or return(0, 'dne');
+    my $mtime = (stat($file))[9] or return(0, 'dne');
+
+    ## my $diff = time - $st->mtime;
+    my $diff = time - $mtime;
+    
+    if($diff <= $time || (defined $max && $max > 0 && $diff > $max)) {
+	# $file has been modified within the specified time limit
+	# everything is OK
+	return($diff, 'ok');
+    } else {
+	# $file has not been modified within the time limit
+	# everything is not OK
+	return($diff,'untouched');
+    }
+    
+    # for debugging, should never happen
+    return (0,'error');
+}
+
+sub hrtime {
+    # Generate a human readable time string from a time in seconds
+
+    my $time = shift;
+
+    my $sec = $time % 60;
+    my $min = (($time - $sec) / 60) % 60;
+    my $hour = (($time - ($min * 60) - $sec) / 3600) % 24;
+    my $day = ($time - ($hour * 3600) - ($min * 60) - $sec) / 86400;
+
+    if($day > 0) {
+	return sprintf("$day %s $hour %s",
+		       ($day == 1) ? "day" : "days",
+		       ($hour == 1) ? "hour" : "hours");
+    } elsif($hour > 0) {
+	return sprintf("$hour %s $min %s",
+		       ($hour == 1) ? "hour" : "hours",
+		       ($min == 1) ? "minute" : "minutes");
+    } else {
+	return sprintf("$min %s $sec %s",
+		       ($min == 1) ? "minute" : "minutes",
+		       ($sec == 1) ? "second" : "seconds");
+    }
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Mailboxcreate Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>mailboxcreate</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>mailboxcreate</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>mailboxcreate</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module mailboxcreate {</B><
+       [<B>protocol</B> (<b>imap</b> | <b>imaps</b>)]
+       <B>username</B> &lt;relation>
+       <B>password</B> &lt;password>
+       [<B>delete</B> &lt;boolean>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClent</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=keyword><A ID="kw-imapprot"></A><B>protocol</B></TD>
+ <TD CLASS=kwref>optional string, either 'imap' or 'imaps', default is 'imaps'</TD>
+ <TD CLASS=kwdef>
+   Whether to use IMAP over port 143 or IMAP-SSL over port 993.
+ </TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=keyword><A ID="kw-username"></A><B>username</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Username for IMAP login.
+ </TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>password</TD>
+ <TD CLASS=kwdef>
+   Password for IMAP login.
+ </TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=keyword><A ID="kw-expunge"></A><B>delete</B></TD>
+ <TD CLASS=kwref>optional boolean, default is true</TD>
+ <TD CLASS=kwdef>
+   Whether or not to permanently delete test mailboxes after creation.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>mailboxcreate</TT> module tests the functioning of a <A
+ HREF="http://cyrusimap.web.cmu.edu/twiki/bin/view/Cyrus/CyrusMurderDesign">Cyrus
+ murder master</A> by creating a new mailbox under the top-level
+ directory for the username on the host. It then renames that mailbox
+ and optionally deletes it.
+
+ <P>
+
+ The Cyrus system allows the backends to operate independently and in
+ a distributed fashion, but synchronization is necessary when a user
+ performs actions that change his or her folder hierarchy. The backend
+ must notify the murder master of such changes, which are eventually
+ replicated to the frontend mailbox location caches.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To create a mailbox on the host being cheked and not delete after
+     creation:
+     <PRE>
+     module mailboxcreate {
+       username bob
+       password pw
+       delete false
+     }
+     </PRE>
+
+ <LI>To create a mailbox over non-SSL IMAP:
+     <PRE>
+     module mailboxcreate {
+       protocol imap
+       username alice
+       password pw
+     }
+     </PRE>
+ </OL>
+
+ <HR>
+ <I>$Date: 2007/03/29 12:25:27 $</I><BR>
+ <I>$Revision: 1.1 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH="10%">
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-expunge">expunge</A><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-imapprot">protocol</A><BR>
+ <A CLASS="keywords" HREF="#kw-username">username</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

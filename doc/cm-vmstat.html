@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Vmstat Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>vmstat</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>vmstat</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  <LI><A HREF="#bugs">Design Errors</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>vmstat</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module vmstat {</B>
+       [<B>utils</B> &lt;string>]
+       <B>freewarn</B> &lt;number>
+       <B>freeprob</B> &lt;number>
+       <B>swapwarn</B> &lt;number>
+       <B>swapprob</B> &lt;number>
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-units"></A><B>units</B></TD>
+ <TD CLASS=kwref>optional string one of 'k', 'K', 'm', or 'M'</TD>
+ <TD CLASS=kwdef>
+   Units <TT>vmstat</TT> should report in.  Not supported on all platforms.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-freewarn"></A><B>freewarn</B></TD>
+ <TD CLASS=kwref>number</TD>
+ <TD CLASS=kwdef>
+   Generate a warning if less than the specified amount of free memory
+   is available, or 0 to not generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-freeprob"></A><B>freeprob</B></TD>
+ <TD CLASS=kwref>number</TD>
+ <TD CLASS=kwdef>
+   Generate a problem if less than the specified amount of free memory
+   is available, or 0 to not generate problems.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-swapwarn"></A><B>swapwarn</B></TD>
+ <TD CLASS=kwref>number</TD>
+ <TD CLASS=kwdef>
+   Minimum amount of swap in use to generate a warning, or 0 to not
+   generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-swapprob"></A><B>swapprob</B></TD>
+ <TD CLASS=kwref>number</TD>
+ <TD CLASS=kwdef>
+   Minimum amount of swap in use to generate a problem, or 0 to not
+   generate problems.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All values are specified in terms of the <I>units</I> used
+ by <TT>vmstat</TT>.
+   
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>vmstat</TT> module determines the amount of virtual memory
+ in use on the host to be checked, via the <TT>vmstat</TT> command.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To warn when free memory is less than 20000 units or at least 10000
+     units of swap are in use, and to generate a problem when free memory
+     is less than 20000 units or at least 10000 units of swap are in use:
+     <PRE>
+     module vmstat {
+       freewarn 20000
+       freeprob 15000
+       swapwarn 10000
+       swapprob 15000
+     }
+     </PRE>
+ </OL>
+
+ <A ID="bugs"></A>
+ <H3>Design Errors</H3>
+
+ This module currently only understands the output of <TT>vmstat</TT>
+ used by Linux.
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:08:56 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-freeprob">freeprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-freewarn">freewarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-swapprob">swapprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-swapwarn">swapwarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-utils">utils</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

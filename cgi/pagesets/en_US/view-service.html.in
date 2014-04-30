@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=View By Service}
+@{INCLUDE header.html}
+
+<!-- view-service.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI s= vt= file=}">@{ECHO $instance}</A>
+ @{IF DEFINED FLAG s}
+ > <A CLASS="navspacer" HREF="@{URI s= vt=}">View By Service</A>
+ > Custom
+ @{ELSE}
+ > View By Service
+ @{ENDIF}
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+
+@{IF DEFINED FLAG s}
+ @{SET vt=@[FLAG vt]}
+ @{IF NOTDEFINED $vt}
+ @{SET vt=grid}
+ @{ENDIF}
+ @{IF STRING $vt = summary}
+  <!-- Generate Service Summary view -->
+  <FORM NAME="custom-service-view" METHOD="get" ACTION="@{URITOP}">
+  <TABLE CLASS="spacer">
+  <TR CLASS="spacer">
+  <TD CLASS="spacer">
+   <TABLE CLASS="infobody">
+   <TR CLASS="infobody">
+   <TH CLASS="infobody" COLSPAN=2>
+    Select A Service
+    @{URITAGS style=hidden omit=s,vt}
+   </TH>
+   </TR>
+
+   @{FOREACH $sort sf FLAG s}
+   @{SET rc=@[CHECKSTATUS type=rc service=$sf]}
+   <TR CLASS="infobody">
+   <TD CLASS="rc@{ECHO $rc}">
+    <INPUT TYPE="checkbox" NAME="s" VALUE="@{ECHO $sf}">
+   </TD>
+   <TD CLASS="rc@{ECHO $rc}">
+    <A CLASS="table" HREF="@{URI s= s=$sf vt= vt=grid}">@{ECHO $sf}</A>
+   </TD>
+   </TR>
+   @{ENDEACH}
+
+   @{INCLUDE form-common-viewtype.html}
+   
+   </TABLE>
+  </TD>
+  </TR>
+  </TABLE>
+  </FORM>
+ @{ELSE}
+  <!-- Generate Service Grid view -->
+  <TABLE CLASS="spacer">
+  <TR CLASS="spacer">
+  <TD CLASS="spacer">
+   <TABLE CLASS="infobody">
+   <TR CLASS="infobody">
+   <TH CLASS="infobody"></TH>
+   @{FOREACH $sort sf FLAG s}
+   <TH CLASS="infobody">@{ECHO $sf}</TH>
+   @{ENDEACH}
+   </TR>
+
+   <!-- generate a list of all hosts in all services -->
+   @{FOREACH sf FLAG s}
+    @{FOREACH h SERVICEMEMBER $sf}
+    @{SET hosts=$hosts $h}
+    @{ENDEACH}
+   @{ENDEACH}
+   
+   <!-- iterate over each host for each service -->
+   @{FOREACH $sort h STRING $hosts}
+   <TR CLASS="infobody">
+   <TH CLASS="infobody">@{ECHO $h}</TH>
+
+    @{FOREACH $sort s FLAG s}
+    @{SET quiet=@[ALERTSTATUS type=quiet service=$s host=$h]}
+    @{SET rc=@[CHECKSTATUS type=rc service=$s host=$h]}
+    @{SET esc=@[ALERTSTATUS type=escalated service=$s host=$h]}
+    @{SET rcclass=$rc}
+    @{IF NUMBER $quiet = 1}
+     @{SET rcclass=q}
+    @{ELSE}
+     @{IF NUMBER $esc > 0}
+      @{SET rcclass=e}
+     @{ENDIF}
+    @{ENDIF}
+    <TD CLASS="rc@{ECHO $rcclass}">
+    @{IF NUMBER $rc != -1}
+     <A HREF="@{URI file= file=view-details.html h=$h s= s=$s vt= back=$encoded}">@{ECHO $rc}</A>
+    @{ENDIF}
+    </TD>
+    @{ENDEACH}
+   </TR>
+   @{ENDEACH}
+  </TABLE>
+  </TD>
+  </TR>
+  </TABLE>
+ @{ENDIF}
+@{ELSE}
+ <FORM NAME="custom-service-view" METHOD="get" ACTION="@{URITOP}">
+ <TABLE CLASS="spacer">
+ <TR CLASS="spacer">
+ <TD CLASS="spacer">
+  <TABLE CLASS="infobody">
+  <TR CLASS="infobody">
+  <TH CLASS="infobody" COLSPAN=2>
+   Select A Service
+   @{URITAGS style=hidden omit=s,vt}
+  </TH>
+  </TR>
+
+  @{FOREACH $sort s SERVICE}
+  @{SET rc=@[CHECKSTATUS type=rc service=$s]}
+  <TR CLASS="infobody">
+  <TD CLASS="rc@{ECHO $rc}">
+   <INPUT TYPE="checkbox" NAME="s" VALUE="@{ECHO $s}">
+  </TD>
+  <TD CLASS="rc@{ECHO $rc}">
+   <A CLASS="table" HREF="@{URI s=$s vt=grid}">@{ECHO $s}</A>
+  </TD>
+  </TR>
+  @{ENDEACH}
+
+  @{INCLUDE form-common-viewtype.html}
+ 
+  </TABLE>
+ </TD>
+ </TR>
+ </TABLE>
+ </FORM>
+@{ENDIF}
+
+@{INCLUDE key.html}
+
+@{INCLUDE footer.html}
+</HTML>

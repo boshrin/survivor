@@ -1,0 +1,33 @@
+----------------------------
+revision 1.8
+date: 2007/03/29 12:07:02;  author: benno;  state: Exp;  lines: +250 -211
+Rename some variables, clean up implementation
+----------------------------
+revision 1.7
+date: 2006/10/12 03:34:24;  author: benno;  state: Exp;  lines: +6 -4
+Add snmpversion
+----------------------------
+revision 1.6
+date: 2006/06/02 03:34:29;  author: ekg2002;  state: Exp;  lines: +322 -258
+converted from net::snmp to snmp
+----------------------------
+revision 1.5
+date: 2006/05/27 05:58:04;  author: ekg2002;  state: Exp;  lines: +91 -37
+expanded options
+----------------------------
+revision 1.4
+date: 2006/05/27 04:16:29;  author: ekg2002;  state: Exp;  lines: +1 -0
+closed snmp session
+----------------------------
+revision 1.3
+date: 2006/05/27 04:13:51;  author: ekg2002;  state: Exp;  lines: +88 -36
+added jetstor support
+----------------------------
+revision 1.2
+date: 2006/05/22 02:19:24;  author: ekg2002;  state: Exp;  lines: +6 -6
+fixed device string
+----------------------------
+revision 1.1
+date: 2006/05/22 01:53:38;  author: ekg2002;  state: Exp;
+Initial revision
+=============================================================================

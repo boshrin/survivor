@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Filetest Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>filetest</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>filetest</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  <LI><A HREF="#bugs">Design Errors</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>filetest</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module filetest {</B>
+       <B>op</B> (<B>any</B> | <B>all</B>)
+       [<B>type</B> &lt;flags>]
+       [<B>grep</B> &lt;relation>]
+       [<B>showline</B> &lt;boolean>]
+       [<B>timewarn</B> &lt;number>]
+       [<B>timeprob</B> &lt;number>]
+       [<B>timemax</B> &lt;number>]
+       [<B>countwarn</B> &lt;relation>]
+       [<B>countprob</B> &lt;relation>]
+       <B>name</B> &lt;string>
+       [<B>name</B> ...]
+       [<B>matchone</B> (<B>newest</B> | <B>oldest</B>)]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=perl"><TT>File::stat</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-op"></A><B>op</B></TD>
+ <TD CLASS=kwref>string, one of 'any' or 'all'</TD>
+ <TD CLASS=kwdef>
+   <I>any</I> indicates that any one of the three supported test
+   (type, grep, or time) succeeding will cause the module to succeed.
+   <I>all</I> indicates that all requested tests must be successful.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-type"></A><B>type</B></TD>
+ <TD CLASS=kwref>optional flags, any of 'rwxfdcbpugksRWXFDCBPUGKS'</TD>
+ <TD CLASS=kwdef>
+   Shell style tests to be performed.
+   <UL>
+   <LI><TT>r</TT>: File is readable
+   <LI><TT>w</TT>: File is writeable
+   <LI><TT>x</TT>: File is executable
+   <LI><TT>f</TT>: File exists and is a plain file
+   <LI><TT>d</TT>: File is a directory
+   <LI><TT>c</TT>: File exists and is character special
+   <LI><TT>b</TT>: File exists and is block special
+   <LI><TT>p</TT>: File is a pipe
+   <LI><TT>u</TT>: File is setuid
+   <LI><TT>g</TT>: File is setgid
+   <LI><TT>k</TT>: File is sticky
+   <LI><TT>s</TT>: File is non-zero in size
+   </UL>
+   All types specified must match in order for the test portion of
+   the module to succeed.  The capital flags negate the meaning of
+   the corresponding test.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-grep"></A><B>grep</B></TD>
+ <TD CLASS=kwref>optional relation, reg/regv only</TD>
+ <TD CLASS=kwdef>
+   A regular expression that must be found in the contents of the
+   file (or must not be found, for regv).  If the file is empty and
+   regv was specified or if the file does not exist, the grep test will
+   still be considered successful.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-showline"></A><B>showline</B></TD>
+ <TD CLASS=kwref>optional boolean, default is 'no'</TD>
+ <TD CLASS=kwdef>
+   When the <TT>grep</TT> test is specified with a <TT>regv</TT>
+   relation, report line numbers of matching expressions.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-timewarn"></A><B>timewarn</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   If a matching file has existed for at least the specified number
+   of minutes, a warning is generated.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-timeprob"></A><B>timeprob</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   If a matching file has existed for at least the specified number
+   of minutes, a problem is generated.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-timemax"></A><B>timemax</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   If a matching file has existed for at least the specified number
+   of minutes, ignore <I>timewarn</I> and <I>timeprob</I>.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-countwarn"></A><B>countwarn</B></TD>
+ <TD CLASS=kwref>optional relation, not reg/regv</TD>
+ <TD CLASS=kwdef>
+   Count the number of files matched.  If the count matches the
+   relation specified, a warning is generated and no further tests
+   are performed.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-countprob"></A><B>countprob</B></TD>
+ <TD CLASS=kwref>optional relation, not reg/regv</TD>
+ <TD CLASS=kwdef>
+   Count the number of files matched.  If the count matches the
+   relation specified, a problem is generated and no further tests
+   are performed.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-name"></A><B>name</B></TD>
+ <TD CLASS=kwref>string list</TD>
+ <TD CLASS=kwdef>
+   File(s) to examine.  Files may also be specified with regular
+   expressions.  If no files match the regular expression, the
+   module will return success.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchone"></A><B>matchone</B></TD>
+ <TD CLASS=kwref>optional string, one of 'newest' or 'oldest'</TD>
+ <TD CLASS=kwdef>
+   Test only one file, even if multiple files are named or matched.
+   Testing is only done on the file with the requested characteristic.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>filetest</TT> module performs a variety of tests on files.
+ It must be run via a <A HREF=tm-about.html>transport</A> module
+ unless the files to be tested are on the scheduler host.  Details of
+ the tests performed are in the argument specification, above.
+
+ <P>
+
+ A failure of the grep or type tests will generate a problem, unless
+ another test has generated a warning, in which case a warning will
+ be generated.
+
+ <P>
+
+ To use the <TT>filetest</TT> module to monitor logfiles, use of the
+ <TT>check</TT> keyword <A HREF="cf-check.html#kw-resulttext"><TT>result
+ text significant</TT></A> is recommended.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To test if a file exists and is being updated frequently:
+     <PRE>
+     module filetest {
+       op       all
+       type	f
+       timewarn	5
+       timeprob	15
+       name     /var/run/tick
+     }
+     via remote
+     </PRE>
+
+ <LI>To test if a batch job completed successfully:
+     <PRE>
+     module filetest {
+       op       all
+       type	f
+       grep	reg[^DONE]
+       name	/batch/status
+     }
+     via remote
+     </PRE>
+
+ <LI>To check for errors in an output file:
+     <PRE>
+     module filetest {
+       op         any
+       type	  F
+       grep	  regv[^ERROR]
+       name	  /batch/output
+     }
+     via remote
+     </PRE>
+
+ <LI>To look for <TT>.rhosts</TT> files:
+     <PRE>
+     module filetest {
+       op       all
+       type     F
+       name	/export/home/.*/\.rhosts
+       name	/\.rhosts
+     }
+     via remote
+     </PRE>
+
+ <LI>To look for outgoing mail backups (or, use the <A
+     HREF=cm-mailq.html><TT>mailq</TT></A> module):
+     <PRE>
+     module filetest {
+       op        all
+       countprob gt[1000]
+       name      /var/spool/mqueue/df.*
+     }
+     via remote
+     </PRE>
+
+ <LI>To test that backup files are being generated regularly:
+     <PRE>
+     module filetest {
+       op       all
+       timeprob 1440
+       name     /db/backups/backup-.*
+       matchone newest
+     }
+     via remote
+     </PRE>
+
+ <LI>To monitor <TT>/var/log/authlog</TT> for failed login attempts:
+     <PRE>
+     module filetest {
+       op       any
+       type     F
+       grep     regv[^failed login]
+       name     /var/log/authlog
+       showline yes
+     }
+     via remote
+     result text significant
+     </PRE>
+
+     If failed login attempts are found, the module will report them,
+     and presumably the AlertPlan in effect will start queuing alerts.
+     Since logfiles are rotated relatively infrequently, there is not
+     an obvious way to "clear" the problem.
+
+     <P>
+
+     The recommended approach is instead to acknowledge the problem.
+     When the logfile is rotated, the check will clear, and so will
+     the acknowledgement.  However, if another failed login attempt
+     occurs, the text description returned by the check will change
+     (even though the module will still be returning
+     <TT>MODEXEC_PROBLEM</TT>), and the <TT>result text
+     significant</TT> keyword will tell the scheduler to clear the
+     existing acknowledgement, and alerting will resume.
+     
+ </OL>
+
+ <A ID="bugs"></A>
+ <H3>Design Errors</H3>
+
+ This module is very complicated and hard to understand.
+
+ <P>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:04:25 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-countprob">countprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-countwarn">countwarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-grep">grep</A><BR>
+ <A CLASS="keywords" HREF="#kw-matchone">matchone</A><BR>
+ <A CLASS="keywords" HREF="#kw-name">name</A><BR>
+ <A CLASS="keywords" HREF="#kw-op">op</A><BR>
+ <A CLASS="keywords" HREF="#kw-showline">showline</A><BR>
+ <A CLASS="keywords" HREF="#kw-timemax">timemax</A><BR>
+ <A CLASS="keywords" HREF="#kw-timeprob">timeprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-timewarn">timewarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-type">type</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

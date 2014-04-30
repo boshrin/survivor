@@ -1,0 +1,54 @@
+----------------------------
+revision 0.13
+date: 2003/06/25 21:14:22;  author: selsky;  state: Exp;  lines: +5 -3
+Try to work around leaking scalar issue
+----------------------------
+revision 0.12
+date: 2003/01/29 01:19:49;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.11
+date: 2002/12/31 04:07:15;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.10
+date: 2002/10/31 01:22:28;  author: selsky;  state: Exp;  lines: +26 -66
+Update for Survivor::Check
+----------------------------
+revision 0.9
+date: 2002/09/06 06:51:26;  author: selsky;  state: Exp;  lines: +57 -39
+Use reference name server for serials
+----------------------------
+revision 0.8
+date: 2002/07/02 20:40:00;  author: selsky;  state: Exp;  lines: +11 -5
+make results more informative
+----------------------------
+revision 0.7
+date: 2002/06/12 21:20:51;  author: selsky;  state: Exp;  lines: +6 -3
+fix error message
+----------------------------
+revision 0.6
+date: 2002/06/09 02:10:55;  author: selsky;  state: Exp;  lines: +6 -3
+zone != hostname
+----------------------------
+revision 0.5
+date: 2002/06/09 02:05:40;  author: selsky;  state: Exp;  lines: +6 -2
+set exit code on query failure
+----------------------------
+revision 0.4
+date: 2002/06/09 02:04:22;  author: selsky;  state: Exp;  lines: +27 -34
+use Net::DNS instead of host/nslookup
+----------------------------
+revision 0.3
+date: 2002/05/27 17:19:49;  author: selsky;  state: Exp;  lines: +40 -30
+port to Survivor.pm
+catch errors with non-recursive servers
+----------------------------
+revision 0.2
+date: 2002/04/04 20:59:51;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:56:55;  author: benno;  state: Exp;
+initial revision
+=============================================================================

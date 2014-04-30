@@ -1,0 +1,31 @@
+# Makefile for transmit modules that don't really need one.
+# Note that install-remote is never called.  All modules are always installed.
+
+# Version: $Revision: 0.9 $
+# Date: $Date: 2006/10/15 15:26:41 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../../../Makefile.inc
+
+# Where to find install
+INSTALL=@INSTALL@
+
+MODULE=`basename \`pwd\``
+
+all:
+
+install-remote:
+
+install:
+	${INSTALL} -o @INST_USER@ -g @INST_GROUP@ -m 555 @srcdir@/${MODULE} \
+	${DESTDIR}@prefix@/mod/transmit/${MODULE}
+
+clean:
+
+veryclean:

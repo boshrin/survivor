@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+ <SurvivorAlertData Version="1.0">
+  <RecipientSet>
+   <Module Name="mail">
+    <Address>foo@nobody.biz</Address>
+    <Address>bar@nobody.biz</Address>
+    <CallList>admins</CallList>
+   </Module>
+  </RecipientSet>
+  <Comment>Host unreachable</Comment>
+  <HelpFile>/etc/symon/help/ping</HelpFile>
+  <Host>sapphire</Host>
+  <Instance>default</Instance>
+  <Instances>3</Instances>
+  <FixComment>Reboot unsuccessful</FixComment>
+  <FixReturnCode>0</FixReturnCode>
+  <ReturnCode>1</ReturnCode>
+  <Service>ping</Service>
+  <Time>1234567890</Time>
+  <Token>Q123298945</Token>
+ </SurvivorAlertData>

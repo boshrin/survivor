@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Tunnel Transport Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>tunnel</TT> Transport Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>tunnel</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>tunnel</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="tm-about.html">transport</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module tunnel {</B>
+       <B>command</B> &lt;string>
+       [<B>rinstdir</B> &lt;string>]
+       [<B>srname</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-command"></A><B>command</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Command to invoke to provide transport.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-rinstdir"></A><B>rinstdir</B></TD>
+ <TD CLASS=kwref>optional string, default is <TT>instdir</TT></TD>
+ <TD CLASS=kwdef>
+   Path to the directory containing <TT>sbin/sr</TT> and <TT>mod/check</TT>
+   on the <A HREF=sr.html>remote</A> hosts.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-srname"></A><B>srname</B></TD>
+ <TD CLASS=kwref>optional string, default is "sr"</TD>
+ <TD CLASS=kwdef>
+   Name of the remote daemon executable.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>tunnel</TT> module establishes a connection over the
+ requested transport to a remote host to execute a check module there.
+ The transport must be configured appropriately to allow automatic
+ command executions before this module will work, see the
+ documentation for the <A HREF=sr.html>Remote Daemon (<TT>sr</TT>)</A>
+ for pointers on how to set this up.  Communication is performed using
+ a simple, text-based <A HREF=spec-sr.html>protocol</A>.
+
+ <P>
+
+ The command that will be executed by the module is as follows:
+
+ <P>
+
+ <I>$command hostname $rinstdir/sbin/$srname -m $rinstdir/mod</I>
+
+ <P>
+
+ It may be useful to run this command by hand before installing this
+ module to verify that the connection establishes with no prompts.
+ Failure to do this may result in the module hanging or timing out.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To execute the <A HREF="cm-disk.html">disk</A> check module using the
+     <TT>tunnel</TT> transport module to operate over <I>ssh</I>:
+     <PRE>
+     transport ssh {
+       module tunnel {
+         command   /usr/bin/ssh -l nobody
+         rinstdir  /opt/survivor-remote
+       }
+     }
+
+     check disk {
+       module disk {}
+       via ssh
+     }
+     </PRE>
+
+ <LI>To execute the <A HREF="cm-mailq.html">mailq</A> check module using the
+     <TT>tunnel</TT> transport module to operate over <I>ssh</I>:
+     <PRE>
+     transport ssh {
+       module tunnel {
+         command   /usr/bin/ssh -l nobody
+         rinstdir  /opt/survivor-remote
+       }
+     }
+
+     check mailq {
+       module mailq {
+         warn   100
+         prob   1000
+       }	
+       via ssh
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:21:46 $</I><BR>
+ <I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-command">command</A><BR>
+ <A CLASS="keywords" HREF="#kw-rinstdir">rinstdir</A><BR>
+ <A CLASS="keywords" HREF="#kw-srname">srname</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,256 @@
+#!/usr/bin/perl -w
+
+# httpurl check module
+
+# Version: $Revision: 0.20 $
+# Author: David Arjanik
+# Date: $Date: 2005/10/07 22:03:39 $
+#
+# Copyright (c) 2002 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# MODEXEC_OK      if response code is 200 and regex checks succeed, or
+#                  if response code is 200 and no regex checks were specified
+# MODEXEC_WARNING if HTTP response status code class is not recognized        
+# MODEXEC_NOTICE  if HTTP response status code is class 1xx or 3xx
+# MODEXEC_PROBLEM if HTTP response status code is class 4xx or 5xx,
+#                     or if class is 200 and $matchregex not found
+#                     or if class is 200 and $errorregex is found
+#
+# scalevalue returned is HTTP response status code
+#
+# textdescription returned is HTTP response status-line unless 
+#                 one or more regex checks fail, in which case msg of 
+#                 regex check failure(s) is/are returned.  If status code 
+#                 class is not recognized then msg so indicating is returned.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use URI;
+use HTTP::Request::Common;
+use LWP::UserAgent;
+
+my %argfmt = ('method' => 'optional string any(GET) default(GET)',
+	      'scheme' => 'optional string any(http,https) default(http)',
+	      'username' => 'optional string',
+	      'password' => 'optional password',
+	      'path' => 'string',
+	      'query' => 'optional string list',
+	      'header' => 'optional string list',
+	      'followredirect' => 'optional boolean default(true)',
+	      'matchcode' => 'optional number between(100,599)',
+	      'matchheader' => 'optional string', # These should really be
+	      'errorheader' => 'optional string', # relations, not strings
+	      'matchregex' => 'optional string',  # and should accept lists
+	      'errorregex' => 'optional string'); 
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&HttpUrlValidate);
+
+if(defined $sc->Arg('username') && !defined $sc->Arg('password')) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, "Both 'username' and 'password' arguments must be provided");
+}
+
+$sc->Arg('path') =~ m!^/! or
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, "Argument 'path' must begin with '/'");
+
+$sc->Arg('scheme') eq 'https' and
+    $sc->UseThreads(0);
+
+my $r = $sc->Exec( \&HttpUrlCheck);
+
+exit($r);
+
+sub HttpUrlValidate {
+    return(MODEXEC_OK, 0, 'HttpUrl OK');
+}
+
+sub HttpUrlCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $rc = MODEXEC_OK;
+    my @regexcheck;
+
+    # Construct URI with correct scheme/hostname/path
+    my $uri = new URI($self->Arg('scheme') . '://' . $host . $self->Arg('path'));
+
+    # replace other uri pieces as necessary
+    $self->Arg('username') && $uri->userinfo($self->Arg('username') . ':' .
+					     $self->Arg('password'));
+
+    if( $self->Arg('query') ) {
+	$uri->query( join('&', $self->Arg('query')) );
+    }
+
+    # get HTTP response
+    my($responseCode, $responseStatusLine, $responseContent,
+       $responseHeaders) = 
+	&doRequest($self->Arg('method'), $uri, $self->Timeout(),
+		   $self->Arg('followredirect'), $self->Arg('header'));
+
+    # check if syntax of URL specified was not valid
+    if ($responseCode == 400) {
+	$self->ExitError(MODEXEC_MISCONFIG, 0,
+			   "Specified 'url' is not absolute");
+    }
+
+    my($scalevalue,$textdescription);
+
+    if(defined($self->Arg("matchcode")))
+    {
+	if($responseCode == $self->Arg("matchcode"))
+	{
+	    $rc = MODEXEC_OK;
+	}
+	else
+	{
+	    $rc = MODEXEC_PROBLEM;
+	}
+
+	$scalevalue = $responseCode;
+	$textdescription = "$responseStatusLine";
+    }
+    else
+    {
+	######################################################################
+	# RFC 2616 (HTTP 1.1): HTTP response classes
+	#      - 1xx: Informational - Request received, continuing process
+	#      - 2xx: Success - The action was successfully received,
+	#        understood, and accepted
+	#      - 3xx: Redirection - Further action must be taken in order to
+	#        complete the request
+	#      - 4xx: Client Error - The request contains bad syntax or cannot
+	#        be fulfilled
+	#      - 5xx: Server Error - The server failed to fulfill an apparently
+	#        valid request
+	######################################################################
+	# map HTTP status code class to survivor check module return code
+	my %rc_map = ( 
+		       1 => MODEXEC_NOTICE,
+		       2 => MODEXEC_OK,
+		       3 => MODEXEC_NOTICE,
+		       4 => MODEXEC_PROBLEM,
+		       5 => MODEXEC_PROBLEM
+		       );
+	my $scclass = substr($responseCode, 0, 1);
+	if (exists($rc_map{$scclass})) {
+	    # assign return values
+	    $rc = $rc_map{$scclass};
+	    $scalevalue = $responseCode;
+	    $textdescription = "$responseStatusLine";
+	} else {
+	    # class of status code not recognized
+	    $rc = MODEXEC_WARNING;
+	    $scalevalue = -1;
+	    $textdescription =
+		"HTTP response class '${scclass}xx' not recognized";
+	}
+    }
+    
+    # do regex checks if response was successful
+    if ($rc == MODEXEC_OK) {
+	my $matchheader = $self->Arg("matchheader");
+	my $errorheader = $self->Arg("errorheader");
+	my $matchregex = $self->Arg("matchregex");
+	my $errorregex = $self->Arg("errorregex");
+	# check if $matchheader not found in response
+	if ( defined $matchheader ) {
+	    my ($h, $v) = split(/=/, $matchheader, 2);
+
+	    if(!defined $$responseHeaders{$h} ||
+	       $$responseHeaders{$h} !~ /$v/) {
+		$rc = MODEXEC_PROBLEM;
+		push(@regexcheck,
+		     "HTTP response header does not match '$matchheader'");
+	    }
+	}
+	# check if $errorheader found in response
+	if ( defined $errorheader ) {
+	    my ($h, $v) = split(/=/, $errorheader, 2);
+
+	    if(defined $$responseHeaders{$h} &&
+	       $$responseHeaders{$h} =~ /$v/) {
+		$rc = MODEXEC_PROBLEM;
+		push(@regexcheck,
+		     "HTTP response header matches '$errorheader'");
+	    }
+	}
+	# check if $matchregex not found in response
+	if ( defined $matchregex && ${$responseContent} !~ /$matchregex/ ) {
+	    $rc = MODEXEC_PROBLEM;
+	    push(@regexcheck,"HTTP response does not match '$matchregex'");
+	}
+	# check if $errorregex found in response
+	if ( defined $errorregex && ${$responseContent} =~ /$errorregex/ ) {
+	    $rc = MODEXEC_PROBLEM;
+	    push(@regexcheck,"HTTP response matches '$errorregex'");
+	}
+    }
+    
+    # write textdescription
+    if (scalar @regexcheck) {
+	# replace HTTP status-line with regex check alerts
+	$textdescription = join(';',@regexcheck);
+    }
+    
+    return($rc, $scalevalue, $textdescription);
+}
+
+# accepts method, url, timeout, redirect, and headers; returns HTTP response
+# status code, status-line, content reference, and headers
+sub doRequest {
+    my $method = shift;
+    my $uri = shift;
+    my $timeout = shift;
+    my $redirect = shift;
+    my @header = @_;
+    my(%header, %form);
+
+    my $ua = new LWP::UserAgent();
+
+    # set timeout value, otherwise use LWP::UserAgent->timeout() default
+    $timeout or $ua->timeout($timeout);
+
+    # if($method eq 'POST') {
+    # 	my @query = split /&/, $uri->query();
+    # 	foreach my $q ( @query ) {
+    # 	    my($name,$value) = split /=/, $q, 2;
+    # 	    $form{$name} = $value;
+    # 	}
+    # }
+
+    foreach my $h ( @header ) {
+	my($name,$value) = split /:\s*/, $h, 2;
+	$header{$name} = $value;
+    }
+
+    #my $baseurl = $uri->scheme() . "://" . $uri->authority() . $uri->path();
+
+    my $res;
+
+    ## XXX can we follow 302s with POST?
+    ## See requests_redirectable   ['GET', 'HEAD'] in LWP::UserAgent docs
+    ## push @{ $ua->requests_redirectable }, 'POST';
+    # if($method eq 'POST') {
+    #   $res = $ua->request( POST $baseurl, \%form, %header);
+    # } else {
+
+    if(!$redirect)
+    {
+	my @requests = ();
+	$ua->requests_redirectable( \@requests );
+    }
+    
+    $res = $ua->request( GET $uri, %header);
+    # }
+
+    return ($res->code, $res->status_line, $res->content_ref, $res->headers);
+}

@@ -1,0 +1,210 @@
+#!/usr/bin/perl -w
+
+# ldap check module
+
+# Version: $Revision: 0.12 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2004/05/27 19:18:08 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("port" => "optional number between(1,65535) default(389)",
+	      "filter" => "string",
+	      "extract" => "optional extraction",
+	      "response" => "optional string",
+	      "replyattribute" => "optional string",
+	      "replyvalue" => "optional string",
+	      "replytest" => "optional relation",
+	      "searchbase" => "optional string",
+	      "binddn" => "optional string",
+	      "bindpassword" => "optional password",
+	      "ssl" => "optional string one(no,ldaps,starttls) default(no)",
+	      "version" => "optional number one(2,3) default(2)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&LdapValidate);
+
+# We don't know which Net::LDAP to use until we've parsed the arguments
+
+if($sc->Arg("ssl") eq "ldaps") {
+    require Net::LDAPS;
+    import Net::LDAPS;
+} else {
+    # We use this for starttls, also
+    require Net::LDAP;
+    import Net::LDAP;
+}
+
+if($sc->Arg("ssl") ne "no") {
+    # Disable threading pending verification that SSL is threadsafe
+    $sc->UseThreads(0);
+}
+
+my $r = $sc->Exec( \&LdapCheck);
+
+exit($r);
+
+sub LdapValidate {
+    return(MODEXEC_OK, 0, "Ldap OK");
+}
+
+sub LdapCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my($ldap,$mesg);
+
+    if($self->Arg("ssl") eq "ldaps") {
+	unless($ldap = Net::LDAPS->new($host, port => $self->Arg("port"),
+				       verify => 'none',
+				       version => $self->Arg("version"))) {
+	    return(MODEXEC_PROBLEM, 0, 'Connect failed');
+	}
+    }
+    else {
+	unless($ldap = Net::LDAP->new($host, port => $self->Arg("port"),
+				      version => $self->Arg("version"))) {
+	    return(MODEXEC_PROBLEM, 0, 'Connect failed');
+	}
+    
+	if($self->Arg("ssl") eq "starttls") {
+	    $ldap->start_tls(verify => 'none');
+	}
+    }
+
+    if($self->Arg("binddn")) {
+	if($self->Arg("bindpassword")) {
+	    $mesg = $ldap->bind($self->Arg("binddn"),
+				password => $self->Arg("bindpassword"));
+	} else {
+	    $mesg = $ldap->bind($self->Arg("binddn"));
+	}
+    } else {
+	# Anonymous bind
+	$mesg = $ldap->bind;
+    }
+    
+    if($mesg->code) {
+	return(MODEXEC_PROBLEM, 0, 'Bind failed ('.$mesg->error.')');
+    }
+
+    my $base = $self->Arg("searchbase");
+
+    if(!defined $base) {
+	$base = '';
+    }
+    
+    my $answer = '';
+    my $lines = 0;
+    my $found = '';
+
+    $mesg = $ldap->search( base => $base, filter => $self->Arg("filter") );
+    if($mesg->code) {
+	return(MODEXEC_PROBLEM, 0, 'Search failed ('.$mesg->error.')');
+    }
+
+    my $rattr = $self->Arg("replyattribute");
+    my $rval = $self->Arg("replyvalue");
+
+    if(defined $self->Arg("response")) {
+	($rattr, $rval) = split(/=/, $self->Arg("response"));
+    }
+    
+    foreach my $entry ($mesg->all_entries) {
+	foreach my $attr ($entry->attributes) {
+	    # If an attribute was provided, only look at those
+	    # attributes
+	    
+	    if(!defined $rattr || $rattr eq $attr)
+	    {
+		foreach my $value ($entry->get_value($attr)) {
+		    if(defined $self->Arg("extract")) {
+			# If an extraction was provided, apply it
+
+			$value =
+			    $self->PerformExtraction($self->Arg("extract"),
+						     $value);
+		    }
+
+		    
+		    # If a value was provided, only look at those values
+
+		    if(!defined $rval || $rval eq $value) {
+			my $line = "$attr=$value\n";
+		    
+			$answer .= $line;
+			$lines++;
+			
+			if(!$found) {
+			    # Success
+			    $found = $line;
+			    chop($found);
+
+			    # Perform a relation test, if requested
+
+			    if(defined $self->Arg("replytest")) {
+				my($rtok, $rtstr) =
+				    $self->RelationCompare($self->Arg("replytest"),
+							   $value);
+
+				if(!$rtok) {
+				    # Just return error here rather than
+				    # cycling through
+				    
+				    return(MODEXEC_PROBLEM, 0, $rtstr);
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    $mesg = $ldap->unbind;
+    if($mesg->code) {
+	return(MODEXEC_PROBLEM, 0, 'Unbind failed ('.$mesg->error.')');
+    }
+
+    if($found ne '') {
+	my $rt = "Found ";
+
+	if($found ne '') {
+	    $rt .= $found . " for ";
+	}
+
+	$rt .= $self->Arg("filter");
+	
+	return(MODEXEC_OK, 1, $rt);
+    } else {
+ 	if(!$rattr && !$answer) {
+ 	    # Success
+ 	    return(MODEXEC_OK, 1,
+		       "Found expected empty response for ".$self->Arg("filter"));
+ 	} else {
+ 	    # Failure
+ 	    if(!$answer) {
+ 		return(MODEXEC_PROBLEM, 0,
+		       "No match found for ".$self->Arg("filter"));
+ 	    } else {
+ 		if($lines == 1) {
+ 		    chomp($answer);
+ 		    return(MODEXEC_PROBLEM, 0, $answer);
+ 		} else {
+ 		    return(MODEXEC_PROBLEM, 0,
+			   'Unexpectedly lengthy response (query may not have matched)');
+ 		}
+ 	    }
+ 	}
+    }
+}

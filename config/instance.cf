@@ -1,0 +1,18 @@
+# Sample instance.cf file.  This file must be installed in /etc/survivor/.
+
+# In this example, the name of the instance is "sample".
+# The instance is given a subdirectory on a survivor disk,
+# and under that directory are separate directories for
+# the instance configuration files, state files, and
+# history files.  (These directories may require special
+# ownerships and permissions.  See the documentation for
+# details.)  The help directory is placed under the
+# master configuration directory, since it contains help
+# information that may be useful across multiple instances.
+
+instance sample {
+  configdir  /survivor/sample/config
+  statedir   /survivor/sample/state
+  historydir /survivor/sample/history
+  helpdir    /etc/survivor/help
+}

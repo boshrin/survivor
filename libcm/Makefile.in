@@ -1,0 +1,50 @@
+# Makefile for Check Module library.
+
+# Version: $Revision: 0.8 $
+# Date: $Date: 2006/10/15 14:26:18 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../Makefile.inc
+
+# Set the paths to the source
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# Where to find install
+INSTALL=@INSTALL@
+
+OBJS=ArgParsed.o\
+ BooleanArg.o\
+ CMArgs.o\
+ ExtractionArg.o\
+ FlagArg.o\
+ NumberArg.o\
+ RelationArg.o\
+ SRProtocol.o\
+ StringArg.o\
+ TMArgs.o\
+ cmutils.o
+
+all: libcm.a
+
+install-remote:
+
+install:
+	echo Nothing to install for libcm
+
+libcm.a: ${OBJS}
+	${AR} -rv libcm.a ${OBJS}
+	${RANLIB} libcm.a
+
+veryclean: clean
+	rm -f *.o *~
+
+clean:
+	rm -f libcm.a ${OBJS}
+

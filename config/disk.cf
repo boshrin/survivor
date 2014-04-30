@@ -1,0 +1,21 @@
+# Sample disk.cf file, used by the disk check module
+
+# This file is used to configure the filesystem checking on each host.
+# The format of this file is
+#   filesysregex,warn,prob
+# Disks not explicitly listed here use the default thresholds in check.cf.
+# Disks listed here that don't exist are ignored.
+# Values must be greater than 0.  101 or greater will never match, and so
+# can be used to suppress warnings or problems.
+
+# Important filesystems should have some spare space
+^/$,90,94
+
+# Some hosts write variable stuff into /var, others /usr/var
+^/usr$,90,94
+^/var$,90,94
+
+# Some filesystems are never worth worrying about
+^/mnt,101,101
+/spare,101,101
+^/cdrom,101,101

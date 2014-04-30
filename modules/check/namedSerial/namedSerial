@@ -1,0 +1,89 @@
+#!/usr/bin/perl -w
+
+# namedSerial check module
+
+# Version: $Revision: 0.13 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/06/25 21:14:22 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::DNS;
+
+my %argfmt = ("zone" => "string",
+	      "reference" => "string");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&NamedSerialValidate);
+
+
+# get reference serial number
+my $refSerial;
+my($rc,$string) = &getSerial($sc->Arg("zone"), $sc->Arg("reference"));
+if($rc == MODEXEC_OK) {
+    $refSerial = $string;
+} else {
+    $sc->ExitError($rc, 0, $string." on reference NS ".$sc->Arg("reference"));
+}
+
+my $r = $sc->Exec( \&NamedSerialCheck);
+
+exit($r);
+
+sub NamedSerialValidate {
+    return(MODEXEC_OK, 0, "NamedSerial OK");
+}
+
+sub NamedSerialCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my($rc,$string) = &getSerial($self->Arg("zone"), $host);
+
+    if($rc == MODEXEC_OK) {
+	my $serial = $string;
+	if( $serial != $refSerial ) {
+	    return(MODEXEC_PROBLEM, 0, 'DNS serial out of synch ('.
+		   $serial.' [should be '.$refSerial.'])');
+	} else {
+	    return(MODEXEC_OK, 1, 'DNS serial current ('.$serial.')');
+	}
+    } else {
+	return($rc, 0, $string);
+    }
+}
+
+sub getSerial {
+    my $zone = shift;
+    my $host = shift;
+
+    my $res = new Net::DNS::Resolver;
+    $res->nameservers($host);
+    $res->recurse( 0 );
+    $res->retry( 2 ); # good enough...or entire module may timeout
+
+    my $query = $res->query($zone, 'SOA');
+
+    if(!defined $query) {
+	if( $res->errorstring eq 'NOERROR' ) {
+	    return(MODEXEC_PROBLEM, 'No SOA record found for '.$zone);
+	}
+	else {
+	    return(MODEXEC_PROBLEM, $res->errorstring);
+	}
+    }
+
+    # Save $rr to work around "Scalars leaked: 1" issue
+    my $rr = ($query->answer)[0];
+    return(MODEXEC_OK, $rr->serial);
+}

@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: About Format Modules</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: About Format Modules</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>What Format Modules Do</A>
+ <LI><A HREF=#modtypes>Module Types</A>
+ <LI><A HREF=#moddata>Module Data</A>
+ <LI><A HREF=#custom>Adding Custom Modules</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ What Format Modules Do
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Format Modules are used as part of the alert transmission mechanism.
+ Data relevant for an alert is assembled and then passed to a Format
+ Module, which converts it according to what the Module does (eg:
+ making it suitable for a pager, or incorporating a help file).  The
+ resulting formatted alert data is then passed to a <A
+ HREF="tmm-about.html">Transmit Module</A>, which is responsible for
+ the actual data transmission.
+
+ <P>
+ 
+ <A ID="modtypes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Types
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Like <A HREF=cm-about.html>Check Modules</A>, Format Modules may be
+ either compiled or scripted, but unlike Check Modules, Format Modules
+ only run on the scheduler host.
+
+ <P>
+
+ <A ID="moddata"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Module Data
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Format Modules take as input on stdin an XML document containing a
+ <TT>SurvivorAlertData</TT> element.
+
+ <P>
+
+ Modules produce as output on stdout an XML document containing
+ a <TT>SurvivorFormattedAlertData</TT> element.
+
+ <P>
+
+ Both of these elements are described in the <A
+ HREF="survivor.dtd">Survivor DTD</A>.
+
+ <P>
+  
+ <A ID="custom"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Adding Custom Modules
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ All Format Modules must conform to the <A HREF=spec-fmm.html>Format
+ Module Specification</A>, otherwise they may not interact correctly
+ with the scheduler.
+
+ <P>
+ 
+ Routines useful for building Format Modules in Perl are provided in
+ <TT>Survivor.pm</TT> and <TT>Survivor::Format.pm</TT>.  As a starting
+ point, see the sample test module in <TT>src/modules/format/test</TT>.
+
+ <P>
+
+ For information on these modules, run
+
+ <PRE>
+     % perldoc src/modules/common/Survivor.pm
+     % perldoc src/modules/common/Survivor/Format.pm
+ </PRE>
+
+ Other languages may be used, but no routines are provided with this
+ package.
+
+ <P>
+
+ For assistance in testing Format Modules, the <A
+ HREF="util-xmlmaker.html">XML Maker utility</A> may be useful.
+
+ <P>
+
+ <B>Important</B>: Please see the <A HREF=license.html>license</A>
+ for this package to see if custom modules are subject to the same
+ license.
+
+ <P>
+ 
+<HR>
+<I>$Date: 2006/11/19 22:32:46 $</I><BR>
+<I>$Revision: 0.4 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

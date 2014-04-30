@@ -1,0 +1,120 @@
+#!/usr/bin/perl -w
+
+# sms format module
+#
+# Version: $Revision: 0.4 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2007/01/07 00:07:13 $
+#
+# Copyright (c) 2003 - 2007
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Format;
+
+# Create a new Format object.
+
+my $sf = new Survivor::Format();
+
+my $r = $sf->ParseAlert();
+
+if($r == MODEXEC_OK)
+{
+    my @addrlist = ();
+    my $subject = "";
+    my $message = "";
+    my $cls = "";
+    my $hosts = "";
+    
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	localtime($sf->Data("Time"));
+
+    # There can be multiple Modules stored within a RecipientSet, each
+    # of which can have multiple addresses and calllists (used to generate
+    # the addresses).
+    
+    foreach my $x (@{$sf->Data("RecipientSet")}) {
+	# The module name is available at $x->{"name"}
+	push(@addrlist, @{$x->{"addresses"}});
+	$cls = join(',', @{$x->{"calllists"}}, $cls);
+    }
+
+    # Toss the trailing comma
+    chop($cls);
+
+    # There can also be multiple hosts.
+
+    $hosts = join(',', @{$sf->Data("Host")});
+
+    # Generate a subject line
+
+    if(defined $sf->Data("FixSummary") && defined $sf->Data("FixReturnCode"))
+    {
+	$subject = "FIXALERT: ";
+    }
+    else
+    {
+	$subject = "ALERT: ";
+    }
+    
+    $subject .= $sf->Data("Service") . "@" . $hosts;
+
+    if($sf->Data("ReturnCode") == 0)
+    {
+	$subject .= " (cleared)";
+    }
+
+    # SMS message limits include to, from, subject, and body.  We need
+    # to put only the bare minimum of information, capping everything
+    # at approximately 90 characters to allow for 70 total in to and
+    # from.
+
+    # These should fit, and are required for replies to be useful.
+    $message = "T=" . $sf->Data("Token") . ",I=" . $sf->Data("Instance") . " ";
+
+    if(length($message) < 90)
+    {
+	# Determine which message we're going to use, then make sure it fits.
+
+	my $x = "";
+	
+	if(defined $sf->Data("FixSummary"))
+	{
+	    $x = $sf->Data("FixSummary");
+	}
+	else
+	{
+	    $x = $sf->Data("Summary");
+	}
+
+	if(length($x) > (90 - length($message)))
+	{
+	    $message .= substr($x, 0, (90 - length($message)));
+	}
+	else
+	{
+	    $message .= $x . " ";
+	}
+
+	if(length($message) < 76)
+	{
+	    # Still enough space for a timestamp
+
+	    $message .= sprintf("%.2d:%.2d:%.2d %.2d/%.2d/%.2d\n",
+				$hour, $min, $sec, $mon+1, $mday,
+				$year + 1900);
+	}
+    }
+    
+    $sf->GenerateFormattedAlert(\@addrlist, $subject, $message,
+				$sf->ReplyOK());
+}
+# else we can't really do anything since we don't have any addresses
+# to notify.
+
+exit $r;

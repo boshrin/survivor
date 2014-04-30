@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Httpurl Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>httpurl</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>httpurl</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>httpurl</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module httpurl {</B>
+       [<B>method</B> &lt;string>]
+       [<B>scheme</B> (<B>http</B> | <B>https</B>)]
+       [<B>username</B> &lt;string>]
+       [<B>password</B> &lt;password>]
+       <B>path</B> &lt;string>
+       [<B>query</B> &lt;string>]
+       [<B>query</B> ...]
+       [<B>header</B> &lt;string>]
+       [<B>header</B> ...]
+       [<B>followredirect</B> &lt;boolean>]
+       [<B>matchcode</B> &lt;number>]
+       [<B>matchheader</B> &lt;string>]
+       [<B>errorheader</B> &lt;string>]
+       [<B>matchregex</B> &lt;string>]
+       [<B>errorregex</B> &lt;string>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>HTTP::Request::Common</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=libwww-perl"><TT>LWP::UserAgent</TT></A>
+   <LI><A HREF="http://search.cpan.org/search?dist=URI"><TT>URI</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-method"></A><B>method</B></TD>
+ <TD CLASS=kwref>optional string, default is 'GET'</TD>
+ <TD CLASS=kwdef>
+   HTTP method to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-scheme"></A><B>scheme</B></TD>
+ <TD CLASS=kwref>optional string, either 'http' or 'https', default is 'http'</TD>
+ <TD CLASS=kwdef>
+   HTTP scheme to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-username"></A><B>username</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Username to use if authorization is required.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>optional password</TD>
+ <TD CLASS=kwdef>
+   Password to use if authorization is required.  Must be provided
+   if <I>username</I> is provided.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-path"></A><B>path</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Path part of URL to be retreived.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-query"></A><B>query</B></TD>
+ <TD CLASS=kwref>optional string list</TD>
+ <TD CLASS=kwdef>
+   Query part of URL to be retrieved.  List should be
+   <TT><I>name</I>=<I>value</I></TT> pairs.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-header"></A><B>header</B></TD>
+ <TD CLASS=kwref>optional string list</TD>
+ <TD CLASS=kwdef>
+   HTTP headers to send along with request.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-followredirect"></A><B>followredirect</B></TD>
+ <TD CLASS=kwref></TD>
+ <TD CLASS=kwdef>
+   Follow a redirect returned by the server.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchcode"></A><B>matchcode</B></TD>
+ <TD CLASS=kwref>optional number between 100 and 599</TD>
+ <TD CLASS=kwdef>
+   Expected HTTP return code.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchheader"></A><B>matchheader</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   String of the form <TT><I>header</I>=<I>regex</I></TT> where
+   <I>header</I> is expected to be in the response header with a value
+   matching <I>regex</I>.  <I>header</I> should be lowercase.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-errorheader"></A><B>errorheader</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   String of the form <TT><I>header</I>=<I>regex</I></TT> where if
+   <I>header</I> is in the response header it is not expected with a value
+   matching <I>regex</I>.  <I>header</I> should be lowercase.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchregex"></A><B>matchregex</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Search filter expected to be in the response.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-errorregex"></A><B>errorregex</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+   Search filter expected not to be in the response.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>httpurl</TT> module performs an HTTP request in order to
+ determine if the web server being contacted is returning expected
+ results.  The two regular expressions indicate a line of the
+ retrieved document that must match (<I>matchregex</I>) or not be
+ matched (<I>errorregex</I>) in order for the check to be considered
+ successful.  This is a different check than the one performed by the
+ <A HREF="cm-protocol.html"><TT>protocol</TT></A> module.
+
+ <P>
+
+ The module return value is determined as follows:
+
+ <UL>
+ <LI>If <I>matchcode</I> is provided and the HTTP response code matches it,
+     <TT>MODEXEC_OK</TT> is returned.
+ <LI>If <I>matchcode</I> is provided and the HTTP response code does not
+     match it, <TT>MODEXEC_PROBLEM</TT> is returned.
+ <LI>If the HTTP response code is 200 and the provided <I>matchregex</I> or
+     <I>matchheader</I> checks succeed, <TT>MODEXEC_OK</TT> is returned.
+ <LI>If the HTTP response code is class 1xx or 3xx, <TT>MODEXEC_NOTICE</TT>
+     is returned.
+ <LI>If the HTTP response code is class 4xx or 5xx, or if the response code
+     is 200 and the provided <I>matchregex</I> or <I>matchheader</I> is not
+     found or the provided <I>errorregex</I> or <I>errorheader</I> is found,
+     <TT>MODEXEC_PROBLEM</TT> is returned.
+ <LI>If the response code is not recognized, <TT>MODEXEC_WARNING</TT> is
+     returned.
+ </UL>
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To test that <TT>test.cgi</TT> is returning 200:
+     <PRE>
+     module httpurl {
+       path /cgi-bin/test.cgi
+     }
+     </PRE>
+
+ <LI>To test that <TT>/test.html</TT> contains the text "Welcome" followed
+     by something and not "Not Found" followed by something:
+     <PRE>
+     module httpurl {
+       path /test.html
+       matchregex Welcome.*
+       errorregex Not Found.*
+     }
+     </PRE>
+
+ <LI>To test that <TT>/secure/staff.html</TT>, which is accessed via HTTPS
+     via the virtual server <TT>www2.site.org</TT> and requires authentication,
+     is returning 200:
+     <PRE>
+     module httpurl {
+       scheme https
+       username bob
+       password secret123
+       path /secure/staff.html
+       header Host: www2.site.org
+     }
+     </PRE>
+
+ <LI>To test that <TT>/cgi-bin/tets.cgi?foo=bar&amp;baz=1</TT> returns 302:
+     <PRE>
+     module httpurl {
+       path /cgi-bin/test.cgi      
+       query foo=bar
+       query baz=1
+       matchcode 302
+     }
+     </PRE>
+
+ <LI>To test that <TT>/cgi-bin/cookietest.cgi?value=true</TT> sets an
+     expected cookie:
+     <PRE>
+     module httpurl {
+       path /cgi-bin/cookietest.cgi
+       query value=true
+       matchheader set-cookie=.*value=true.*
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:09:24 $</I><BR>
+ <I>$Revision: 0.9 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-errorheader">errorheader</A><BR>
+ <A CLASS="keywords" HREF="#kw-errorregex">errorregex</A><BR>
+ <A CLASS="keywords" HREF="#kw-followredirect">followredirect</A><BR>
+ <A CLASS="keywords" HREF="#kw-header">header</A><BR>
+ <A CLASS="keywords" HREF="#kw-matchcode">matchcode</A><BR>
+ <A CLASS="keywords" HREF="#kw-matchheader">matchheader</A><BR>
+ <A CLASS="keywords" HREF="#kw-matchregex">matchregex</A><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-path">path</A><BR>
+ <A CLASS="keywords" HREF="#kw-query">query</A><BR>
+ <A CLASS="keywords" HREF="#kw-scheme">scheme</A><BR>
+ <A CLASS="keywords" HREF="#kw-username">username</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

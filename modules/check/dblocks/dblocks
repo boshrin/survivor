@@ -1,0 +1,114 @@
+#!/usr/bin/perl -w
+
+# Check for locks in the database.
+# REQUIRES DBI MODULUES.
+
+# Version: $Revision: 1.1 $
+# Author: David Filion, based on the database module version 0.6
+#  by Benjamin Oshrin and Matt Selsky.
+# Date: $Date: 2007/03/29 12:23:22 $
+
+# Copyright (c) 2005 - 2007
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Parameters:
+#	type		=>	Database type.  Values: postgres
+#	name		=>	Database name
+#	username	=>	User name
+#	password	=>	User's password
+#	warn		=>	Number of locks at which to issue a warning
+#	prob		=>	Number of locks at which to issue a problem
+#
+# The module works by connecting to the specified database and then querying
+# the system table responsible for listing the current database locks.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+use DBI;
+
+my %argfmt = (
+	"type" => "string any(postgres)",
+	"name" => "string",
+	"username" => "optional string",
+	"password" => "optional password",
+	"warn" => "number",
+        "prob" => "number");
+
+my $sc = new Survivor::Check();
+$sc->GetOpt(\%argfmt, \&DBLockValidate);
+my $rc = $sc->Exec( \&DBLockCheck);
+exit($rc);
+
+
+sub DBLockValidate {
+    return(MODEXEC_OK, 0, "Database OK");
+}
+
+
+# The brains behind the operation...
+sub DBLockCheck {
+	my $self = shift;
+	my $host = shift;
+
+    # Setup the data source name
+    my ($dsn, $qry, $dbh, $sth);
+
+	if ($self->Arg('type') eq 'postgres') {
+		$dsn = 'DBI:Pg:dbname='.$self->Arg('name').';host='.$host;
+
+ 		$qry = 'select relation, database, transaction, pid, mode, granted '
+			 . 'from pg_locks';
+	} else {
+		# Should never happen.  But.....
+		return(MODEXEC_PROBLEM, 0, 'Connect failed - Unknown database type');
+	}
+
+	
+    $dbh = DBI->connect( $dsn, $self->Arg('username'),
+			 $self->Arg('password'), {PrintError => 0, AutoCommit=> 0});
+
+	if(! $dbh) {
+		return(MODEXEC_PROBLEM, 0,'Connect failed - '.&cleanErrMsg($DBI::errstr));
+	}
+
+	$sth =  $dbh->prepare($qry);
+	if (! defined($sth)) {
+		return(MODEXEC_PROBLEM, 0,'Prepare failed - '.&cleanErrMsg($DBI::errstr));
+	}
+	
+	if (! $sth->execute()) {
+		return(MODEXEC_PROBLEM, 0,'Execution failed - '.&cleanErrMsg($DBI::errstr));
+	}
+
+	my $rows = 0;
+	while (my @row = $sth->fetchrow_array()) {
+		$rows++;
+	}
+	
+	if ($DBI::err) {
+		return(MODEXEC_PROBLEM, 0,'Execution failed - '.&cleanErrMsg($DBI::errstr));
+	}
+
+	$dbh->disconnect();
+
+	# prob=0 or warn=0 means we don't care about that threshold
+	if ($self->Arg('prob') > 0 && $rows > $self->Arg('prob')) {
+		return(MODEXEC_PROBLEM, $rows, "$rows db locks exceeds problem limit of " . $self->Arg('prob'));
+	} elsif ($self->Arg('warn') > 0 && $rows > $self->Arg('warn')) {
+		return(MODEXEC_WARNING, $rows, "$rows db locks exceeds warning limit of ". $self->Arg('warn'));
+	}
+
+	return(MODEXEC_OK, $rows, $rows . " database locks found");
+}
+
+
+sub cleanErrMsg {
+    my $err = shift;
+
+    $err =~ s/\n//g;
+
+    return $err;
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Imap Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>imap</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>imap</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>imap</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module imap {</B>
+       [<B>protocol</B> (<B>imap</B> | <B>imaps</B>)]
+       <B>username</B> &lt;string>
+       <B>password</B> &lt;password>
+       [<B>select</B> &lt;boolean>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=Mail-IMAPClient"><TT>Mail::IMAPClient</TT></A> Version 2.2.7 is known to work.
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-protocol"></A><B>protocol</B></TD>
+ <TD CLASS=kwref>optional string, either 'imap' or 'imaps', default is 'imap'</TD>
+ <TD CLASS=kwdef>
+   Whether to use IMAP over port 143 or IMAP-SSL over port 993.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-username"></A><B>username</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   Username to use for login.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>password</TD>
+ <TD CLASS=kwdef>
+   Password to use for login.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-select"></A><B>select</B></TD>
+ <TD CLASS=kwref>optional boolean, default true</TD>
+ <TD CLASS=kwdef>
+   Whether or not to <TT>SELECT</TT> INBOX.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>imap</TT> module connects to an IMAP server, logs in, and,
+ optionally, opens INBOX, in order to determine if the server is
+ returning expected results.  Only IMAP and IMAP-SSL are supported
+ currently.  IMAP-TLS is not supported.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To login but not select INBOX:
+     <PRE>
+     module imap {
+       username bob
+       password pw
+       select false
+     }
+     </PRE>
+
+ <LI>To login via IMAP-SSL:
+     <PRE>
+     module imap {
+       protocol imaps
+       username alice
+       password pw
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 19:10:14 $</I><BR>
+ <I>$Revision: 0.6 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-protocol">protocol</A><BR>
+ <A CLASS="keywords" HREF="#kw-select">select</A><BR>
+ <A CLASS="keywords" HREF="#kw-username">username</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

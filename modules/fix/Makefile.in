@@ -1,0 +1,45 @@
+# Fix Module makefile
+
+# Version: $Revision: 0.3 $
+# Date: $Date: 2003/05/04 21:24:11 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../../Makefile.inc
+
+all:
+	for i in `ls -d * | grep -v common` ;\
+	do ( if [ -d $$i ] && [ ! -h $$i ] && [ "$$i" != "RCS" ]; then \
+	  ( echo '>>' $$i ; cd $$i ; ${MAKE} ) ; fi ) ;\
+	done
+
+install-remote:
+	for i in `ls -d * | grep -v common` ;\
+	do ( if [ -d $$i ] && [ ! -h $$i ] && [ "$$i" != "RCS" ]; then \
+          ( echo '>>' $$i ; cd $$i ; ${MAKE} install-remote ) ; fi ) ;\
+	done
+
+install:
+	for i in `ls -d * | grep -v common` ;\
+	do ( if [ -d $$i ] && [ ! -h $$i ] && [ "$$i" != "RCS" ]; then \
+          ( echo '>>' $$i ; cd $$i ; ${MAKE} install ) ; fi ) ;\
+	done
+
+veryclean: clean
+	for i in `ls -d * | grep -v common` ;\
+	do ( if [ -d $$i ] && [ ! -h $$i ] && [ "$$i" != "RCS" ]; then \
+          ( echo '>>' $$i ; cd $$i ; ${MAKE} veryclean ) ; fi ) ;\
+	done
+
+clean:
+	for i in `ls -d * | grep -v common` ;\
+	do ( if [ -d $$i ] && [ ! -h $$i ] && [ "$$i" != "RCS" ]; then \
+	  ( echo '>>' $$i ; cd $$i ; ${MAKE} clean ) ; fi ) ;\
+	done
+
+

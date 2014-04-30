@@ -1,0 +1,1251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: check.cf</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: check.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>check.cf</TT></A>
+ <LI><A HREF=#checks>Checks</A>
+  <UL>
+  <LI><A HREF=#checks-about>About Checks</A>
+  <LI><A HREF=#checks-dependencies>Dependencies</A>
+  <LI><A HREF=#checks-keywords>Check Stanza Keywords</A>
+  <LI><A HREF=#checks-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#composites>Composite Checks</A>
+  <UL>
+  <LI><A HREF=#composites-about>About Composite Checks</A>
+  <LI><A HREF=#composites-dependencies>Dependencies</A>
+  <LI><A HREF=#composites-keywords>Composite Check Stanza Keywords</A>
+  <LI><A HREF=#composites-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#fixes>Fixes</A>
+  <UL>
+  <LI><A HREF=#fixes-about>About Fixes</A>
+  <LI><A HREF=#fixes-dependencies>Dependencies</A>
+  <LI><A HREF=#fixes-keywords>Fix Stanza Keywords</A>
+  <LI><A HREF=#fixes-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#transports>Transports</A>
+  <UL>
+  <LI><A HREF=#transports-about>About Transports</A>
+  <LI><A HREF=#transports-dependencies>Dependencies</A>
+  <LI><A HREF=#transports-keywords>Transport Stanza Keywords</A>
+  <LI><A HREF=#transports-examples>Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>check.cf</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear anywhere
+      <I>except</I> on the same line as a <A HREF=#kw-module>named
+      argument</A>.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;argname> : [a-zA-Z0-9\._-]+
+     &lt;argvalue> : [^ \n\t][^\n]*
+     &lt;interval> : "second[s]"|"minute[s]"|"hour[s]"|"day[s]"|"week[s]"
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+     &lt;number> : [0-9]+
+  </PRE>
+
+  For <I>argvalue</I>, trailing whitespace may be silently removed.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>check.cf</TT> defines <A CLASS=kwlink HREF=#checks>Checks</A>,
+ which are used to monitor services that run on hosts, <A CLASS=kwlink
+ HREF=#composites>Composite Checks</A>, which are Checks defined in
+ terms of other Checks, <A CLASS=kwlink HREF=#fixes>Fixes</A>, which
+ are used to attempt to correct problems on hosts reported by Checks,
+ and <A CLASS=kwlink HREF=#transports>Transports</A>, which are used
+ to execute Checks and Fixes directly on remotely monitored hosts.
+
+ <P>
+ 
+ <A ID="checks"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Checks
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>check</B> &lt;name> <B>{</B>
+         <B>module</B> &lt;name> <B>{</B>
+	     [&lt;argname> &lt;argvalue>]
+	     [...]
+	 <B>}</B>
+	 [<B>via scheduler</B> | <B>via</B> &lt;name>]
+	 [<B>check on</B> &lt;name> <B>schedule</B>]
+	 [<B>alert on</B> &lt;name> <B>alertplan</B>]
+	 [<B>fix with</B> &lt;name>]
+	 [<B>check all hosts</B>]
+	 [<B>helpfile</B> &lt;name>]
+	 [<B>timeout</B> &lt;number> &lt;interval>]
+	 [<B>result text significant</B>]
+     <B>}</B>
+
+     <B>default timeout</B> &lt;number> &lt;interval>
+
+     <B>default check via</B> (&lt;name> | <B>scheduler</B>)
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="checks-about"></A>
+ <H3>About Checks</H3>
+
+ A <I>check</I> stanza defines the module to be executed for that
+ Check, the arguments (if any) to be passed to that module, and some
+ optional information related to it.  A Check is executed for the
+ hosts defined in a <A HREF=cf-host.html>group</A> with the same name.
+
+ <A ID="checks-dependencies"></A>
+ <H3>Dependencies</H3>
+ 
+ <UL>
+ <LI>The Schedule specified by the <TT>check</TT> keyword must be defined
+     in <A HREF=cf-schedule.html>schedule.cf</A>.
+
+ <LI>The Alert Plan specified by the <TT>alert</TT> keyword must be defined
+     in <A HREF=cf-schedule.html>schedule.cf</A>.
+
+ <LI>The Transport specified by the <TT>via</TT> keyword must be defined
+     first in a <TT>transport</TT> stanza.
+
+ <LI>The Fix specified by the <TT>fix with</TT> keyword must be defined
+     first in a <TT>fix</TT> stanza.
+ </UL>
+
+ <A ID="checks-keywords"></A>
+ <H3>Check Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-check"></A>
+  <B>check</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Check.  When a host <A HREF=cf-host.html>Group</A> is
+  defined with the same name as a Check, then the Check will be
+  run for those hosts.  (But see <A HREF=#kw-checkallhosts><I>check
+  all hosts</I></A>, below.)
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-module"></A>
+  <B>module</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the name of the module to run.  Check modules are expected
+  to be found in <TT>$MODDIR/check/<I>modulename</I></TT> (where
+  <TT>$MODDIR</TT> is by default <TT>$INSTDIR/mod</TT>).
+  <P>
+
+  Arguments passed to the module are specified as name/value pairs,
+  with one pair per line.  The specific arguments for each module are
+  described in the module's documentation.  <TT>#</TT> symbols are treated
+  as part of the argument, not as a comment.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-via"></A>
+  <B>via scheduler</B><P>
+  <B>via</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Indicate where the Check runs.  Checks run <I>via scheduler</I> are
+  executed on the scheduler host.  This is useful for Checks that
+  follow a client-server model, such as testing an HTTP server or
+  querying an SNMP daemon.  This is the <A HREF=#kw-default-via>default</A>.
+  <P>
+
+  Checks may also be run remotely, directly on the host being
+  monitored.  This is useful for Checks that need to examine specific
+  files on a host, among other reasons.  To run a Check remotely, use
+  the <I>via</I> keyword to specify the name of a Transport to use.
+  The Transport must be defined <I>before</I> the Check is defined.
+  Transports are described <A HREF=#transports>below</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkon"></A>
+  <B>check on</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a Schedule to use for this Check.  By default, Checks are
+  executed according to the Check Schedules supplied for each
+  <A HREF=cf-host.html>HostClass</A>.  However, a Check can override
+  the default Schedule for all hosts to be monitored for that Check.
+  <P>
+
+  The Schedule named must be defined in <A
+  HREF=cf-schedule.html><TT>schedule.cf</TT></A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alerton"></A>
+  <B>alert on</B> &lt;name> <B>alertplan</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify an Alert Plan to use for this Check.  By default, alert
+  notifications are transmitted according to the Alert Plan supplied
+  for each <A HREF=cf-host.html>HostClass</A>.  However, a Check can override
+  the default Alert Plan for all hosts to be monitored for that Check.
+  <P>
+
+  The Alert Plan named must be defined in <A
+  HREF=cf-schedule.html><TT>schedule.cf</TT></A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fixwith"></A>
+  <B>fix with</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a Fix to use with this Check.  If enabled in the appropriate
+  Alert Plan, a predefined Fix may be attempted to correct an error
+  state reported by a Check.  The Fix must be defined <I>before</I>
+  the Check is defined.  Fixes are described <A HREF=#fixes>below</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkallhosts"></A>
+  <B>check all hosts</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Run the Check on all defined hosts.  The Check will run on every
+  host defined in every HostClass, regardless of group memberships.
+  <P>
+
+  (If multiple Instances are in use, the Check will only be run on
+  the hosts in the same Instance as the Check.)
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-helpfile"></A>
+  <B>helpfile</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Associate a helpfile with this Check.  When provided, the contents
+  of this file may be transmitted along with the alert.  This is
+  useful to provide hints or reminders along with an error message.
+  Not all format modules support helpfiles.  If not begun with <TT>/</TT>,
+  filenames are relative to <TT>helpdir</TT>, as defined in <A
+  HREF=cf-instance.html><TT>instance.cf</TT></A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-timeout"></A>
+  <B>timeout</B> &lt;number> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+  Override the default Check timeout.  The timeout indicates how long
+  the scheduler should wait for the Check to complete.  A timeout of 0
+  seconds is exactly that: an instantaneous timeout.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-resulttext"></A>
+  <B>result text significant</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Ordinarily, the <I>textdescription</I> portion of a check result
+  (as defined in the <A HREF="spec-cm.html">check module specification</A>)
+  is treated as a comment, and simply recorded.  If this flag is set,
+  the scheduler will look for changes to the text description in addition
+  to changes in the check return code when determining whether to clear
+  alert state, including acknowledgements.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <TABLE BORDER=0>
+ <TR>
+ <TD CLASS=hltitle>
+  <A ID="kw-default-timeout"></A>
+  default timeout
+ </TD>
+ <TD CLASS=highlight>
+  The default module timeout is 45 seconds.  The default may be
+  changed at any point within the configuration file.  The new
+  default will apply to any Checks (or Fixes) defined after it, unless
+  overridden within a stanza or until the default is changed again.
+  For example:
+
+  <PRE>
+  # Change module timeout
+  default timeout 3 minutes
+  </PRE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+  <A ID="kw-default-via"></A>
+  default check transport module
+ </TD>
+ <TD CLASS=highlight>
+  The default Transport is <TT>via scheduler</TT>, which is
+  not actually a Transport but rather an indication to execute
+  the module directly on the scheduler host.  The default may be
+  changed at any point within the configuration file.  The new
+  default will apply to any Checks defined after it (unless
+  overridden within the <TT>check</TT> stanza) until the end of the
+  file or until the default is changed again.  For example:
+  <PRE>
+  # Run all subsequent check modules via the plaintext transport stanza
+  default check via remote
+
+  # Except in this module
+  check imap {
+    module protocol {
+      service imap
+    }
+    via scheduler
+  }
+  </PRE>
+
+  Changing the default value should be done with care, as some modules
+  will not run correctly remotely, and others will not run correctly
+  on the scheduler.  Achieving this using <TT>default check via</TT>
+  rather than <TT>via</TT> statements within a <TT>check</TT> stanza
+  may reduce the understandability of the configuration file.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="checks-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>A simple Check, using the <A
+     HREF=cm-protocol.html><TT>protocol</TT></A> module.  The module is
+     passed the service argument <I>http</I> to instruct it to verify that
+     protocol.  This Check will be run for any host found in the
+     corresponding host Group <I>http</I>, as defined in <A
+     HREF=cf-host.html><TT>host.cf</TT></A>.
+
+     <PRE>
+     check http {
+       module protocol {
+         service http
+       }
+     }
+     </PRE>
+
+ <LI>A Check using the <A HREF=cf-ping.html><TT>ping</TT></A> module
+     to monitor every host defined in every HostClass.
+
+     <PRE>
+     check ping {
+       module ping {}
+       check all hosts
+     }
+     </PRE>
+
+ <LI>An IMAP Check (using the <A HREF=cf-protocol.html><TT>protocol</TT></A>
+     module) that sends out the contents of <TT>$helpdir/imap-problems</TT>
+     if the relevant format module supports it.
+
+     <PRE>
+     check imap {
+       module protocol {
+         service imap
+       }
+       helpfile imap-problems
+     }
+     </PRE>
+
+ <LI>A <A HREF=cf-ping.html><TT>ping</TT></A> test with a very quick timeout.
+
+     <PRE>
+     check fastping {
+       module ping {}
+       timeout 5 seconds
+     }
+     </PRE>
+
+ <LI>In order to demonstrate how the override of Schedules and AlertPlans
+     work, here is an excerpt from a sample <A
+     HREF=cf-schedule.html><TT>schedule.cf</TT></A>.
+
+     <PRE>
+     # From host.cf
+     class class1 {
+       hosts {
+         server1
+       }
+
+       check on hourly schedule
+       alert on standard alertplan
+     }
+
+     class class2 {
+       hosts {
+         server2
+       }
+
+       check on halfhourly schedule
+       alert on standard alertplan
+     }
+
+     group imap {
+       server1
+       server2
+     }
+     </PRE>
+
+     Back in <TT>check.cf</TT>, <TT>server1</TT> will be checked for
+     <TT>imap</TT> hourly and <TT>server2</TT> will be checked every
+     30 minutes.
+     
+     <PRE>
+     # From check.cf
+     check imap {
+       module protocol {
+         service imap
+       }
+     }
+     </PRE>
+
+     However, if this next stanza were defined instead, both
+     <TT>server1</TT> and <TT>server2</TT> would check on the
+     halfhourly schedule and alert on the critical alertplan.
+
+     <PRE>
+     check imap {
+       module protocol {
+         service imap
+       }
+       
+       check on halfhourly schedule
+       alert on critical alertplan
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+
+ <A ID="composites"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Composite Checks
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>check</B> &lt;name> <B>{</B>
+         [<B>required checks {</B>
+	     &lt;name>
+	     [...]
+	 <B>}</B>]
+         [<B>optional checks {</B>
+	     &lt;name>
+	     [...]
+	 <B>}</B>]
+	 [<B>check on</B> &lt;name> <B>schedule</B>]
+	 [<B>alert on</B> &lt;name> <B>alertplan</B>]
+	 [<B>fix with</B> &lt;name>]
+	 [<B>check all hosts</B>]
+	 [<B>helpfile</B> &lt;name>]
+	 [<B>timeout</B> &lt;number> &lt;interval>]
+     <B>}</B>
+
+     <B>default timeout</B> &lt;number> &lt;interval>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="composites-about"></A>
+ <H3>About Composite Checks</H3>
+
+ A <I>composite check</I> is a Check whose results are determined by
+ the execution of its member or <I>component</I> Checks.  When a
+ composite Check is scheduled, all of its component Checks are
+ simultaneously run for all hosts to be examined.  The results are
+ then accumulated and sorted to determine the status of the the
+ Composite Check.
+
+ <P>
+
+ Composite Checks cannot be composed of other Composite Checks.
+ This restriction may be lifted in a future release.
+
+ <P>
+ 
+ Composite Checks are more resource intensive than standard Checks,
+ and so should not be used when a standard Check can accomplish the
+ same task.
+ 
+ <H4>Composite Check Result Accumulation</H4>
+
+ There are two types of components: <I>required</I> and
+ <I>optional</I>.  Required components behave similarly to boolean
+ <I>and</I>, optional components behave similarly to boolean
+ <I>or</I>.  At least one required or one optional component must be
+ specified.  The same component cannot be both required and optional.
+
+ <P>
+
+ The return value of the Composite Check is determined as follows:
+
+ <UL>
+ <LI>If any component, whether required or optional, does not complete,
+     then the composite exits with <TT>MODEXEC_TIMEDOUT</TT>.
+ <LI>If required components were specified and any failed,
+     then the Composite Check exits with the highest exit code
+     in the order
+     <UL>
+     <LI><TT>MODEXEC_MISCONFIG</TT>
+     <LI><TT>MODEXEC_PROBLEM</TT>
+     <LI><TT>MODEXEC_WARNING</TT>
+     <LI><TT>MODEXEC_OK</TT>
+     <LI>For any other return value, larger takes priority over smaller
+     </UL>
+ <LI>If required components were specified and none failed,
+     then the Composite Check exits with <TT>MODEXEC_OK</TT> regardless of the
+     status of any optional components.
+ <LI>If no required components were specified and any optional
+     components succeeded, then the Composite Check exits with
+     <TT>MODEXEC_OK</TT>.
+ <LI>If no required components were specified and no optional
+     component succeeded, then the Composite Check exits with the lowest
+     exit code in the order
+     <UL>
+     <LI><TT>MODEXEC_OK</TT>
+     <LI><TT>MODEXEC_WARNING</TT>
+     <LI><TT>MODEXEC_PROBLEM</TT>
+     <LI><TT>MODEXEC_MISCONFIG</TT>
+     <LI>For any other return value, smaller takes priority over larger
+     </UL> 
+ </UL>
+
+ <P>
+
+ Comments generated by each component are concatenated together in the
+ order they are received, delimited by a semi-colon (<TT>;</TT>).
+  
+ <P>
+ 
+ Scalar values, as defined in the <A HREF=spec-cm.html>check module
+ specification</A> and recorded in the history files as specified in
+ <A HREF=cf-instance.html><TT>instance.cf</TT></A>, consist of the
+ number of completed component Checks.  The scalar values returned by
+ each component Check are ignored.
+ 
+ <H4>Composite Checks vs <A
+ HREF=cf-dependency.html>Check Dependencies</A></H4>
+
+ All components of a Composite Check are executed simultaneously.
+ This is useful when a test cannot properly be executed by one module
+ alone, or when multiple Checks can trigger execution of the same fix
+ (see <A HREF=#fixes>below</A>).
+
+ <P>
+
+ Check Dependencies prevent other Checks from executing.  This is useful
+ when a host becomes unavailable.  Only one alert notification (say, for
+ <TT>ping</TT>) will be transmitted, instead of one alert notification
+ for every service configured for that host.
+
+ <A ID="composites-dependencies"></A>
+ <H3>Dependencies</H3>
+ <UL>
+ <LI>The component Checks specified by the <TT>required</TT> and
+     <TT>optional</TT> keywords must be defined first in
+     <TT>check</TT> stanzas.
+
+ <LI>All dependencies that apply to <A HREF=#checks-dependencies>Checks</A>
+     also apply here.
+ </UL>
+
+ <A ID="composites-keywords"></A>
+ <H3>Composite Check Stanza Keywords</H3>
+
+ Except where noted below, these keywords have the same behavior as
+ for simple <A HREF=#checks>Checks</A>.
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-check-comp"></A>
+  <B>check</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Composite Check.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-required"></A>
+  <B>required</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the names of the required components.  Each name corresponds
+  to a previously defined <TT>check</TT> stanza.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-optional"></A>
+  <B>optional</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the names of the optional components.  Each name corresponds
+  to a previously defined <TT>check</TT> stanza.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkon-comp"></A>
+  <B>check on</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a Schedule to use for this Check.
+  <P>
+
+  Whether or not this keyword is provided, any Schedules that would
+  otherwise apply to the component Checks are ignored.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alerton-comp"></A>
+  <B>alert on</B> &lt;name> <B>alertplan</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify an Alert Plan to use for this Check.
+  <P>
+
+  Whether or not this keyword is provided, any Alert Plans that would
+  otherwise apply to the component Checks are ignored.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fixwith-comp"></A>
+  <B>fix with</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a Fix to use with this Check.
+  <P>
+
+  Whether or not this keyword is provided, any Fixes that would
+  otherwise apply to the component Checks are ignored.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkallhosts-comp"></A>
+  <B>check all hosts</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Run the Check on all defined hosts.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-helpfile-comp"></A>
+  <B>helpfile</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Associate a helpfile with this Check.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-timeout-comp"></A>
+  <B>timeout</B> &lt;number> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+  Override the default Check timeout.
+  <P>
+
+  Whether or not this keyword is provided, any timeouts that would
+  otherwise apply to the component Checks are ignored.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="composites-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>A Composite Check to monitor an application that has both a web
+     interface and a directory interface.  Both Checks must complete
+     successfully for the composite Check to be successful.  Only the
+     <TT>gizmo</TT> group would be defined in <A
+     HREF=cf-host.html><TT>host.cf</TT></A>.
+
+     <PRE>
+     check gizmoldap {
+       module ldap {
+         port     6389
+	 filter   uid=testuser
+	 response objectclass=candidate
+       }
+     }
+
+     check gizmohttp {
+       module httpurl {
+         path     /cgi-bin/welcome
+	 query    newuser=true
+       }
+     }
+
+     check gizmo {
+       required checks {
+         gizmoldap
+	 gizmohttp
+       }
+
+       check on critical schedule
+       alert on critical alertplan
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+
+ <A ID="fixes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Fixes
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>fix</B> &lt;name> <B>{</B>
+         <B>module</B> &lt;name> <B>{</B>
+	     [&lt;argname> &lt;argvalue>]
+	     [...]
+	 <B>}</B>
+	 [<B>via scheduler</B> | <B>via</B> &lt;name>]
+	 [<B>require host locking</B> | <B>require service locking</B>]
+	 [<B>expire lock after</B> &lt;number> &lt;interval>]
+	 [<B>timeout</B> &lt;number> &lt;interval>]
+     <B>}</B>
+
+     <B>default expire fix lock after</B> &lt;number> &lt;interval>
+     
+     <B>default fix via</B> (&lt;name> | <B>scheduler</B>)
+
+     <B>default timeout</B> &lt;number> &lt;interval>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="fixes-about"></A>
+ <H3>About Fixes</H3>
+
+ A <I>fix</I> stanza defines the module to be executed for a Fix.
+ Fixes are run in an attempt to automatically restore a service.
+ Generally, fix modules must execute via transport modules.  If
+ multiple Checks can trip a Fix, it may make sense to <A
+ HREF=#composites>composite</A> them.
+
+ <P>
+
+ A Fix will be attempted automatically when the following criteria
+ are met:
+
+ <OL>
+ <LI>A Fix has been defined in <TT>check.cf</TT>.
+ <LI>An Alert Plan has been defined in <TT>schedule.cf</TT> that
+     includes an <TT>attempt fix</TT> try.
+ <LI>A Check has been defined which uses the Fix and Alert Plan
+     described above.
+ <LI>The Check failure status meets the requirements of the
+     Alert Plan.
+ <LI>There is no outstanding acknowledgement or inhibition for
+     the service@host that has failed.
+ </OL>
+ 
+ <P>
+ 
+ Fixes may also be manually attempted, regardless of outstanding
+ failures, acknowledgements, or inhibitions.
+
+ <P>
+
+ When a Fix executes, a lock is established for the
+ <TT>service@host</TT> to prevent the Fix from being run more than
+ once concurrently for the same <TT>service@host</TT>.  It is possible
+ to establish wider scoped Fix locking, to <TT>service@</TT> or
+ <TT>@host</TT>, to prevent multiple Fixes for a given service from
+ running simultaneously on multiple hosts or to prevent multiple Fixes
+ for a given host from running simultaneously, regardless of service.
+ Fix modules are subject to timeouts in the same fashion as check
+ modules.  In the event a module times out, its lock may not be
+ correctly removed.  As such, Fix locks may be expired when they are
+ found to be stale.
+
+ <P>
+ 
+ <A ID="fixes-dependencies"></A>
+ <H3>Dependencies</H3>
+ 
+ <UL>
+ <LI>The Transport specified by the <TT>via</TT> keyword must be defined
+     first in a <TT>transport</TT> stanza.
+ </UL>
+ 
+ <A ID="fixes-keywords"></A>
+ <H3>Fix Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fix"></A>
+  <B>fix</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Fix.  This name can then be used in the <A
+  HREF=kw-fixwith><TT>fix with</TT></A> keyword of a Fix definition.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-module-fix"></A>
+  <B>module</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the name of the module to run.  Fix modules are expected
+  to be found in <TT>$MODDIR/fix/<I>modulename</I></TT> (where
+  <TT>$MODDIR</TT> is by default <TT>$INSTDIR/mod</TT>).
+  <P>
+
+  Arguments passed to the module are specified as name/value pairs,
+  with one pair per line.  The specific arguments for each module are
+  described in the module's documentation.  <TT>#</TT> symbols are treated
+  as part of the argument, not as a comment.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-via-fix"></A>
+  <B>via scheduler</B><P>
+  <B>via</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Indicate where the Fix runs.  Fixes run <I>via scheduler</I> are
+  executed on the scheduler host, usually not a very useful scenario.
+  More useful is to run a Fix remotely, using
+  the <I>via</I> keyword to specify the name of a Transport to use.
+  The Transport must be defined <I>before</I> the Fix is defined.
+  Transport are described <A HREF=#transports>below</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-requirehost"></A>
+  <B>require host locking</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Require host level locking to execute the Fix.  Only one Fix may be
+  run on a given host at one time, regardless of what the Fixes are for.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-requiresvc"></A>
+  <B>require service locking</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Require service level locking to execute the Fix.  Only one Fix may be
+  run on a given service at one time, regardless of how many hosts
+  require fixing.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-expirelock"></A>
+  <B>expire lock after</B> &lt;number> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+  Override the default Fix lock expiry.  When a Fix lock is found that
+  is at least this old, the lock is considered stale and will be removed.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-timeout-fix"></A>
+  <B>timeout</B> &lt;number> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+  Override the default Fix timeout.  The timeout indicates how long
+  the scheduler should wait for the Fix to complete.  A timeout of 0
+  seconds is exactly that: an instantaneous timeout.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TABLE BORDER=0>
+ <TR>
+ <TD CLASS=hltitle>
+  <A ID="kw-default-via-fix"></A>
+  default fix transport module
+ </TD>
+ <TD CLASS=highlight>
+  As for check module Transports, the default fix module Transport
+  is <TT>via scheduler</TT>, which is of limited utility.  The default
+  may be changed at any point within the configuration file.  The new
+  default will apply to any fixes defined after it (unless overridden
+  within the <TT>fix</TT> stanza) until the end of the file or until
+  the default is changed again.  For example:
+
+  <PRE>
+  # Run all subsequent fix modules via the plaintext transport stanza
+  default fix via remote
+  </PRE>
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=hltitle>
+  <A ID="kw-default-expire"></A>
+  default fix lock expiry
+ </TD>
+ <TD CLASS=highlight>
+  The default time for the expiration of stale fix locks is 120
+  seconds.  The default may be changed at any point within the
+  configuration file.  The new default will apply to any Fixes defined
+  after it (unless overridden within the <TT>fix</TT> stanza) until
+  the end of the file or until the default is changed again.  For
+  example:
+
+  <PRE>
+  # Expire fix locks after 5 minutes
+  default expire fix lock after 5 minutes
+  </PRE>
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=hltitle>
+  <A ID="kw-default-timeout-fix"></A>
+  default fix timeout
+ </TD>
+ <TD CLASS=highlight>
+  The default Fix timeout is the same as the <A
+  HREF=#kw-default-timeout>default Check timeout</A>.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="fixes-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, a Fix is defined for <TT>syslog</TT> using the
+     <A HREF=fm-init.d.html><TT>init.d</TT></A> module to restart the
+     syslog daemon and the <A
+     HREF=cm-process.html><TT>process</TT></A> module to detect the
+     failure.  Both use a <TT>remote</TT> Transport, described <A
+     HREF=#transports>below</A>.
+     
+     <PRE>
+     fix syslog {
+       module init.d {
+         service syslog
+       }
+       via remote
+     }
+
+     check syslogd {
+       module process {
+         name  .*syslogd
+       }
+       via remote
+       fix with syslog
+     }
+     </PRE>
+
+ <LI>Here, a Fix is defined that can only be run by resetting a central
+     control, regardless of which host is broken.  As such, service
+     level locking is required.  Because the Fix takes a while to run,
+     the timeout is also extended.
+
+     <PRE>
+     fix gizmo {
+       module gizmofix {
+         # A locally written module to fix gizmo
+	 restartkey foobar
+       }
+       # Use a locally written transport that knows where the fix runs
+       via gizmotransport
+
+       require service locking
+       timeout 5 minutes
+       expire lock after 5 minutes
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+
+ <A ID="transports"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Transports
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>transport</B> &lt;name> <B>{</B>
+         <B>module</B> &lt;name> <B>{</B>
+	     [&lt;argname> &lt;argvalue>]
+	     [...]
+	 <B>}</B>
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="transports-about"></A>
+ <H3>About Transports</H3>
+
+ A <I>transport</I> stanza defines a mechanism by which a Check or Fix
+ can be executed on a <A HREF=sr.html>remote</A> host.  More details
+ about how to set up the infrastucture for remote monitoring can be
+ found in the documentation for <A HREF=sr.html><TT>sr</TT></A>.
+ <P>
+
+ By default, check and fix modules are run directly on the scheduler
+ host.  However, some check modules and most fix modules run directly
+ on the host to be monitored.  (See <A HREF=cm-about.html>the check
+ module documentation</A> for more information.)  Checks and Fixes
+ that are to be run <I>remotely</I> must be configured to run via
+ a <A HREF=tm-about.html>transport module</A>.  The appropriate
+ <TT>transport</TT> stanza must be defined before the Check or Fix
+ that uses it.
+
+ <A ID="transports-dependencies"></A>
+ <H3>Dependencies</H3>
+ 
+ <UL>
+ <LI>None.
+ </UL>
+ 
+ <A ID="transports-keywords"></A>
+ <H3>Transport Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-transport"></A>
+  <B>transport</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Transport.  This name can then be used in the
+  <A HREF=kw-via><TT>via</TT></A> keyword of a Check definition.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-module-tran"></A>
+  <B>module</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the name of the module to run.  Transport modules are expected
+  to be found in <TT>$MODDIR/transport/<I>modulename</I></TT> (where
+  <TT>$MODDIR</TT> is by default <TT>$INSTDIR/mod</TT>).
+  <P>
+
+  Arguments passed to the module are specified as name/value pairs,
+  with one pair per line.  The specific arguments for each module are
+  described in the module's documentation.  <TT>#</TT> symbols are treated
+  as part of the argument, not as a comment.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="transports-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, the <A HREF=cm-mailq.html><TT>mailq</TT></A>
+     module is configured to run via the <A
+     HREF=tm-plaintext.html><TT>plaintext</TT></A> transport module.
+
+     <PRE>
+     transport remote {
+       module plaintext {}
+     }
+
+     check mailq {
+       module mailq {
+         warn 1000
+	 prob 2000
+       }
+       via remote
+     }
+     </PRE>
+ </OL>
+
+ <P>
+
+ Next: <A HREF=cf-dependency.html><TT>dependency.cf</TT></A>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 16:34:05 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-alerton>alert on alertplan</A><BR>
+ <A CLASS="keywords" HREF=#kw-alerton>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-alerton-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-check>check</A><BR>
+ <A CLASS="keywords" HREF=#kw-check>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-check-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkallhosts>check all hosts</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkallhosts>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkallhosts-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkon>check on schedule</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkon>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkon-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-via>default check via</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-expire>default expire fix lock</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-via-fix>default fix via</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-timeout>default timeout</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-timeout>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-timeout-fix>- (fix)</A><BR>
+ <A CLASS="keywords" HREF=#kw-expirelock>expire lock after</A><BR>
+ <A CLASS="keywords" HREF=#kw-fix>fix</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixwith>fix with</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixwith>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixwith-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-helpfile>helpfile</A><BR>
+ <A CLASS="keywords" HREF=#kw-helpfile>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-helpfile-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-module>module</A><BR>
+ <A CLASS="keywords" HREF=#kw-module>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-module-fix>- (fix)</A><BR>
+ <A CLASS="keywords" HREF=#kw-module-tran>- (transport)</A><BR>
+ <A CLASS="keywords" HREF=#kw-optional>optional</A><BR>
+ <A CLASS="keywords" HREF=#kw-required>required</A><BR>
+ <A CLASS="keywords" HREF=#kw-requirehost>require host locking</A><BR>
+ <A CLASS="keywords" HREF=#kw-requiresvc>require service locking</A><BR>
+ <A CLASS="keywords" HREF=#kw-resulttext>result text significant</A><BR>
+ <A CLASS="keywords" HREF=#kw-timeout>timeout</A><BR>
+ <A CLASS="keywords" HREF=#kw-timeout>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-timeout-comp>- (composite)</A><BR>
+ <A CLASS="keywords" HREF=#kw-timeout-fix>- (fix)</A><BR>
+ <A CLASS="keywords" HREF=#kw-transport>transport</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>via</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-via-fix>- (fix)</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>via scheduler</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>- (check)</A><BR>
+ <A CLASS="keywords" HREF=#kw-via-fix>- (fix)</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

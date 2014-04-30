@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- SurvivorAlertAcknowledgement: DTD describing alert acknowledgments -->
+
+<!ELEMENT SurvivorAlertAcknowledgement (Who,Why?)>
+ <!ATTLIST SurvivorAlertAcknowledgement Version CDATA #FIXED "1.0">
+ <!ELEMENT Who (#PCDATA)>
+ <!ELEMENT Why (#PCDATA)>
+
+<!-- SurvivorAlertEscalation: DTD describing alert escalation -->
+
+<!ELEMENT SurvivorAlertEscalation (EscalateTo)>
+ <!ATTLIST SurvivorAlertEscalation Version CDATA #FIXED "1.0">
+ <!ELEMENT EscalateTo (#PCDATA)>
+
+<!-- SurvivorAlertInhibition: DTD describing alert inhibition -->
+
+<!ELEMENT SurvivorAlertInhibition (Who,Why?)>
+ <!ATTLIST SurvivorAlertInhibition Version CDATA #FIXED "1.0">
+ <!ELEMENT Who (#PCDATA)>
+ <!ELEMENT Why (#PCDATA)>
+
+<!-- SurvivorAlertData: DTD for passing data from scheduler to format
+     modules -->
+
+<!-- A RecipientSet element contains the set of recipients for the Alert.
+     Each Module element corresponds to the stanza in the configuration
+     file used to generate the recipient list.  While multiple Module
+     elements are permitted, typically only one will be provided.
+     Since an address can come from more than one calllist, no attempt
+     is made to organize addresses with the calllists they came from.
+     -->
+
+<!ELEMENT SurvivorAlertData (RecipientSet,Summary,HelpFile?,Host+,
+                             Instance,Instances,FixSummary?,FixReturnCode?
+			     ReturnCode,Service,Time,Token)>
+ <!ATTLIST SurvivorAlertData Version CDATA #FIXED "1.1">
+ <!ATTLIST SurvivorAlertData ReplyOK (yes|no)>
+ <!ELEMENT RecipientSet (Module+)>
+  <!ELEMENT Module (Address+,CallList+)>
+   <!ATTLIST Module Name CDATA>
+   <!ELEMENT Address (#PCDATA)>
+   <!ELEMENT CallList (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT HelpFile (#PCDATA)>
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT Instance (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT FixSummary (#PCDATA)>
+ <!ELEMENT FixReturnCode (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Service (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ <!ELEMENT Token (#PCDATA)>
+ 
+<!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorAlertData (RecipientSet,Summary,HelpFile?,Host+,
+                             Instance,Instances,FixSummary?,FixReturnCode?
+			     ReturnCode,Service,Time,Token)>
+ <!ATTLIST SurvivorAlertData Version CDATA #FIXED "1.0">
+ <!ELEMENT RecipientSet (Module+)>
+  <!ELEMENT Module (Address+,CallList+)>
+   <!ATTLIST Module Name CDATA>
+   <!ELEMENT Address (#PCDATA)>
+   <!ELEMENT CallList (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT HelpFile (#PCDATA)>
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT Instance (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT FixSummary (#PCDATA)>
+ <!ELEMENT FixReturnCode (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Service (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ <!ELEMENT Token (#PCDATA)>
+
+<!-- SurvivorAlertStatus: DTD describing alert status information -->
+
+<!ELEMENT SurvivorAlertStatus (RecipientSet,Instances,CheckReturnCode,
+                               CheckSummary,Time,Since)>
+ <!ATTLIST SurvivorAlertStatus Version CDATA #FIXED "1.1">
+ <!ELEMENT RecipientSet (Module+)>
+  <!ELEMENT Module (Address+,ReturnCode)>
+   <!ATTLIST Module Name CDATA>
+   <!ELEMENT Address (#PCDATA)>
+   <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT CheckReturnCode (#PCDATA)>
+ <!ELEMENT CheckSummary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ <!ELEMENT Since (#PCDATA)>
+
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorAlertStatus (RecipientSet,Instances,CheckReturnCode,
+                               CheckSummary,Time)>
+ <!ATTLIST SurvivorAlertStatus Version CDATA #FIXED "1.0">
+ <!ELEMENT RecipientSet (Module+)>
+  <!ELEMENT Module (Address+,ReturnCode)>
+   <!ATTLIST Module Name CDATA>
+   <!ELEMENT Address (#PCDATA)>
+   <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT CheckReturnCode (#PCDATA)>
+ <!ELEMENT CheckSummary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+
+<!-- SurvivorCallListStatus: DTD describing calllist status information -->
+
+<!ELEMENT SurvivorCallListStatus (LastNotify?,LastRotate?,PersonOnCall?)>
+ <!ATTLIST SurvivorCallListStatus Version CDATA #FIXED "1.1">
+ <!ELEMENT LastNotify (Person,Address,Module)>
+  <!ELEMENT Person (#PCDATA)>
+  <!ELEMENT Address (#PCDATA)>
+  <!ELEMENT Module (#PCDATA)>
+ <!ELEMENT LastRotate (#PCDATA)>
+ <!ELEMENT PersonOnCall (#PCDATA)>
+
+<!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorCallListStatus (LastNotify,LastRotate?)>
+ <!ATTLIST SurvivorCallListStatus Version CDATA #FIXED "1.0">
+ <!ELEMENT LastNotify (Person,Address,Module)>
+  <!ELEMENT Person (#PCDATA)>
+  <!ELEMENT Address (#PCDATA)>
+  <!ELEMENT Module (#PCDATA)>
+ <!ELEMENT LastRotate (#PCDATA)>
+
+<!-- SurvivorCallListSubstitutions: DTD describing calllist substitutions -->
+
+<!ELEMENT SurvivorCallListSubstitutions (Substitution+)>
+ <!ATTLIST SurvivorCallListSubstitutions Version CDATA #FIXED "1.0">
+ <!ELEMENT Substitution (Begin,End,Original,Replacement)>
+  <!ELEMENT Begin (#PCDATA)>
+  <!ELEMENT End (#PCDATA)>
+  <!ELEMENT Original (#PCDATA)>
+  <!ELEMENT Replacement (#PCDATA)>
+
+<!-- SurvivorCheckData: DTD for passing data to check modules -->
+
+<!ELEMENT SurvivorCheckData (Host+,Timeout?,ModuleOption*)>
+ <!ATTLIST SurvivorCheckData Version CDATA #FIXED "1.0">
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT Timeout (#PCDATA)>
+ <!ELEMENT ModuleOption (OptionValue)>
+  <!ATTLIST ModuleOption OptionName CDATA>
+  <!ELEMENT OptionValue (#PCDATA)>
+  
+<!-- SurvivorCheckResult: DTD for passing check result -->
+
+<!ELEMENT SurvivorCheckResult (Host?,ReturnCode,Scalar,Comment,Duration?)>
+ <!ATTLIST SurvivorCheckResult Version CDATA #FIXED "1.1">
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Scalar (#PCDATA)>
+ <!ELEMENT Comment (#PCDATA)>
+ <!ELEMENT Duration (#PCDATA)>
+ 
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorCheckResult (Host?,ReturnCode,Scalar,Comment)>
+ <!ATTLIST SurvivorCheckResult Version CDATA #FIXED "1.0">
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Scalar (#PCDATA)>
+ <!ELEMENT Comment (#PCDATA)>
+ 
+<!-- SurvivorCheckStatus: DTD describing check status information -->
+
+<!ELEMENT SurvivorCheckStatus (Instances,ReturnCode,Summary,Time,Since,Duration?)>
+ <!ATTLIST SurvivorCheckStatus Version CDATA #FIXED "1.1">
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ <!ELEMENT Since (#PCDATA)>
+ <!ELEMENT Duration (#PCDATA)>
+ 
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorCheckStatus (Instances,ReturnCode,Summary,Time)>
+ <!ATTLIST SurvivorCheckStatus Version CDATA #FIXED "1.0">
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ 
+<!-- SurvivorFixData: DTD for passing data to fix modules -->
+
+<!ELEMENT SurvivorFixData (ModuleOption*)>
+ <!ATTLIST SurvivorFixData Version CDATA #FIXED "1.0">
+ <!ELEMENT Timeout (#PCDATA)>
+ <!ELEMENT ModuleOption (OptionValue)>
+  <!ATTLIST ModuleOption OptionName CDATA>
+  <!ELEMENT OptionValue (#PCDATA)>
+
+<!-- SurvivorFixResult: DTD for passing fix result -->
+
+<!ELEMENT SurvivorFixResult (ReturnCode,Comment)>
+ <!ATTLIST SurvivorFixResult Version CDATA #FIXED "1.0">
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Comment (#PCDATA)>
+ 
+<!-- SurvivorFixStatus: DTD describing fix status information -->
+
+<!ELEMENT SurvivorFixStatus (InitiatedBy,Instances,ReturnCode,Summary,Time,Since)>
+ <!ATTLIST SurvivorFixStatus Version CDATA #FIXED "1.1">
+ <!ELEMENT InitiatedBy (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ <!ELEMENT Duration (#PCDATA)>
+
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorFixStatus (InitiatedBy,Instances,ReturnCode,Summary,Time)>
+ <!ATTLIST SurvivorFixStatus Version CDATA #FIXED "1.0">
+ <!ELEMENT InitiatedBy (#PCDATA)>
+ <!ELEMENT Instances (#PCDATA)>
+ <!ELEMENT ReturnCode (#PCDATA)>
+ <!ELEMENT Summary (#PCDATA)>
+ <!ELEMENT Time (#PCDATA)>
+ 
+<!-- SurvivorFormattedAlertData: DTD for passing data from format
+     modules to alert modules -->
+
+<!ELEMENT SurvivorFormattedAlertData (Address+,ReplyTo?,Subject,Message)>
+ <!ATTLIST SurvivorFormattedAlertData Version CDATA #FIXED "2.0">
+ <!ATTLIST SurvivorFormattedAlertData ReplyOK (yes|no)>
+ <!ELEMENT Address (#PCDATA)>
+ <!ELEMENT ReplyTo (#PCDATA)>
+ <!ELEMENT Subject (#PCDATA)> 
+ <!ELEMENT Message (#PCDATA)>
+ 
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorFormattedAlertData (Address+,Subject?,Message?)>
+ <!ATTLIST SurvivorFormattedAlertData Version CDATA #FIXED "1.0">
+ <!ELEMENT Address (#PCDATA)>
+ <!ELEMENT Subject (#PCDATA)> 
+ <!ELEMENT Message (#PCDATA)>
+
+<!-- SurvivorReportRequest: DTD for passing requests to report modules -->
+
+<!ELEMENT SurvivorReportRequest (Formatting,DataSet*)>
+ <!ATTLIST SurvivorReportRequest Version CDATA #FIXED "1.2">
+ <!ELEMENT Formatting (TmpDir?,TmpURIPrefix?)>
+  <!ATTLIST Formatting Style (text|html|check)>
+  <!ELEMENT TmpDir (#PCDATA)>
+  <!ELEMENT TmpURIPrefix (#PCDATA)>
+ <!ELEMENT DataSet (AlertData*,CheckData*,CommandData*,FixData*)>
+  <!ATTLIST DataSet Host CDATA>
+  <!ATTLIST DataSet Service CDATA>
+  <!ELEMENT AlertData (Time,AlertRC,CheckRC,Recipient+,Via)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT AlertRC (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Recipient (#PCDATA)>
+   <!ELEMENT Via (#PCDATA)>
+  <!ELEMENT CheckData (Time,CheckRC,Scalar,Comment,Duration?)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Scalar (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+   <!ELEMENT Duration (#PCDATA)>
+  <!ELEMENT CommandData (Time,Command,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT Command (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+  <!ELEMENT FixData (Time,FixRC,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT FixRC (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)> 
+ 
+ <!-- Version 1.1 is deprecated -->
+ 
+<!ELEMENT SurvivorReportRequest (Formatting,DataSet*)>
+ <!ATTLIST SurvivorReportRequest Version CDATA #FIXED "1.1">
+ <!ELEMENT Formatting (TmpDir?,TmpURIPrefix?)>
+  <!ATTLIST Formatting Style (text|html|check)>
+  <!ELEMENT TmpDir (#PCDATA)>
+  <!ELEMENT TmpURIPrefix (#PCDATA)>
+ <!ELEMENT DataSet (AlertData*,CheckData*,CommandData*,FixData*)>
+  <!ATTLIST DataSet Host CDATA>
+  <!ATTLIST DataSet Service CDATA>
+  <!ELEMENT AlertData (Time,AlertRC,CheckRC,Recipient+,Via)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT AlertRC (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Recipient (#PCDATA)>
+   <!ELEMENT Via (#PCDATA)>
+  <!ELEMENT CheckData (Time,CheckRC,Scalar,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Scalar (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+  <!ELEMENT CommandData (Time,Command,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT Command (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+  <!ELEMENT FixData (Time,FixRC,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT FixRC (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)> 
+ 
+ <!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorReportRequest (Formatting,DataSet*)>
+ <!ATTLIST SurvivorReportRequest Version CDATA #FIXED "1.0">
+ <!ELEMENT Formatting (TmpDir,TmpURIPrefix?)>
+  <!ATTLIST Formatting Style (text|html)>
+  <!ELEMENT TmpDir (#PCDATA)>
+  <!ELEMENT TmpURIPrefix (#PCDATA)>
+ <!ELEMENT DataSet (AlertData*,CheckData*,CommandData*,FixData*)>
+  <!ATTLIST DataSet Host CDATA>
+  <!ATTLIST DataSet Service CDATA>
+  <!ELEMENT AlertData (Time,AlertRC,CheckRC,Recipient+,Via)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT AlertRC (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Recipient (#PCDATA)>
+   <!ELEMENT Via (#PCDATA)>
+  <!ELEMENT CheckData (Time,CheckRC,Scalar,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT CheckRC (#PCDATA)>
+   <!ELEMENT Scalar (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+  <!ELEMENT CommandData (Time,Command,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT Command (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)>
+  <!ELEMENT FixData (Time,FixRC,Who,Comment)>
+   <!ELEMENT Time (#PCDATA)>
+   <!ELEMENT FixRC (#PCDATA)>
+   <!ELEMENT Who (#PCDATA)>
+   <!ELEMENT Comment (#PCDATA)> 
+ 
+<!-- SurvivorStatus: DTD for passing informations regarding system status -->
+
+<!ELEMENT SurvivorStatus (ConfigurationStatus,SchedulerStatus,
+                          InstanceStatus)>
+ <!ATTLIST SurvivorStatus Version CDATA #FIXED "1.1">
+ <!ELEMENT ConfigurationStatus (ModuleError*,ParseError?)>
+  <!ATTLIST ConfigurationStatus ParseOK (yes|no)>
+  <!ELEMENT ModuleError (ErrorDetail)>
+   <!ATTLIST ModuleError ModuleName CDATA>
+   <!ATTLIST ModuleError ModuleType (check|fix|format|transmit|transport)>
+   <!ELEMENT ErrorDetail (#PCDATA)>
+  <!ELEMENT ParseError (#PCDATA)>
+ <!ELEMENT SchedulerStatus (LastAlertCycle,LastCheckCycle)>
+  <!ELEMENT LastAlertCycle (#PCDATA)>
+  <!ELEMENT LastCheckCycle (#PCDATA)>
+ <!ELEMENT InstanceStatus (StalledCheck*)>
+  <!ELEMENT StalledCheck (LastCheck)>
+   <!ATTLIST StalledCheck Service CDATA>
+   <!ATTLIST StalledCheck Host CDATA>
+   <!ELEMENT LastCheck (#PCDATA)>
+  
+<!-- Version 1.0 is deprecated -->
+
+<!ELEMENT SurvivorStatus (ConfigurationStatus,SchedulerStatus?)>
+ <!ATTLIST SurvivorStatus Version CDATA #FIXED "1.0">
+ <!ELEMENT ConfigurationStatus (ModuleError*,ParseError?)>
+  <!ATTLIST ConfigurationStatus ParseOK (yes|no)>
+  <!ELEMENT ModuleError (ErrorDetail)>
+   <!ATTLIST ModuleError ModuleName CDATA>
+   <!ATTLIST ModuleError ModuleType (check|fix|format|transmit|transport)>
+   <!ELEMENT ErrorDetail (#PCDATA)>
+  <!ELEMENT ParseError (#PCDATA)>
+ <!ELEMENT SchedulerStatus (LastAlertCycle,LastCheckCycle)>
+  <!ELEMENT LastAlertCycle (#PCDATA)>
+  <!ELEMENT LastCheckCycle (#PCDATA)>
+
+<!-- SurvivorTransportData: DTD for passing data to transport modules -->
+
+<!ELEMENT SurvivorTransportData (Host+,Timeout?,ModuleOption*,RemoteModule)>
+ <!ATTLIST SurvivorTransportData Version CDATA #FIXED "1.0">
+ <!ELEMENT Host (#PCDATA)>
+ <!ELEMENT Timeout (#PCDATA)>
+ <!ELEMENT ModuleOption (OptionValue)>
+  <!ATTLIST ModuleOption OptionName CDATA>
+  <!ELEMENT OptionValue (#PCDATA)>
+ <!ELEMENT RemoteModule (Module,ModType,ModuleOption*)>
+  <!ELEMENT Module (#PCDATA)>
+  <!ELEMENT ModType (#PCDATA)>
+  <!ELEMENT ModuleOption (OptionValue)>
+   <!ATTLIST ModuleOption OptionName CDATA>
+   <!ELEMENT OptionValue (#PCDATA)>
+
+<!-- SurvivorWebAuthRequest: DTD for passing authentication request
+     information to webauth modules -->
+
+<!ELEMENT SurvivorWebAuthRequest (RequestedURI,SourceIP?,ModuleOption*)>
+ <!ATTLIST SurvivorWebAuthRequest Version CDATA #FIXED "1.0">
+ <!ELEMENT RequestedURI (#PCDATA)>
+ <!ELEMENT SourceIP (#PCDATA)>
+ <!ELEMENT ModuleOption (OptionValue)>
+  <!ATTLIST ModuleOption OptionName CDATA>
+  <!ELEMENT OptionValue (#PCDATA)>
+     
+<!-- SurvivorWebAuthResult: DTD for passing authentication results
+     from webauth modules -->
+     
+<!ELEMENT SurvivorWebAuthResult (Error?,Username?,MemberOf*,Deferral?,
+                                 SkipFlag*)>
+ <!ATTLIST SurvivorWebAuthResult Version CDATA #FIXED "1.0">
+ <!ATTLIST SurvivorWebAuthResult AuthOK (yes|deferred|no)>
+ <!ELEMENT Error (#PCDATA)>
+ <!ELEMENT Username (#PCDATA)>
+ <!ELEMENT MemberOf (#PCDATA)>
+ <!ELEMENT Deferral (#PCDATA)>
+ <!ELEMENT SkipFlag (#PCDATA)>

@@ -1,0 +1,143 @@
+Specification for survivor state and history files
+
+State files are maintained for active hosts and services only.  When a host
+or service is unconfigured, the corresponding state will be deleted.
+
+History files are maintained for all hosts and services and are not
+automatically deleted.
+
+Lock files control access to all state files except tmpstatus.  Lock files
+do not control access to history files.
+
+Path components in CAPS are variable and determined at run time.
+
+(1) State Files
+
+* STATE/calllist/LISTNAME/lock
+  STATE/host/HOSTNAME/SERVICE/lock
+  STATE/service/SERVICE/lock
+
+  Present for: Any active state directory
+
+  Contents:
+  Empty (this file is used to gain exclusive access to the state)
+
+* STATE/calllist/LISTNAME/lastnotify
+
+  Present for: Standard and rotating call lists
+
+  Contents:
+  last entry notified\n
+
+* STATE/calllist/LISTNAME/lastrotate
+
+  Present for: Rotating call lists
+
+  Contents:
+  unix time call list last rotated\n
+
+* STATE/calllist/LISTNAME/substitutions
+
+  Present for: Standard and rotating call lists (broadcast call lists are
+  not supported because they have no state)
+
+  Contents: Lines of the form
+  begintime:endtime:newname:oldname\n
+
+* STATE/host/HOSTNAME/SERVICE/acknowledge
+
+  Present for: Services that have generated alerts that have been acknowledged
+  (this file is automatically removed when a problem clears)
+
+  Contents:
+  identify of acknowledger\n
+
+* STATE/host/HOSTNAME/SERVICE/alertstatus
+
+  Present for: Services that have generated alerts
+
+  Contents:
+  most recent return code\n
+  consecutive instances of that return code\n
+
+* STATE/host/HOSTNAME/SERVICE/checkstatus
+
+  Present for: All services checked on all hosts
+
+  Contents:
+  most recent return code\n
+  consecutive instances of that return code\n
+  human readable comment\n
+
+* STATE/host/HOSTNAME/SERVICE/escalate
+
+  Present for: Services that have generated alerts that have been acknowledged
+  (any utility creating this file should also remove the lastalert file to
+  ensure that an escalated alert is generated promptly)
+
+  Contents:
+  number of warnings to escalate to\n
+
+* STATE/host/HOSTNAME/SERVICE/lastalert
+
+  Present for: Services that have generated alerts
+
+  Contents:
+  unixtime this service on this host last generated an alert\n
+  return code of check that generated this alert\n
+  address(es) notified\n
+
+* STATE/host/HOSTNAME/SERVICE/lastcheck
+
+  Present for: All services checked on all hosts
+
+  Contents:
+  unixtime this service on this host was last checked\n
+
+* STATE/host/HOSTNAME/SERVICE/noalert
+
+  Present for: Services and/or hosts that should not have alerts generated
+  (this file is manually created and removed)
+
+  Contents:
+  identity of inhibitor\n
+
+* STATE/host/HOSTNAME/SERVICE/token [footnote 1]
+
+  Present for: Services that have generated alerts
+
+  Contents:
+  pseudo-random token\n
+
+* STATE/service/SERVICE/lastcheck
+
+  Present for: Services specified in check.cf with an override schedule
+
+  Contents:
+  unixtime this service was last checked\n
+
+* STATE/service/SERVICE/tmpstatus
+
+  Present for: Services that are currently being examined (this file
+  may or may not be removed after the service is examined)
+
+  Contents:
+  output from check module
+
+(2) History Files
+
+* HISTORY/host/HOSTNAME/SERVICE/checkhistory
+
+  Present for: All services checked on all hosts
+
+  Contents: Lines of the form:
+  human readable date:return code:scalar value:human readable comment\n
+
+
+
+[footnote 1] The pseudo-random token is not designed for strong security,
+             but merely to provide simple authentication and correlation
+             and to prevent nuisance attacks in two way messaging mechanisms.
+             It is currently implemented as a 32-bit number, but may
+             consist of any string of non-space characters of up to 80
+	     characters in length.

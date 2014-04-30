@@ -1,0 +1,172 @@
+#!/usr/bin/perl -w
+
+# process check module
+
+# Version: $Revision: 0.16 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2005/12/28 16:28:34 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argformat = (# Warning threshold
+		 'warn' => 'optional relation',
+		 # Problem threshold
+		 'prob' => 'optional relation',
+		 # Names to look for
+		 'name' => 'string list',
+		 # Type of matching
+		 'matchtype' => 'optional flags any(a,i)',
+		 # Userid
+		 'userid' => 'optional string');
+
+sub ProcessValidate {
+    my ($self) = @_;
+
+    return(MODEXEC_OK, 0, 'Process OK');
+}
+
+sub ProcessCheck {
+    my ($self, $host) = @_;
+
+    my %ps;
+    my $psref;
+    my $matchtype = $self->Arg('matchtype') || '';
+    my $user = $self->Arg('userid');
+
+    if(!defined $user || $user =~ /^\d+$/) {
+	$psref = $self->ParsePS(0, $matchtype);
+    } else {
+	$psref = $self->ParsePS(1, $matchtype);
+    }
+
+    if(!defined $psref) {
+	$self->ExitError(MODEXEC_PROBLEM, 0, 'Failed to exec ps');
+    }
+    
+    %ps = %$psref;
+
+    my $err = '';
+    my $found = 0;
+    my $r = MODEXEC_OK;
+
+    foreach my $name ($self->Arg('name')) {
+	my $cur_found = 0;
+	my $cur_matched = 0;
+	my $rc;
+	my $msg;
+	
+	foreach my $pid (keys %{$ps{"name"}}) {
+	    if($ps{"name"}{$pid} =~ /$name/) {
+		# if one of the processes we found is this process or
+		# our parent, don't count it
+		next if($pid == $$ || $pid == getppid);
+		# check $user if we care, while being careful if $user
+		# is numeric
+		if(!defined $user || 
+		   ($user =~ /^\d+$/ && $user == $ps{"user"}{$pid}) ||
+		   $user eq $ps{"user"}{$pid}) {
+		    $cur_found++;
+		}
+	    }
+	}
+
+	# cur_found now contains the number of matching processes for
+	# the current name regular expression.  See what that means.
+
+	my $label = "Number of processes matching $name";
+	
+	if(defined $user) {
+	    $label .= " owned by ".($user =~ /^\d+$/ ? 'uid' : '')." $user";
+	}
+	
+	if(defined $self->Arg('prob')) {
+	    my $probargref = $self->Arg('prob');
+	    my %probarg = %$probargref;
+	    
+	    ($rc, $msg) = $self->RelationCompare($probargref,
+						 $cur_found,
+						 $label);
+
+	    if($rc) {
+		$r = MODEXEC_PROBLEM;
+		$err .= $msg . ' (expecting not ' . $probarg{'rel'}
+		. ' ' . $probarg{'x'};
+
+		if($probarg{'rel'} eq 'bt' || $probarg{'rel'} eq 'nb') {
+		    $err .= '+' . $probarg{'y'};
+		}
+
+		$err .= '),';
+
+		$cur_matched++;
+	    }
+	}
+
+	if(!$cur_matched && defined $self->Arg('warn')) {
+	    my $warnargref = $self->Arg('warn');
+	    my %warnarg = %$warnargref;
+	    
+	    ($rc, $msg) = $self->RelationCompare($warnargref,
+						 $cur_found,
+						 $label);
+
+	    if($rc) {
+		if($r != MODEXEC_PROBLEM) {
+		    $r = MODEXEC_WARNING;
+		}
+		$err .= $msg . ' (expecting not ' . $warnarg{'rel'}
+		. ' ' . $warnarg{'x'};
+
+		if($warnarg{'rel'} eq 'bt' || $warnarg{'rel'} eq 'nb') {
+		    $err .= '+' . $warnarg{'y'};
+		}
+
+		$err .= '),';
+
+		$cur_matched++;
+	    }
+	}
+
+	if(!$cur_matched && $cur_found == 0) {
+	    # No threshold set, so finding 0 is a problem, 1+ is OK
+	    $r = MODEXEC_PROBLEM;
+	    if(defined $user) {
+		$err .= "No process matching '$name' owned by ".($user =~ /^\d+$/ ? 'uid ' : '')."$user,";
+	    } else {
+		$err .= "No process matches '$name',";
+	    }
+
+	    $cur_matched++;
+	}
+
+	if(!$cur_matched) {
+	    $err .= sprintf("$cur_found %s%s matching '$name' found,",
+			    ($cur_found == 1) ? 'process' : 'processes',
+			    defined $user ? ' owned by ' . ($user =~ /^\d+$/ ? 'uid ' : '') . $user : '');
+	}
+
+	$found += $cur_found;
+    }
+
+    # remove trailing comma
+    chop($err);
+    
+    return($r, $found, $err);
+}
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argformat, \&ProcessValidate);
+
+my $r = $sc->Exec(\&ProcessCheck);
+
+exit($r);

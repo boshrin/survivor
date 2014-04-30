@@ -1,0 +1,16 @@
+Return-Path: <JUSER@vtext.com>
+Received: from njbdmta2.airbridge.net (njbdmta2.airbridge.net [66.174.3.139])
+	by somehost.cc.columbia.edu (8.13.0/8.13.0) with ESMTP id i8UI2THU013150
+	for <juser@columbia.edu>; Thu, 30 Sep 2004 14:02:30 -0400 (EDT)
+Date: Thu, 30 Sep 2004 14:02:28 -0400 (EDT)
+Message-ID: <7109871.1096567343240.JavaMail.root@njbd-wigdb2>
+From: JUSER@vtext.com
+To: juser+e@columbia.edu
+Subject: symon/14:01/ ALERT: daytimer@almond/ T=S017903637,I=unix
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+X-Spam-Score: 0.339 () NO_REAL_NAME
+X-Scanned-By: MIMEDefang 2.40
+
+ symon/14:01/ ALERT: daytimer@almond/ T=S017903637,I=unix Timed out 14:00:52 09/30/2004

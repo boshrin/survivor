@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: sr Protocol Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: sr Protocol Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec2>Specification v2</A>
+  <UL>
+  <LI><A HREF=#spec2-about>About Version 2</A>
+  <LI><A HREF=#spec2-keywords>Version 2 Keywords</A>
+  <LI><A HREF=#spec2-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#spec1>Specification v1</A>
+  <UL>
+  <LI><A HREF=#spec1-about>About Version 1</A>
+  <LI><A HREF=#spec1-keywords>Version 1 Keywords</A>
+  <LI><A HREF=#spec1-examples>Examples</A>
+  </UL>
+ </UL>
+ 
+ <A ID="spec2"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification v2
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally significant, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords or values.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>The line terminator is <TT>\n</TT>.
+  </UL>
+  <PRE>
+     &lt;command> : <B>check</B>|<B>exit</B>|<B>fix</B>|<B>version</B>
+     &lt;command specific arguments> : [^\n]+
+     &lt;command specific data> : .+
+     &lt;command specific result> : [^\n]+
+     &lt;command specific response> : .+
+  </PRE>
+
+  <PRE>
+  CLIENT: &lt;command> [&lt;command specific arguments>]
+  SERVER: [<B>OK</B>|<B>ERROR</B>] [&lt;command specific result>]
+  CLIENT: [<B>BEGIN DATA</B>
+  CLIENT: &lt;command specific data>
+  CLIENT: <B>END DATA</B>]
+  SERVER: [<B>BEGIN RESPONSE</B>
+  SERVER: &lt;command specific response>
+  SERVER: <B>END RESPONSE</B>]
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="spec2-about"></A>
+ <H3>About Version 2</H3>
+
+ The protocol consists of one or more exchanges, beginning with the
+ client issuing a command, possibly with one or more arguments, to the
+ server.  The server then provides a one line result to the command.
+ If the command permits, the client may then send a data block with
+ more information for the request, and the server may respond with a
+ data block containing more detailed results.  This process may be
+ repeated until either end closes the connection or until the client
+ transmits the command <TT>exit</TT>.
+
+ <P>
+
+ The daemon must know from out-of-band configuration where the module
+ directory is.
+
+ <P>
+
+ Because <TT>sr</TT> should only be run within a given site, no
+ specific port number is expected.
+
+ <P>
+ 
+ Version 2 was introduced with release 0.9.6.
+
+ <P>
+
+ <A ID="spec2-keywords"></A>
+ <H3>Version 2 Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-check"></A>
+  <B>check</B> &lt;module>
+ </TD>
+ <TD CLASS=kwdef>
+  Execute a check using the specified <I>module</I>.
+
+  <P>
+
+  On success, the server result will be
+
+  <PRE>
+   OK send SurvivorCheckData
+  </PRE>
+
+  The client should then send a <TT>DATA</TT> block with a <A
+  HREF="survivor.dtd">SurvivorCheckData</A> document (in which the
+  <TT>Host</TT> element should be "localhost").  The server will return a
+  <TT>RESPONSE</TT> block with a <A
+  HREF="survivor.dtd">SurvivorCheckResult</A> document.
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-exit"></A>
+  <B>exit</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Terminate the current session.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fix"></A>
+  <B>fix</B> &lt;module>
+ </TD>
+ <TD CLASS=kwdef>
+  Execute a fix using the specified <I>module</I>.
+
+  <P>
+
+  On success, the server result will be
+
+  <PRE>
+   OK send SurvivorFixData
+  </PRE>
+
+  The client should then send a <TT>DATA</TT> block with a <A
+  HREF="survivor.dtd">SurvivorFixData</A> document The server will
+  return a <TT>RESPONSE</TT> block with a <A
+  HREF="survivor.dtd">SurvivorFixResult</A> document.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-version"></A>
+  <B>version</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Obtain the server's protocol version.  Defined response strings are
+
+   <UL>
+   <LI><TT>OK v2</TT><BR>
+       Protocol version 2.
+   <LI><TT>4:0:Unrecognized command version</TT><BR>
+       Protocol version 1.
+   </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="spec2-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI><PRE>
+     version
+     <I>OK v2</I>
+     check mailq
+     <I>OK send SurvivorCheckData</I>
+     BEGIN DATA
+     &lt;?xml version="1.0" encoding="iso-8859-1"?>
+      &lt;SurvivorCheckData Version="1.0">
+       &lt;Host>localhost&lt;/Host>
+       &lt;Timeout>180&lt;/Timeout>
+       &lt;ModuleOption OptionName="warn">
+        &lt;OptionValue>100&lt;/OptionValue>
+       &lt;/ModuleOption>
+       &lt;ModuleOption OptionName="prob">
+        &lt;OptionValue>1000&lt;/OptionValue>
+       &lt;/ModuleOption>
+      &lt;/SurvivorCheckData>
+     END DATA
+     <I>BEGIN RESPONSE
+     &lt;?xml version="1.0" encoding="iso-8859-1"?>
+      &lt;SurvivorCheckResult Version="1.0">
+       &lt;Host>localhost&lt;/Host>
+       &lt;ReturnCode>2&lt;/ReturnCode>
+       &lt;Scalar>188&lt;/Scalar>
+       &lt;Comment>188 messages queued&lt;/Comment>
+      &lt;/SurvivorCheckResult>
+     END RESPONSE</I>
+     exit
+     </PRE>
+ </LI>
+ </OL>
+
+ <P>
+ 
+ <A ID="spec1"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification v1
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+ CLIENT: <B><I>command</I></B>[<B>:<I>module</I></B>[<B>:<I>timeout</I></B>]]
+ CLIENT: [<B><I>argname</I>=<I>argvalue</I></B>]
+ CLIENT: [...]
+ CLIENT: 
+ SERVER: <B><I>returnvalue</I>:<I>scalevalue</I>:</B>[<B><I>comment</I></B>]
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="spec1-about"></A>
+ <H3>About Version 1</H3>
+
+ The protocol consists of one or more exchanges, beginning with the
+ client issuing a request to the daemon.  The daemon then provides a
+ one line response to that request.  This process may be repeated until
+ either end closes the connection or until the client transmits the
+ command <TT>exit</TT>.
+
+ <P>
+
+ The daemon must know from out-of-band configuration where the module
+ directory is.
+
+ <P>
+
+ Because <TT>sr</TT> should only be run within a given site, no
+ specific port number is expected.
+
+ <P>
+ 
+ Version 1 was used in all versions of the package up to and including
+ 0.9.5a.
+
+ <P>
+  
+ <A ID="spec1-keywords"></A>
+ <H3>Version 1 Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-command1"></A>
+  <B>command</B>
+ </TD>
+ <TD CLASS=kwdef>
+  <TT>check</TT> to indicate that a check module is to be executed,
+  <TT>fix</TT> to indicate that a fix module is to be executed, or
+  <TT>exit</TT> to terminate the session.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-module1"></A>
+  <B>module</B>
+ </TD>
+ <TD CLASS=kwdef>
+  The module to be executed.  This value must be a relative path name
+  and must not contain '/' characters.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-timeout1"></A>
+  <B>timeout</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Number of seconds to wait before failing (defaults to 0, for no timeout).
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-argname1"></A>
+  <B>argname</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Name of argument to be passed to the module.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-argvalue1"></A>
+  <B>argvalue</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Value of argument to be passed to the module.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-returnvalue1"></A>
+  <B>returnvalue</B>
+ </TD>
+ <TD CLASS=kwdef>
+  As specified in <A HREF=spec-cm.html>the check module specification</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-scalevalue1"></A>
+  <B>scalevalue</B>
+ </TD>
+ <TD CLASS=kwdef>
+  As specified in <A HREF=spec-cm.html>the check module specification</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-commentvalue1"></A>
+  <B>commentvalue</B>
+ </TD>
+ <TD CLASS=kwdef>
+  As specified in <A HREF=spec-cm.html>the check module specification</A>.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="spec1-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI><PRE>
+     check:mailq
+     warn=100
+     prob=1000
+
+     <I>2:188:188 messages queued</I>
+     </PRE>
+ </LI>
+ </OL>
+
+ <HR>
+ <I>$Date: 2006/11/20 00:13:18 $</I><BR>
+ <I>$Revision: 0.7 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-check>check</A><BR>
+ <A CLASS="keywords" HREF=#kw-exit>exit</A><BR>
+ <A CLASS="keywords" HREF=#kw-fix>fix</A><BR>
+ <A CLASS="keywords" HREF=#kw-version>version</A><BR>
+ <A CLASS="keywords" HREF=#kw-argname1>argname (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-argvalue1>argvalue (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-command1>command (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-comment1>comment (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-module1>module (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-returnvalue1>returnvalue (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-scalevalue1>scalevalue (v1)</A><BR>
+ <A CLASS="keywords" HREF=#kw-timeout1>timeout (v1)</A><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

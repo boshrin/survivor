@@ -1,0 +1,29 @@
+----------------------------
+revision 0.7
+date: 2004/03/24 16:50:04;  author: benno;  state: Exp;  lines: +7 -2
+Don't use threads, env variables aren't thread safe enough
+----------------------------
+revision 0.6
+date: 2003/01/29 01:16:19;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.5
+date: 2002/12/31 04:04:53;  author: benno;  state: Exp;  lines: +45 -46
+Convert to named args
+----------------------------
+revision 0.4
+date: 2002/06/04 01:46:18;  author: selsky;  state: Exp;  lines: +6 -3
+fix uninitialized variable problem
+----------------------------
+revision 0.3
+date: 2002/05/28 19:50:44;  author: selsky;  state: Exp;  lines: +38 -29
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:58:32;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:49:26;  author: benno;  state: Exp;
+initial revision
+=============================================================================

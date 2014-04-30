@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Raidbox Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>raidbox</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>raidbox</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>raidbox</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="info">No</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module raidbox {</B>
+       [<B>community</B> &lt;string>]
+       [<B>faileddiskwarn</B> &lt;relation>]
+       [<B>faileddiskprob</B> &lt;relation>]
+       [<B>failedpowersupplywarn</B> &lt;relation>]
+       [<B>failedpowersupplyprob</B> &lt;relation>]
+       [<B>failedfanswarn</B> &lt;relation>]
+       [<B>failedfansprob</B> &lt;relation>]
+       [<B>fanspeedwarn</B> &lt;relation>]
+       [<B>fanspeedprob</B> &lt;relation>]
+       [<B>loadaveragewarn</B> &lt;relation>]
+       [<B>loadaverageprob</B> &lt;relation>]
+       [<B>diskspareswarn</B> &lt;relation>]
+       [<B>disksparesprob</B> &lt;relation>]
+       [<B>volumespeed</B> &lt;relation>]
+       [<B>snmpversion</B> (<B>1</B> | <B>2</B> | <B>2c</B> | <B>3</B>)]
+       [<B>snmptimeout</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://net-snmp.sourceforge.net"><TT>SNMP</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-community"></A><B>community</B></TD>
+ <TD CLASS=kwref>optional string, default 'public'</TD>
+ <TD CLASS=kwdef>
+   Community name required by the SNMP daemon.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-faileddiskwarn"></A><B>faileddiskwarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[0]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the number of failed disks.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-faileddiskprob"></A><B>faileddiskprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[1]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the number of failed disks.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-failedpowersupplywarn"></A><B>failedpowersupplywarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[0]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the number of failed power
+   supplies.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-failedpowersupplyprob"></A><B>failedpowersupplyprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[1]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the number of failed power
+   supplies.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-failedfanswarn"></A><B>failedfanswarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[0]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the number of failed fans.
+   This test only executes on NetApps.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-failedfansprob"></A><B>failedfansprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[1]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the number of failed fans.
+   This test only executes on NetApps.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-fanspeedwarn"></A><B>fanspeedwarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is lt[1500]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the fan speed.
+   This test only executes on JetStors.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-fanspeedprob"></A><B>fanspeedprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is lt[1000]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the fan speed.
+   This test only executes on JetStors.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-loadaveragewarn"></A><B>loadaveragewarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[75]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the load average.
+   This test only executes on NetApps.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-loadaverageprob"></A><B>loadaverageprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is gt[95]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the load average.
+   This test only executes on NetApps.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-diskspareswarn"></A><B>diskspareswarn</B></TD>
+ <TD CLASS=kwref>optional relation, default is lt[2]
+ <TD CLASS=kwdef>
+   Generate a warning when this relation matches the number of spare disks.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-disksparesprob"></A><B>disksparesprob</B></TD>
+ <TD CLASS=kwref>optional relation, default is lt[1]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the number of spare disks.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-volumespeed"></A><B>volumespeed</B></TD>
+ <TD CLASS=kwref>optional relation, default is regv[^320\.0MB\/Sec]
+ <TD CLASS=kwdef>
+   Generate a problem when this relation matches the volume speed.
+   This test only executes on JetStors.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmpversion"></A><B>snmpversion</B></TD>
+ <TD CLASS=kwref>optional string, one of '1', '2','2c', or '3', default
+  is '1'</TD>
+ <TD CLASS=kwdef>
+   SNMP protocol version to use.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-snmptimeout"></A><B>snmptimeout</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity, default
+  is '5'</TD>
+ <TD CLASS=kwdef>
+   SNMP query timeout, in seconds.  Note that multiple queries may be
+   issued within one check, so this should not be the same as the module
+   timeout.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>raidbox</TT> module monitors various hardware metrics on RAID
+ boxes using the Perl <TT>SNMP</TT> module.  The module currently
+ supports Network Appliance servers and JetStor RAIDs, and will
+ automatically determine the type of device and execute the
+ appropriate tests for it.
+
+ <P>
+
+ The module does not monitor filesystem usage.  For that, see the
+ <A HREF="cm-disk.html"><TT>disk</TT></A>,
+ <A HREF="cm-nadisk.html"><TT>nadisk</TT></A>, and
+ <A HREF="cm-snmp.html"><TT>snmp</TT></A> check modules.
+
+ <P>
+
+ It may be useful to set <A
+ HREF="cf-check.html#kw-resulttext"><TT>result text
+ significant</TT></A> for <TT>raidbox</TT> checks.  This will clear an
+ existing acknowledgement when the summary text changes, for example
+ when the system load is high after a disk has already failed.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To generate warnings at less than 3 spares and problems at less than 5
+     spares:
+     <PRE>
+     module raidbox {
+       community mycommunity
+       diskspareswarn lt[3]
+       disksparesprob lt[5]
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2007/03/29 12:24:58 $</I><BR>
+ <I>$Revision: 1.1 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-community">community</A><BR>
+ <A CLASS="keywords" HREF="#kw-diskcf">diskcf</A><BR>
+ <A CLASS="keywords" HREF="#kw-examine">examine</A><BR>
+ <A CLASS="keywords" HREF="#kw-filesystem">filesystem</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmptimeout">snmptimeout</A><BR>
+ <A CLASS="keywords" HREF="#kw-snmpversion">snmpversion</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

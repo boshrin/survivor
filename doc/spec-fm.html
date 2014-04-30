@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Fix Module Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Fix Module Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#spec>Specification</A>
+ </UL>
+
+ <P>
+
+ <A ID="spec"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <OL>
+ <LI>Fix modules <B>must</B> be reentrant for a given service
+     or a given host (default locking enforced on a fix module
+     is for service@host) <B>or must</B> document that additional
+     locking (service level or host level) is required.
+     <P>
+
+ <LI>Fix modules <B>must not</B> change their process group by any
+     means, including via <TT>setsid()</TT>, <TT>setpgid()</TT>,
+     <TT>setpgrp()</TT>, or any similar function.
+     <P>
+
+ <LI>Fix modules <B>must</B> be written in a scripting language
+     such as perl to make changes easier and more transparent.
+     Compiled modules are not permitted.
+     <P>
+    
+ <LI>Each module <B>must</B> place its source code in a directory
+     underneath <TT>survivor/src/modules/fix/</TT> with the following
+     conventions:
+
+     <OL>
+     <LI>The name of the directory <B>must</B> be
+        <TT>fix/<I>modulename</I>/</TT>.
+        <P>
+
+     <LI>A Makefile.in must be present, with directives for
+        <TT>clean</TT>, <TT>veryclean</TT>, <TT>all</TT>,
+        <TT>install</TT>, and <TT>install-remote</TT>.
+	<P>
+	
+        The <TT>install</TT> <B>should</B>, except in exceptional
+	circumstances, install the module into
+	<TT>@prefix@/mod/fix</TT>, owned by <TT>@INST_USER@</TT>
+	and <TT>@INST_GROUP@</TT>, mode 555.
+	<P>
+ 
+        The <TT>install-remote</TT> directive <B>should</B> be the
+        same as <TT>install</TT>.
+        <P>
+
+     <LI>Documentation describing the module <B>should</B> be in
+        <TT>doc/fm-<I>modulename</I>.html</TT>
+        <P>
+     </OL>
+     <P>
+    
+ <LI>Fix modules do not accept any command line arguments, but
+     instead receive their required data via a <A
+     HREF="survivor.dtd">SurvivorFixData</A> element provided in
+     an XML document on stdin.
+     <P>
+     
+     The optional <TT>ModuleOption</TT> elements <B>should</B>
+     conform to the <A HREF="spec-xmlarg.html">Module XML Argument
+     Specification</A>.
+     <P>
+
+ <LI>Fix modules <B>should not</B> accept arguments that can result in
+     arbitrary command being executed or arbitrary files being
+     modified.  Instead, out of band communication (eg: via a
+     configuration file or preexisting information) should be used.
+     <P>
+
+ <LI>Fix modules <B>must not</B> permit any filehandles to remain
+     attached to parent processes in any process the module backgrounds
+     (daemonizes).  All filehandles inherited by child processes,
+     including stdin, stdout, or stderr, must be closed or redirected
+     to <TT>/dev/null</TT> before the fix module exits.
+     <P>
+        
+ <LI>Fix modules <B>must</B> generate output on stdout consisting of
+     an XML document consisting of a <A
+     HREF="survivor.dtd">SurvivorFixResult</A> element.  The elements
+     defined are
+     <P>
+
+     <UL>
+     <LI><B>ReturnCode</B><BR>
+         The numeric return code (as defined in <TT>include/survivor.H</TT>).
+	 Possible values include
+
+	 <UL>
+	 <LI><B><TT>MODEXEC_OK</TT></B>: Fix successfully executed.
+	 <LI><B><TT>MODEXEC_PROBLEM</TT></B>: An error occurred
+	     during the execution of the fix.
+	 <LI><B><TT>MODEXEC_MISCONFIG</TT></B>: The module is misconfigured
+	     and is unable to execute the fix.
+	 </UL>
+	
+	 but ReturnCode <B>may</B> be a value of 20 through 1000 to
+	 transmit custom return information.
+	 <P>
+
+     <LI><B>Comment</B><BR>
+         The Comment <B>may</B> be an empty string, or it
+         <B>may</B> provide a human readable explanation of the return
+	 or scalar values.  The comment may be reformatted or truncated.
+     </UL>
+     <P>
+
+ <LI>Fix modules <B>must</B> exit with the <I>returnvalue</I> used above.
+     <P>
+    
+ </OL>
+
+<HR>
+<I>$Date: 2006/11/20 00:05:55 $</I><BR>
+<I>$Revision: 0.6 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

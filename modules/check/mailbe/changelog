@@ -1,0 +1,9 @@
+----------------------------
+revision 1.2
+date: 2006/01/23 00:33:14;  author: ekg2002;  state: Exp;  lines: +5 -7
+host is now the backend host to be checked
+----------------------------
+revision 1.1
+date: 2006/01/18 07:36:59;  author: ekg2002;  state: Exp;
+Initial revision
+=============================================================================

@@ -1,0 +1,43 @@
+#!/usr/bin/perl -w
+
+# message check module
+
+# Version: $Revision: 0.7 $
+# Author: Benjamin Oshrin and Matt Selsky
+# Date: $Date: 2003/01/29 01:18:00 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+#
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argformat = ("message" => "string");
+
+sub MessageValidate {
+    my ($self) = @_;
+    
+    return(MODEXEC_OK, 0, "Message OK");
+}
+
+sub MessageCheck {
+    my ($self, $host) = @_;
+
+    return(MODEXEC_NOTICE, 0, $self->Arg("message"));
+}
+
+my $sc = new Survivor::Check();
+$sc->GetOpt(\%argformat, \&MessageValidate);
+
+# Threading and forking will slow us down, since all we do is return.
+$sc->UseThreads(0);
+$sc->UseFork(0);
+
+my $r = $sc->Exec(\&MessageCheck);
+
+exit($r);

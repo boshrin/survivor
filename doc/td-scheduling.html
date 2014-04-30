@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Technical Document: Scheduling</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR Technical Document: Scheduling</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About This Document</A>
+ <LI><A HREF=#scheduling>Scheduling</A>
+  <UL>
+  <LI><A HREF=#staggered>Staggered Scheduling</A>
+  <LI><A HREF=#transient>Transient Failure Scheduling</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About This Document
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ This document contains details of the SURVIVOR implementation.  It
+ contains no information necessary for the operation of the systems
+ monitor that is not available in the general sections of this
+ manual.
+
+ <P>
+ 
+ <A ID="scheduling"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Scheduling
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ The SURVIVOR scheduler (<A HREF=ss.html><TT>ss</TT></A>) is
+ responsible for scheduling the execution of checks and alerts.
+ Ordinarily, the scheduler attempts to track as closely as possible to
+ the schedules configured in <A
+ HREF="cf-schedule.html"><TT>schedule.cf</TT></A>.  However, under
+ certain circumstances, the scheduler (if not told otherwise) will
+ adjust these schedules in a collection of methods called <I>smart
+ scheduling</I>.
+
+ <A ID="staggered"></A>
+ <H3>Staggered Scheduling</H3>
+
+  For large sites, checking all hosts for a service simultaneously
+  can result in slowdowns and timeouts.  While the threaded check
+  utilities in <TT>libcm</TT> and <TT>Survivor::Check.pm</TT> will
+  prevent too many hosts from being checked simultaneously, if the
+  number of hosts is large enough, timeouts will be reported because
+  the master check process will not be able to complete in time.
+
+  <P>
+
+  If smart scheduling is enabled, staggered scheduling will be used
+  to spread the checking of the hosts over the interval defined for
+  the schedule in effect.  Staggered scheduling is only used when a
+  minimum number of hosts are monitored for the same service on the
+  same schedule.
+
+  <P>
+
+  For each service, the scheduler will sort the monitored hosts
+  according to the schedules on which they are monitored.  The
+  scheduler will then determine the interval for each schedule, divide
+  that by the timeout for the check, and spread the hosts across the
+  result.  Once the maximum number of hosts have been scheduled, only
+  hosts in a failed state (where the return code is not
+  <TT>MODEXEC_OK</TT>) will be added to the list of hosts to be
+  checked until the next run of the scheduler.
+
+  <P>
+
+  For example, the service <TT>ping</TT> is checked on 100 hosts using
+  a schedule defined with the frequency of <TT>every 15 minutes</TT>,
+  and another 50 hosts using a schedule defined with the frequency of
+  <TT>every 30 minutes</TT>, and the service has a timeout of three
+  minutes.  The maximum number of hosts to be scheduled simultaneously
+  from the first group will be <TT>100 / (15 / 3) = 20</TT>, while the
+  maximum number of hosts from the second group will be <TT>50 / (30
+  / 3) = 5</TT>.
+
+  <P>
+ 
+ <A ID="transient"></A>
+ <H3>Transient Failure Scheduling</H3>
+
+  If a check module fails to return any results for any hosts, it may
+  be due to a transient failure of the module.  (Programmers aren't
+  perfect, after all.)  If smart scheduling is enabled, the scheduler
+  will wait 30 seconds and then retry if a check module fails to return
+  any results and does not time out.  If the module fails a second time,
+  it will then be marked as misconfigured.
+
+  <P>
+  
+<HR>
+<I>$Date: 2006/11/20 02:53:03 $</I><BR>
+<I>$Revision: 0.4 $</I>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
+

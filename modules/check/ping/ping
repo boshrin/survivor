@@ -1,0 +1,276 @@
+#!/usr/bin/perl -w
+
+# ping check module
+
+# Version: $Revision: 0.25 $
+# Author: Benjamin Oshrin, Johan Andersen, and Matt Selsky
+# Date: $Date: 2005/01/11 22:47:49 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+$| = 1;
+
+my %argfmt = ("all" => "optional boolean default(0)");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&PingValidate);
+
+my $PING = $sc->Which('fping');
+my $r = MODEXEC_MISCONFIG;
+my $failstr = "";
+
+if(!defined $PING) {
+    # Hand off to the Exec routine
+
+    if($sc->Arg("all") == 1) {
+	$sc->ExitError(MODEXEC_MISCONFIG, 0,
+		       'Option "all" is not permitted when fping unavailable');
+    }
+    
+    # Just in case we need it
+    $PING = $sc->Which('ping');    
+
+    if(!defined $PING) {
+	$sc->ExitError(MODEXEC_MISCONFIG, 0, 'unable to find usable ping');
+    }
+
+    # If we're on Linux or Darwin, give ping -c 1
+    if($sc->OperatingSystem() eq 'linux'
+       || $sc->OperatingSystem() eq 'darwin') {
+	$PING .= ' -c 1';
+	$failstr = 'Host is unreachable';
+    }
+    
+    $r = $sc->Exec(\&PingCheck);
+} else {
+    # We need to read stdout and stderr separately since different errors
+    # are reported in different locations.
+
+    use IO::Handle;  # for autoflush
+
+    # [P]arent/[C]hild [R]eadsFrom [W]ritesTo
+    if(!pipe(CR1, PW1) || !pipe(PR1, CW1) || !pipe(CR2, PW2)
+       || !pipe(PR2, CW2)) {
+	$sc->ExitError(MODEXEC_PROBLEM, 0, 'pipe() failed');
+    }
+
+    PW1->autoflush(1);
+    CW1->autoflush(1);
+    PW2->autoflush(1);
+    CW2->autoflush(1);
+
+    my $pid = fork();
+
+    if(!defined $pid) {
+	$sc->ExitError(MODEXEC_PROBLEM, 0, 'fork() failed');
+    }
+
+    if($pid == 0) {
+	# Child
+
+	close PR1;
+	close PW1;
+	close PR2;
+	close PW2;
+
+	open(STDOUT, ">&CW1");
+	open(STDERR, ">&CW2");
+
+	# Let fping handle the parallelization
+
+	my $hostlist = join(' ', $sc->Hosts());
+
+	if($sc->Arg('all') == 1) {
+	    # ping all addresses for host
+	    $PING .= ' -m -n -A';
+	}
+
+	exec("$PING $hostlist");
+	exit(MODEXEC_PROBLEM);
+    }
+    # Else parent, fall through
+    
+    # Assume success unless otherwise noted
+    $r = MODEXEC_OK;
+
+    my(%results,%rescodes);
+
+    close CR1;
+    close CW1;
+    close CR2;
+    close CW2;
+
+    my $outdone = 0;
+    my $errdone = 0;
+
+    while(!$outdone || !$errdone) {
+	my $rin = '';
+	
+	if(!$outdone) { vec($rin, fileno(PR1), 1) = 1; }
+	if(!$errdone) { vec($rin, fileno(PR2), 1) = 1; }
+
+	my $nfound = select(my $rout=$rin, undef, undef, 0);
+	
+	if ($nfound) {
+	    # input waiting
+
+	    if (vec($rout,fileno(PR1),1)) { 
+		my $line = <PR1>;
+
+		if(defined $line) {
+		    process_fping_line($line);
+		} else {
+		    $outdone++;
+		}
+	    }
+	    if (vec($rout,fileno(PR2),1)) {
+		my $line = <PR2>;
+
+		if(defined $line) {
+		    process_fping_line($line);
+		} else {
+		    $errdone++;
+		}
+	    }
+	}
+    }
+    
+    close PR1;
+    close PW1;
+    close PR2;
+    close PW2;
+    waitpid($pid,0);
+
+    foreach my $host (keys %rescodes) {
+	my $errString = ($rescodes{$host} == 0) ? MODEXEC_PROBLEM : MODEXEC_OK;
+	# Set 'host up' because, above, we might see an error on an interface
+	# after we've seen ok on a different interface.  This prevents 'host
+	# up' from being followed by 'host is unreachable' in the same line.
+	$results{$host} = 'Host up' if (! exists $results{$host});
+	$sc->Result($host, $errString, $rescodes{$host}, $results{$host});
+    }
+   
+    sub process_fping_line {
+	my ($l) = (@_);
+	chomp($l);
+
+	my $host = "";
+	my $addr = "";
+	my $ret = "";
+	
+	if($l =~ /for ICMP Echo sent to/) {
+	    # Output for network errors is in a different format
+
+	    $ret = $l;
+
+	    my $x = $l;
+	    $x =~ s/.*sent to //;
+	    ($host, $addr, $x) = split(/ /, $x);
+	} else {	
+	    @_ = split(/ /, $l);
+	    $host = shift( @_ );
+	    $addr = $host;  # Provide default value if not ALL
+	
+	    $addr = shift( @_ ) if ($sc->Arg('all') == 1);
+	
+	    $ret = join(' ', @_);
+	}
+	
+	if($ret eq 'is alive') {
+	    # Set if it hasn't been set already
+	    $rescodes{$host} = 1 if (! exists($rescodes{$host}));
+	} elsif($ret =~ /duplicate for/) {
+	    # This appears to be a non-error
+	    $rescodes{$host} = 1 if (! exists($rescodes{$host}));
+	} elsif($ret =~ /ICMP Time Exceeded/) {
+	    # This is only a problem with one particular CatOS
+	    # concentrator, it seems.
+	    $rescodes{$host} = 1 if (! exists($rescodes{$host}));
+	}
+	else {
+	    $r = MODEXEC_PROBLEM;
+	    $rescodes{$host} = 0;	# Reset it even if it exists
+
+	    my $errString;
+	    if($ret eq 'address not found') {
+		$errString = "$addr: Address not found";
+	    }
+	    elsif($ret eq 'is unreachable' || $ret =~ /ICMP Host Unreachable/)
+	    {
+		if(!defined $results{$host} || $results{$host} !~ /nreachable/)
+		{
+		    # Don't report > 1 time
+		    $errString = "$addr is unreachable";
+		}
+	    }
+	    else {	    
+		$errString = "$addr error: $ret";
+	    }
+
+	    if(defined $errString) {
+		if (exists($results{$host})) {
+		    $results{$host} = $results{$host} . ", $errString";
+		} else {
+		    $results{$host} = $errString;
+		}
+	    }
+	}
+    }
+}
+
+exit($r);
+
+sub PingValidate {
+    return(MODEXEC_OK, 0, "Ping OK");
+}
+
+sub PingCheck {
+    my $self = shift;
+    my $host = shift;
+
+    # This routine lets Survivor::Check handle the parallelization.
+    # If we're running as root, use Net::Ping's icmp ping routine, since
+    # it's more efficient than forking ping over and over again.
+    # Otherwise, fork ping over and over again.
+
+    if($> == 0) {
+	# Running as root, use Net::Ping icmp
+
+	use Net::Ping;
+    
+	my $nping = Net::Ping->new('icmp');
+	my $pr = $nping->ping($host);
+	$nping->close();
+	
+	if(!defined $pr) {
+	    return(MODEXEC_PROBLEM, 0, "$host: Address not found"); 
+	} elsif($pr == 0) {
+	    return(MODEXEC_PROBLEM, 0, "$host is unreachable");
+	} else {
+	    return(MODEXEC_OK, 1, 'Host up');
+	}
+    } else {
+	my $pingout = `$PING $host 2>&1`;
+
+	if($? == 0) {
+	    return(MODEXEC_OK, 1, 'Host up');
+	} else {
+	    chomp($pingout);
+	    if(defined $failstr) {
+		return(MODEXEC_PROBLEM, 0, $failstr);
+	    } else {
+		return(MODEXEC_PROBLEM, 0, $pingout);
+	    }
+	}
+    }
+}

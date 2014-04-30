@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Time Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>time</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>time</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>time</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module time {}</B>
+
+     <I>or</I>
+
+     <B>module time {}</B>
+     <B>via</B> &lt;transport>
+
+     <I>or</I>
+
+     <B>module time {</B>
+       <B>server</B> &lt;string>
+       [<B>warn</B> &lt;number>]
+       [<B>prob</B> &lt;number>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=libnet"><TT>Net::Time</TT></A>(>=2.10)
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-server"></A><B>server</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+   <A HREF="http://www.faqs.org/rfcs/rfc868.html">RFC 868</A> time
+   server to check the time against.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional number greater than zero</TD>
+ <TD CLASS=kwdef>
+   Minimum time offset to generate a warning.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob"></A><B>prob</B></TD>
+ <TD CLASS=kwref>optional number greater than zero</TD>
+ <TD CLASS=kwdef>
+   Minimum time offset to generate a problem.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ One of <I>warn</I> or <I>prob</I> must be specified.
+   
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>time</TT> moduleuses the <TT>Net::Time</TT> Perl module to
+ determine the time difference between a reference host and the host
+ to be checked by comparing machine readable time (epoch seconds).
+ When used as a remote module, <TT>time()</TT> is used to determine
+ the time on the remote host.
+ 
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To compare time against <TT>sundial.columbia.edu</TT>, warning if
+     the time is off by 60 seconds and generating a problem if the time
+     is off by 300 seconds:
+     <PRE>
+     module time {
+       server sundial.columbia.edu
+       warn 60
+       prob 300
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:06:40 $</I><BR>
+ <I>$Revision: 0.8 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-server">server</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

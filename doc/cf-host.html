@@ -1,0 +1,392 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: host.cf</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: host.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>host.cf</TT></A>
+ <LI><A HREF=#classes>HostClasses</A>
+  <UL>
+  <LI><A HREF=#classes-about>About HostClasses</A>
+  <LI><A HREF=#classes-dependencies>Dependencies</A>
+  <LI><A HREF=#classes-keywords>HostClass Stanza Keywords</A>
+  <LI><A HREF=#classes-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#groups>Groups</A>
+  <UL>
+  <LI><A HREF=#groups-about>About Groups</A>
+  <LI><A HREF=#groups-dependencies>Dependencies</A>
+  <LI><A HREF=#groups-keywords>Group Stanza Keywords</A>
+  <LI><A HREF=#groups-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#aliases>Group Aliases</A>
+  <UL>
+  <LI><A HREF=#aliases-about>About Group Aliases</A>
+  <LI><A HREF=#aliases-dependencies>Dependencies</A>
+  <LI><A HREF=#aliases-keywords>Group Alias Stanza Keywords</A>
+  <LI><A HREF=#aliases-examples>Examples</A>
+  </UL>
+ </UL>
+ 
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>host.cf</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear anywhere.
+      Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <TT>host.cf</TT> defines <A CLASS=kwlink
+ HREF="#classes">HostClasses</A>, which are distinct sets of hosts
+ with common basic characteristics, <A CLASS=kwlink
+ HREF="#groups">Groups</A>, which are sets of hosts that are monitored
+ for a given Check, and <A CLASS=kwlink HREF="#aliases">Group Aliases</A>,
+ which duplicate a Group under another name.
+
+ <P>
+
+ A <A HREF=util-preparse.html>preparsing utility</A> is available to
+ verify <TT>host.cf</TT> before installation.
+ 
+ <P>
+ 
+ <A ID="classes"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ HostClasses
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>class</B> &lt;name> <B>{</B>
+         <B>hosts</B> <B>{</B>
+	     &lt;name>
+	     [...]
+	 <B>}</B>
+	 [<B>check on</B> &lt;name> <B>schedule</B>]
+	 [<B>alert on</B> &lt;name> <B>alertplan</B>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="classes-about"></A>
+ <H3>About HostClasses</H3>
+
+ A <I>class</I> stanza defines the default check and alert
+ characteristics of its member hosts.  Any host monitored by the
+ scheduler must be defined in exactly one HostClass.
+
+ <A ID="classes-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The Schedule specified by the <TT>check</TT> keyword in a hostclass
+     definition must be defined in schedule.cf.
+
+ <LI>The Alert Plan specified by the <TT>alert</TT> keyword in a hostclass
+     definition must be defined in schedule.cf.
+ </UL>
+ 
+ <A ID="classes-keywords"></A>
+ <H3>HostClass Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-class"></A>
+  <B>class</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new HostClass, which defines the default <A HREF=cf-sched.html>Check
+  Schedule and Alert Plan</A> for its hosts.  The HostClass <TT>all</TT> is
+  reserved.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-hosts"></A>
+  <B>hosts</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the set of hosts in the HostClass.  A host must be a member of
+  exactly one HostClass in order to be monitored.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkon"></A>
+  <B>check on</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the default Check <A HREF="cf-schedule.html#schedules">Schedule</A>
+  for the members of the HostClass.  Individual Checks can <A
+  HREF="cf-check.html#kw-checkon">override this default</A>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alerton"></A>
+  <B>alert on</B> &lt;name> <B>alertplan</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define the default <A HREF="cf-schedule.html#alertplans">Alert Plan</A>
+  for the members of the HostClass.  Individual Checks can <A
+  HREF="cf-check.html#kw-alerton">override this default</A>.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="classes-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In the following example, <TT>server1</TT> and <TT>server2</TT>
+     will by default have all of their Checks run on
+     the <TT>critical</TT> Schedule and alert notifications will be
+     transmitted according to the <TT>critical</TT> Alert Plan.
+
+     <PRE>
+     class servers {
+       hosts {
+         server1
+         server2
+       }
+
+       check on critical schedule
+       alert on critical alertplan
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+
+ <A ID="groups"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Groups
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>group</B> &lt;name> <B>{</B>
+	 &lt;name>
+	 [...]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="groups-about"></A>
+ <H3>About Groups</H3>
+
+ A Group is a set of zero or more hosts.  A host may be a member of
+ zero or more Groups.  If a host is specified in a Group but not
+ defined in a HostClass, it may be silently ignored.
+
+ <P>
+
+ Group names are used to select which Checks are executed for
+ which hosts.  A Check is executed on a host when the following
+ conditions are met:
+ 
+ <P>
+
+ <OL>
+ <LI>A host is a member of a Group.
+ <LI>There is a corresponding <A HREF="cf-check.html#checks">Check</A>
+     defined in <TT>check.cf</TT> with the same name as that Group.
+ <LI>The host is defined in a HostClass.
+ </OL>
+   
+ <P>
+ 
+ <A ID="groups-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The hosts specified in a Group definition must be defined by a
+     Host Class definition before the Group definition that references
+     them.
+ </UL>
+
+ <A ID="groups-keywords"></A>
+ <H3>Group Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-group"></A>
+  <B>group</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Group.  The Group name <TT>all</TT> is reserved.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="groups-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In the following example, if a Check named <TT>http</TT> is
+     defined, it will be run for hosts <TT>server1</TT> and
+     <TT>server2</TT>.
+
+     <PRE>
+     group http {
+       server1
+       server2
+     }
+     </PRE>
+ </OL>
+ 
+ <P>
+
+ <A ID="aliases"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Group Aliases
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alias</B> &lt;name> <B>to</B> &lt;name>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="aliases-about"></A>
+ <H3>About Group Aliases</H3>
+
+ A Group Alias is simply another name for the identified set of hosts.
+ This is useful in order to have multiple Checks run on the same set
+ of hosts without having to maintain multiple identical Groups.
+
+ <P>
+ 
+ <A ID="aliases-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The original Group specified in a Group Alias definition must be
+     defined before the Alias definition that references it.
+ </UL>
+
+ <A ID="aliases-keywords"></A>
+ <H3>Group Alias Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alias"></A>
+  <B>alias</B> &lt;name> <B>to</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Group Alias.  The name by <TT>to</TT> is the name of the
+  "new" Group.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="aliases-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In the following example, the <TT>imap</TT> Group is aliased to
+     <TT>pop</TT> and <TT>smtp</TT> so that imap, pop, and smtp may
+     be checked on the same set of hosts.
+
+     <PRE>
+     alias imap to pop
+     alias imap to smtp
+     </PRE>
+     <P>
+
+ <LI>The following is equivalent to the first example:
+
+    <PRE>
+    alias imap to smtp
+    alias smtp to pop
+    </PRE>
+ </OL>
+ 
+ <P>
+
+ Next: <A HREF=cf-check.html><TT>check.cf</TT></A>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 14:16:53 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-alerton>alert on alertplan</A><BR>
+ <A CLASS="keywords" HREF=#kw-alias>alias</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkon>check on schedule</A><BR>
+ <A CLASS="keywords" HREF=#kw-class>class</A><BR>
+ <A CLASS="keywords" HREF=#kw-group>group</A><BR>
+ <A CLASS="keywords" HREF=#kw-hosts>hosts</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

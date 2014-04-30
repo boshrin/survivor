@@ -1,0 +1,30 @@
+----------------------------
+revision 1.7
+date: 2006/01/24 04:01:14;  author: ekg2002;  state: Exp;  lines: +7 -7
+changed error checking for the search action
+----------------------------
+revision 1.6
+date: 2006/01/23 00:36:09;  author: ekg2002;  state: Exp;  lines: +3 -3
+*** empty log message ***
+----------------------------
+revision 1.5
+date: 2006/01/19 04:38:08;  author: ekg2002;  state: Exp;  lines: +14 -5
+added optional imaphost parameter
+----------------------------
+revision 1.4
+date: 2006/01/18 07:37:49;  author: ekg2002;  state: Exp;  lines: +10 -5
+ many enhancements and fixes, parameter checking
+----------------------------
+revision 1.3
+date: 2006/01/12 04:16:20;  author: ekg2002;  state: Exp;  lines: +6 -6
+changed functions to reflect name change
+----------------------------
+revision 1.2
+date: 2006/01/11 00:44:06;  author: ekg2002;  state: Exp;  lines: +114 -41
+fixed imap recieve functionality
+added better return code checking
+----------------------------
+revision 1.1
+date: 2006/01/10 22:45:50;  author: ekg2002;  state: Exp;
+Initial revision
+=============================================================================

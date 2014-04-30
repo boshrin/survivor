@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: database Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>database</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>database</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>database</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <TD CLASS="scheduler">Yes</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module database {</B>
+       <B>type</B> (<B>postgres</B> | <B>oracle</B> | <B>oracleic</B> | <B>ingres</B> | <B>db2</B> | <B>sybase</B> | <B>mysql</B> | <B>msql</B>)
+       <B>name</B> &lt;string>
+       [<B>username</B> &lt;string>]
+       [<B>password</B> &lt;password>]
+       [<B>environment</B> &lt;string>]
+       [<B>environment</B> ...]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>Perl Modules
+<SURVIVOR META="dependency" TYPE="perl">
+   <UL>
+   <LI><A HREF="http://search.cpan.org/search?dist=DBI"><TT>DBI</TT></A>
+   <LI>For DB2: <A HREF="http://search.cpan.org/search?dist=DBD-DB2"><TT>DBD::DB2</TT></A>
+   <LI>For Ingres: <A HREF="http://search.cpan.org/search?dist=DBD-Ingres"><TT>DBD::Ingres</TT></A>
+   <LI>For mSQL: <A HREF="http://search.cpan.org/search?mode=module&amp;query=DBD%3A%3Amsql"><TT>DBD::msql</TT></A>
+   <LI>For MySQL: <A HREF="http://search.cpan.org/search?dist=DBD-mysql"><TT>DBD::mysql</TT></A>
+   <LI>For Oracle: <A HREF="http://search.cpan.org/search?dist=DBD-Oracle"><TT>DBD::Oracle</TT></A>
+   <LI>For Postgres: <A HREF="http://search.cpan.org/search?dist=DBD-Pg"><TT>DBD::Pg</TT></A>
+   <LI>For Sybase: <A HREF="http://search.cpan.org/search?dist=DBD-Sybase"><TT>DBD::Sybase</TT></A>
+   </UL>
+</SURVIVOR META="dependency">
+ </UL>
+ 
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword><A ID="kw-type"></A><B>type</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+  Database type.  Currently supported types are <I>postgres</I>, <I>oracle</I>,
+  <I>oracleic</I>, <I>ingres</I>, <I>db2</I>, <I>sybase</I>, <I>mysql</I>,
+  and <I>msql</I>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword><A ID="kw-name"></A><B>name</B></TD>
+ <TD CLASS=kwref>string</TD>
+ <TD CLASS=kwdef>
+  Database name or identifier.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword><A ID="kw-username"></A><B>username</B></TD>
+ <TD CLASS=kwref>optional string</TD>
+ <TD CLASS=kwdef>
+  Username to use if authentication is required.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword><A ID="kw-password"></A><B>password</B></TD>
+ <TD CLASS=kwref>optional password</TD>
+ <TD CLASS=kwdef>
+  Password to use if authentication is required.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword><A ID="kw-environment"></A><B>environment</B></TD>
+ <TD CLASS=kwref>optional string list</TD>
+ <TD CLASS=kwdef>
+  Environment variables to set.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>database</TT> module verifies that a database is functioning
+ correctly by actually interacting with the database.  The module
+ connects to the database, and upon connection, &quot;pings&quot; the
+ database to ensure a medium level of functionality.  The <A
+ HREF="cm-process.html"><TT>process</TT></A> module can also be used
+ to ensure that the database processes are running.
+
+ <P>
+
+ A problem is generated if the connection to the database fails or if
+ the database ping fails.
+
+ <P>
+
+ Some databases require environment variables to be set in order for
+ the connection to succeed.  Oracle (but not Oracle Instant Client)
+ requires <TT>ORACLE_HOME</TT> to be set; Ingres requires
+ <TT>II_SYSTEM</TT> to be set; DB2 requires <TT>DB2INSTANCE</TT> to be
+ set.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To monitor an Oracle database:
+    <PRE>
+    module database {
+      type oracle
+      name mydb1
+      username /
+      environment ORACLE_HOME=/opt/local
+    }
+    </PRE>
+
+ <LI>To monitor an Oracle database using an Instant Client installation:
+    <PRE>
+    module database {
+      type oracleic
+      name mydb1
+      username /
+    }
+    </PRE>
+
+ <LI>To monitor an Ingres database:
+    <PRE>
+    module database {
+      type ingres
+      name testdb
+      environment II_SYSTEM=/usr/ingres2
+    }
+    </PRE>
+
+ <LI>To monitor a Postgres database:
+    <PRE>
+    module database {
+      type postgres
+      name horde
+      username imp
+      password notMyPassword
+    }
+    </PRE>
+
+ <LI>To monitor a DB2 database:
+    <PRE>
+    module database {
+      type db2
+      name survivor
+      username db2survivor
+      password pword
+      environment DB2INSTANCE=db2user
+    }
+    </PRE>
+ </OL>
+
+ <HR>
+ <I>$Date: 2006/12/10 01:42:48 $</I><BR>
+ <I>$Revision: 0.11 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-environment">environment</A><BR>
+ <A CLASS="keywords" HREF="#kw-name">name</A><BR>
+ <A CLASS="keywords" HREF="#kw-password">password</A><BR>
+ <A CLASS="keywords" HREF="#kw-type">type</A><BR>
+ <A CLASS="keywords" HREF="#kw-username">username</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

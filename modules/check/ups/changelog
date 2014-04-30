@@ -1,0 +1,65 @@
+----------------------------
+revision 0.15
+date: 2007/02/11 02:07:50;  author: benno;  state: Exp;  lines: +11 -6
+Add snmptimeout
+----------------------------
+revision 0.14
+date: 2006/10/12 03:34:45;  author: benno;  state: Exp;  lines: +7 -5
+Add snmpversion
+----------------------------
+revision 0.13
+date: 2006/06/02 15:35:52;  author: jx2119;  state: Exp;  lines: +6 -6
+When SNMP query fails, module only reports "No Response".
+I changed the message to "No Response to SNMP query", which is more meaningful to the NOC guys.
+----------------------------
+revision 0.12
+date: 2006/05/10 15:03:34;  author: jx2119;  state: Exp;  lines: +26 -8
+Modified seconds to minutes conversion so it is correct for Liebert.
+Added note about the MIB's for APC
+----------------------------
+revision 0.11
+date: 2006/05/09 17:08:51;  author: jx2119;  state: Exp;  lines: +6 -2
+testing
+----------------------------
+revision 0.10
+date: 2005/04/16 21:48:56;  author: benno;  state: Exp;  lines: +9 -10
+Rename from apc
+----------------------------
+revision 0.9
+date: 2004/12/09 22:28:29;  author: medina;  state: Exp;  lines: +35 -7
+check sysObject to determine if device is a Liebert
+----------------------------
+revision 0.8
+date: 2004/09/12 16:01:53;  author: benno;  state: Exp;  lines: +7 -3
+Catch empty responses
+----------------------------
+revision 0.7
+date: 2003/05/09 13:34:24;  author: medina;  state: Exp;  lines: +6 -4
+changed nearly all problems to warnings
+----------------------------
+revision 0.6
+date: 2003/05/06 19:44:26;  author: medina;  state: Exp;  lines: +7 -3
+threw in silly problem check, to differentiate from warning
+----------------------------
+revision 0.5
+date: 2003/03/26 21:04:47;  author: selsky;  state: Exp;  lines: +6 -9
+convert timeticks to minutes
+----------------------------
+revision 0.4
+date: 2003/03/26 20:44:03;  author: medina;  state: Exp;  lines: +5 -20
+removed all the hard work
+
+only two checks now
+----------------------------
+revision 0.3
+date: 2003/03/26 19:57:27;  author: medina;  state: Exp;  lines: +14 -8
+added capacity check
+----------------------------
+revision 0.2
+date: 2003/03/26 16:55:15;  author: medina;  state: Exp;  lines: +25 -8
+added voltage check
+----------------------------
+revision 0.1
+date: 2003/03/26 00:28:02;  author: selsky;  state: Exp;
+Initial revision
+=============================================================================

@@ -1,0 +1,83 @@
+# Sample calllist.cf file.
+
+# First we define how we reach people.
+
+alert via mail {
+  format as full        # This defines the message format (format module)
+  transmit with mail    # This defines how it is sent (transmit module)
+}
+
+alert via page {
+  format as compact
+  transmit with mail
+}
+
+# Next, we define the people who can be notified, the addresses they
+# can be reached at, and the modules used to reach them at those addresses.
+
+person alice {
+  notify alice@somedomain.org via mail
+  notify alice@pager.somedomain.org via page
+}
+
+person bob {
+  notify bob@pager.somedomain.org via page
+  notify bob@somedomain.org otherwise
+}
+
+person carol {
+  notify carol@somedomain.org via mail
+}
+
+person david {
+  notify david@somedomain.org via mail
+}
+
+person elaine {
+  notify elaine@somedomain.org via mail
+}
+
+# In this first call list example, the two recipients are both
+# notified using the mail alert module whenever an alert is to
+# be sent to the sysadmins call list.
+
+call list sysadmins {
+  notifies {
+    alice
+    bob
+  }
+
+  via mail
+  broadcasts to all
+}
+
+# In this next example, the three recipients are on a weekly rotation,
+# with the person on call changing each Monday at noon.  Call list
+# rotation begins after the first alert is sent to the call list, so
+# if the first alert goes out on Wednesday the 5th, alice will receive
+# it, and mom will receive any alerts sent out from noon on Monday the
+# 10th through 11:59am on Monday the 17th.
+
+call list oncall {
+  notifies {
+    alice
+    bob
+    carol
+  }
+
+  via mail
+  rotates using rotation schedule   # Defined in schedule.cf
+}
+
+# This third example is just like the first.  It is provided for
+# an example in schedule.cf.
+
+call list managers {
+  notifies {
+    david
+    elaine
+  }
+  
+  via mail
+  broadcasts to all
+}

@@ -1,0 +1,58 @@
+revision 0.14
+date: 2003/01/29 01:10:08;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.13
+date: 2002/12/31 04:02:05;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.12
+date: 2002/10/28 00:41:42;  author: selsky;  state: Exp;  lines: +43 -70
+Update for Survivor::Check
+----------------------------
+revision 0.11
+date: 2002/08/02 05:52:20;  author: selsky;  state: Exp;  lines: +37 -77
+code cleanup
+----------------------------
+revision 0.10
+date: 2002/06/04 03:46:10;  author: selsky;  state: Exp;  lines: +19 -10
+fix pluralization
+----------------------------
+revision 0.9
+date: 2002/05/26 23:39:56;  author: selsky;  state: Exp;  lines: +61 -47
+port to Survivor.pm
+----------------------------
+revision 0.8
+date: 2002/04/29 23:58:58;  author: selsky;  state: Exp;  lines: +104 -84
+Net::Time doesn't seem to work with our Solaris8 machines
+However, now we don't deal well with machines in different time zones
+----------------------------
+revision 0.7
+date: 2002/04/04 20:56:19;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.6
+date: 2002/04/03 20:40:06;  author: benno;  state: Exp;  lines: +4 -0
+add rcs headers
+----------------------------
+revision 0.5
+date: 2001/12/09 02:12:28;  author: selsky;  state: Exp;  lines: +16 -6
+use tcp or udp
+----------------------------
+revision 0.4
+date: 2001/12/08 23:15:16;  author: selsky;  state: Exp;  lines: +5 -1
+fix host is on time condition
+----------------------------
+revision 0.3
+date: 2001/12/08 23:13:00;  author: selsky;  state: Exp;  lines: +68 -75
+use the time service instead of ntp
+----------------------------
+revision 0.2
+date: 2001/12/06 19:03:44;  author: selsky;  state: Exp;  lines: +29 -5
+not resolving the ntp server is a module misconfig
+make comments more helpful by giving labels
+----------------------------
+revision 0.1
+date: 2001/12/05 23:36:18;  author: selsky;  state: Exp;
+Initial revision
+=============================================================================

@@ -1,0 +1,110 @@
+#!/usr/bin/perl -w
+
+# compact format module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2003/10/06 22:24:31 $
+#
+# Copyright (c) 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Format;
+
+# Create a new Format object.
+
+my $sf = new Survivor::Format();
+
+my $r = $sf->ParseAlert();
+
+if($r == MODEXEC_OK)
+{
+    my @addrlist = ();
+    my $subject = "";
+    my $message = "";
+    my $cls = "";
+    my $hosts = "";
+    
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	localtime($sf->Data("Time"));
+
+    # There can be multiple Modules stored within a RecipientSet, each
+    # of which can have multiple addresses and calllists (used to generate
+    # the addresses).
+    
+    foreach my $x (@{$sf->Data("RecipientSet")}) {
+	# The module name is available at $x->{"name"}
+	push(@addrlist, @{$x->{"addresses"}});
+	$cls = join(',', @{$x->{"calllists"}}, $cls);
+    }
+
+    # Toss the trailing comma
+    chop($cls);
+
+    # There can also be multiple hosts.
+
+    $hosts = join(',', @{$sf->Data("Host")});
+
+    # Generate a subject line
+
+    if(defined $sf->Data("FixSummary") && defined $sf->Data("FixReturnCode"))
+    {
+	$subject = "FIXALERT: ";
+    }
+    else
+    {
+	$subject = "ALERT: ";
+    }
+    
+    $subject .= $sf->Data("Service") . "@" . $hosts;
+
+    if($sf->Data("ReturnCode") == 0)
+    {
+	$subject .= " (cleared)";
+    }
+    
+    # Generate an abbreviate message body consisting of the most
+    # important fields.
+
+    if(defined $sf->Data("FixSummary") && defined $sf->Data("FixReturnCode"))
+    {
+	$message = "Fix result for \"" . $sf->Data("Summary") . "\": "
+	    . $sf->Data("FixSummary") . "\n";
+    }
+    else
+    {
+	$message = $sf->Data("Summary") . "\n";
+    }
+
+    $message .= sprintf("%.2d:%.2d:%.2d %.2d/%.2d/%.2d\n",
+			$hour, $min, $sec, $mon+1, $mday, $year + 1900);
+    
+    # Include the helpfile, even if it might get truncated in transmission.
+    
+    if($sf->Data("ReturnCode") > 0 && defined $sf->Data("HelpFile")
+       && open(HELP, $sf->Data("HelpFile")))
+    {
+	# If open fails, just ignore.  Don't send helpfiles on clear.
+
+	$message .= "\n";
+	
+	while(<HELP>)
+	{
+	    $message .= $_;
+	}
+
+	close HELP;
+    }
+    
+    $sf->GenerateFormattedAlert(\@addrlist, $subject, $message, "no");
+}
+# else we can't really do anything since we don't have any addresses
+# to notify.
+
+exit $r;

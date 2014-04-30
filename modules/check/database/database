@@ -1,0 +1,122 @@
+#!/usr/bin/perl -w
+
+# database check module
+
+# Version: $Revision: 0.7 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2006/12/10 01:40:50 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use DBI;
+
+my %argfmt = ("type" => "string any(postgres,oracle,oracleic,ingres,db2,sybase,mysql,msql)",
+	      "name" => "string",
+	      "username" => "optional string",
+	      "password" => "optional password",
+	      "environment" => "optional string list");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&DatabaseValidate);
+
+my $r = $sc->Exec( \&DatabaseCheck);
+
+exit($r);
+
+sub DatabaseValidate {
+    return(MODEXEC_OK, 0, "Database OK");
+}
+
+sub DatabaseCheck {
+    my $self = shift;
+    my $host = shift;
+
+    # Databases like Ingres, Oracle (but not Oracle Instant Client), and DB2
+    # need to set some environment variables
+    foreach my $e ( $self->Arg('environment') ) {
+	my($a,$b) = split( '=', $e, 2);
+	$ENV{$a} = $b;
+    }
+
+    # Setup the data source name
+    my $dsn;
+
+    if ($self->Arg('type') eq 'ingres') {
+	#&checkHome( $mode, $dbHome );
+	exists $ENV{'II_SYSTEM'} ||
+	    return(MODEXEC_MISCONFIG, 0,
+		   "Environment variable 'II_SYSTEM' must be provided");
+	-d $ENV{'II_SYSTEM'} ||
+	    return(MODEXEC_MISCONFIG, 0,
+		   "Directory '".$ENV{'II_SYSTEM'}."' must exist (II_SYSTEM)");
+	# Note: host *ignored*
+	$dsn = 'DBI:Ingres:'.$self->Arg('name');
+    }
+    elsif ($self->Arg('type') eq 'postgres') {
+	$dsn = 'DBI:Pg:dbname='.$self->Arg('name').';host='.$host;
+    }
+    elsif ($self->Arg('type') eq 'oracle') {
+	exists $ENV{'ORACLE_HOME'} ||
+	    return(MODEXEC_MISCONFIG, 0,
+		   "Environment variable 'ORACLE_HOME' must be provided");
+	-d $ENV{'ORACLE_HOME'} ||
+	    return(MODEXEC_MISCONFIG, 0,
+		   "Directory '".$ENV{'ORACLE_HOME'}."' must exist (ORACLE_HOME)");
+	$dsn = 'DBI:Oracle:host='.$host.';sid='.$self->Arg('name');
+    }
+    elsif ($self->Arg('type') eq 'oracleic') {
+	$dsn = 'DBI:Oracle:host='.$host.';sid='.$self->Arg('name');
+    }
+    elsif ($self->Arg('type') eq 'db2') {
+	exists $ENV{'DB2INSTANCE'} ||
+	    return(MODEXEC_MISCONFIG, 0,
+		   "Environment variable 'DB2INSTANCE' must be provided");
+	# Note: host *ignored*
+	$dsn = 'DBI:DB2:'.$self->Arg('name');
+    }
+    elsif ($self->Arg('type') eq 'sybase') {
+	# Note: sybase requires host to be uppercase
+	# Reported by David Filion
+	$dsn = 'DBI:Sybase:server='.uc($host).';database='.$self->Arg('name');
+    }
+    elsif ($self->Arg('type') eq 'mysql') {
+	$dsn = 'DBI:mysql:database='.$self->Arg('name').';host='.$host;
+    }
+    elsif ($self->Arg('type') eq 'msql') {
+	$dsn = 'DBI:msql:database='.$self->Arg('name').';host='.$host;
+    }
+
+    my $dbh;
+
+    $dbh = DBI->connect( $dsn, $self->Arg('username'),
+			 $self->Arg('password'), { PrintError => 0 } );
+
+    if( ! $dbh ) {
+	return(MODEXEC_PROBLEM, 0,
+	       'Connect failed - '.&cleanErrMsg($DBI::errstr));
+    } elsif( ! $dbh->ping() ) {
+	return(MODEXEC_PROBLEM, 0,
+	       'DB ping failed - '.&cleanErrMsg($DBI::errstr));
+    } else {
+	$dbh->disconnect();
+	return(MODEXEC_OK, 1, "DB ping of '".$self->Arg('name')."' succeeded");
+    }
+}
+
+sub cleanErrMsg {
+    my $err = shift;
+
+    $err =~ s/\n//g;
+
+    return $err;
+}

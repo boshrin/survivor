@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+
+# test format module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2003/10/06 22:23:33 $
+#
+# Copyright (c) 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Format;
+
+# Create a new Format object.
+
+my $sf = new Survivor::Format();
+
+my $r = $sf->ParseAlert();
+
+if($r == MODEXEC_OK)
+{
+    my @addrlist = ();
+    my $subject = "";
+    my $message = "";
+    my $cls = "";
+    my $hosts = "";
+    
+    # There can be multiple Modules stored within a RecipientSet, each
+    # of which can have multiple addresses and calllists (used to generate
+    # the addresses).
+    
+    foreach my $x (@{$sf->Data("RecipientSet")}) {
+	# The module name is available at $x->{"name"}
+	push(@addrlist, @{$x->{"addresses"}});
+	$cls = join(',', @{$x->{"calllists"}}, $cls);
+    }
+
+    # Toss the trailing comma
+    chop($cls);
+
+    # There can also be multiple hosts.
+
+    $hosts = join(',', @{$sf->Data("Host")});
+
+    # Generate a subject line
+
+    $subject = "TEST: " . $sf->Data("Service") . "@" . $hosts;
+
+    # Generate a message body consisting of all the other fields.
+    
+    $message = "Summary: " . $sf->Data("Summary") . "\n";
+    if(defined $sf->Data("HelpFile")) {
+	$message .= "HelpFile: " . $sf->Data("HelpFile") . "\n";
+    }
+    $message .= "Instance: " . $sf->Data("Instance") . "\n";
+    $message .= "Instances: " . $sf->Data("Instances") . "\n";
+    if(defined $sf->Data("FixSummary")) {
+	$message .= "FixSummary: " . $sf->Data("FixSummary") . "\n";
+    }
+    if(defined $sf->Data("FixReturnCode")) {
+	$message .= "FixReturnCode: " . $sf->Data("FixReturnCode") . "\n";
+    }
+    $message .= "ReturnCode: " . $sf->Data("ReturnCode") . "\n";
+    $message .= "Service: " . $sf->Data("Service") . "\n";
+    $message .= "Time: " . $sf->Data("Time") . "\n";
+    $message .= "Token: " . $sf->Data("Token") . "\n";
+
+    $sf->GenerateFormattedAlert(\@addrlist, $subject, $message,
+				$sf->ReplyOK());
+}
+
+exit $r;

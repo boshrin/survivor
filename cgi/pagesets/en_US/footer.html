@@ -1,0 +1,49 @@
+<P>
+
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+<FONT CLASS="navspacer">SURVIVOR</FONT>
+</TD>
+</TR>
+</TABLE>
+@{SET clip=@[AUTHLEVEL clipboard]}
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <FORM NAME="refresh" METHOD="get" ACTION="@{URITOP}">
+ @{URITAGS style=hidden omit=r}
+ <TABLE CLASS="infobar">
+ <TR CLASS="infobar">
+ <TH CLASS="infobar">Pageset</TH>
+ @{IF NOTDEFINED STRING norefresh}
+ <TH CLASS="infobar" COLSPAN=2>Refresh</TH>
+ @{ENDIF}
+ @{IF NUMBER $clip = 1}
+ <TH CLASS="infobar">Clipboards</TH>
+ @{ENDIF}
+ </TR>
+
+ <TR CLASS="infobar">
+ <TD CLASS="infobar">@{PAGESET}</TD>
+ @{IF NOTDEFINED STRING norefresh}
+ <TD CLASS="infobar">
+  Every <INPUT TYPE=text NAME=r SIZE=4 VALUE=@{REFRESH}> seconds
+ </TD>
+ <TD CLASS="infobar">
+  <INPUT TYPE=submit VALUE="Set">
+ </TD>
+ @{ENDIF}
+ @{IF NUMBER $clip = 1}
+ <TD CLASS="infobar"><A HREF="@{URITOP}?file=clipboards.html">View</A></TD>
+ @{ENDIF}
+ </TR>
+ </TABLE>
+ </FORM>
+</TD>
+<TD CLASS="spacer">
+</TD>
+</TR>
+</TABLE>
+
+</BODY>

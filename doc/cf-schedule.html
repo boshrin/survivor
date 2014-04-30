@@ -1,0 +1,1335 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: schedule.cf</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: schedule.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>schedule.cf</TT></A>
+ <LI><A HREF=#schedules>Schedules</A>
+  <UL>
+  <LI><A HREF=#schedules-about>About Schedules</A>
+  <LI><A HREF=#schedules-dependencies>Dependencies</A>
+  <LI><A HREF=#schedules-keywords>Schedule Stanza Keywords</A>
+  <LI><A HREF=#schedules-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#alertplans>Alert Plans</A>
+  <UL>
+  <LI><A HREF=#alertplans-about>About Alert Plans</A>
+  <LI><A HREF=#alertplans-dependencies>Dependencies</A>
+  <LI><A HREF=#alertplans-keywords>Alert Plan Stanza Keywords</A>
+  <LI><A HREF=#alertplans-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#apaliases>Alert Plan Aliases</A>
+  <UL>
+  <LI><A HREF=#apaliases-about>About Alert Plan Aliases</A>
+  <LI><A HREF=#apaliases-dependencies>Dependencies</A>
+  <LI><A HREF=#apaliases-keywords>Alert Plan Alias Stanza Keywords</A>
+  <LI><A HREF=#apaliases-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#rtgroups>Return Groups</A>
+  <UL>
+  <LI><A HREF=#rtgroups-about>About Return Groups</A>
+  <LI><A HREF=#rtgroups-dependencies>Dependencies</A>
+  <LI><A HREF=#rtgroups-keywords>Return Group Stanza Keywords</A>
+  <LI><A HREF=#rtgroups-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#throttle>Alert Throttle</A>
+  <UL>
+  <LI><A HREF=#throttle-about>About Alert Throttle</A>
+  <LI><A HREF=#throttle-dependencies>Dependencies</A>
+  <LI><A HREF=#throttle-keywords>Alert Throttle Stanza Keywords</A>
+  <LI><A HREF=#throttle-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#shift>Alert Shift</A>
+  <UL>
+  <LI><A HREF=#shift-about>About Alert Shift</A>
+  <LI><A HREF=#shift-dependencies>Dependencies</A>
+  <LI><A HREF=#shift-keywords>Alert Shift Stanza Keywords</A>
+  <LI><A HREF=#shift-examples>Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>schedule.cf</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;day> : "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" |
+                "friday" | "saturday"
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+     &lt;number> : [0-9]+
+     &lt;interval> : &lt;number> "second[s]"|"minute[s]"|"hour[s]"|"day[s]"|"week[s]"
+     &lt;time> : [&lt;day>] [0-2][0-9]:[0-5][0-9]
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>schedule.cf</TT> defines <A CLASS=kwlink
+ HREF=#schedules>Schedules</A>, which define periods of time and
+ intervals for that period of time, <A CLASS=kwlink HREF=#alertplans>Alert
+ Plans</A>, which define behaviors for when a <A HREF=cm-about.html>Check</A>
+ returns an error, <A CLASS=kwlink HREF=#apaliases>Alert Plan Aliases</A>,
+ which allow Alert Plans to be reused with a different <A
+ HREF=cf-calllist.html>Call List</A>, <A CLASS=kwlink HREF=#rtgroups>Return
+ Groups</A>, which group together return codes for easier reference,
+ <A CLASS=kwlink HREF=#throttle>Alert Throttle</A>, which restricts the
+ number of alert notifications that can be queued for transmission at one
+ time, and <A CLASS=kwlink HREF=#shift>Alert Shift</A>, which offsets the
+ times in a Schedule definition for use with Alert Plans.
+
+ <P>
+  
+ <A ID="schedules"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Schedules
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>schedule</B> &lt;name> <B>{</B>
+         ([<B>from</B> &lt;time> <B>until</B> &lt;time>] (<B>every</B> &lt;interval> | <B>never</B>) |
+	  <B>at {</B> &lt;time> ... <B>}</B>)
+         [...]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="schedules-about"></A>
+ <H3>About Schedules</H3>
+
+ A <I>schedule</I> stanza defines one or more time period/frequency
+ pairs.  A time period indicates a block of time with fixed start
+ and end points.  When no time period is indicated, all time periods
+ are implied (ie: it is always "now").  A frequency indicates how
+ often whatever is using the Schedule should execute.
+
+ <P>
+
+ If more than one time period/frequency pair is specified in a Schedule,
+ the first time period matched will be used.
+
+ <P>
+
+ Schedules are used to determine when Checks are executed, form
+ the building blocks of Alert Plans, and serve some other purposes.
+
+ <A ID="schedules-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="schedules-keywords"></A>
+ <H3>Schedule Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-schedule"></A>
+  <B>schedule</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Schedule.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-from"></A>
+  <B>from</B> &lt;time> <B>until</B> &lt;time>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a time period during which this Schedule is in effect.
+  The period runs through the last second of the <I>until</I> minute.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-every"></A>
+  <B>every</B> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify a frequency for when this time period is in effect.
+
+  <P>
+
+  Note that frequencies are generally implemented as approximations, so
+  a frequency of every 1 hour beginning at 08:00 when used as a Check
+  Schedule might cause the Check to execute at 08:00, 09:01, 10:02,
+  11:02, 12:03, 13:04, 14:04, 15:05, etc.  <TT>every</TT> Schedules
+  may be expected to drift.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-at"></A>
+  <B>at</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a time period of one or more exact times, with an implied
+  frequency of once per time specified.
+
+  <P>
+
+  Note that care should be taken when using the same <TT>at</TT>
+  Schedule with both a Check and an Alert Plan for the same service.
+  It is possible that an alert notification will transmit before the
+  Check runs, which may produce counterintuitive results.
+  See <A HREF=#shift>Alert Shift</A> for more information.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="schedules-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>First, some example time periods.  These would be specified within
+     a Schedule definition, examples of which appear below.
+     <P>
+
+     <UL>
+     <LI><TT>from 08:30 until 16:59</TT><BR>
+         The time period from 8:30am through (and including) 4:59pm
+	 every day.
+	 <P>
+
+     <LI><TT>from monday 08:00 until friday 16:59</TT><BR>
+         The time period from 8:00am on Monday through 4:59pm on Friday.
+	 Inverting the order is a useful way to specify weekends.
+	 <P>
+
+     <LI><TT>from friday 17:00 until monday 07:59</TT><BR>
+         The time period from 5:00pm Friday through 7:59am Monday.
+	 The reason to end at 7:59 is that the Schedule is in effect
+	 through the end of the time specified, in this case 7:59:59.
+	 This allows another time period to be specified beginning
+	 at 08:00 without conflicting.
+	 <P>
+     </UL>
+     <P>
+
+ <LI>Next, some example frequencies.  These would be specified within
+     a Schedule definition, examples of which follow.
+     <P>
+
+     <UL>
+     <LI><TT>every 30 minutes</TT>
+     <LI><TT>every hour</TT>
+     <LI><TT>never</TT>
+     </UL>
+     <P>
+
+ <LI>A Schedule defining a frequency of every hour from 8:00am until
+     9:59pm.  A Schedule like this can be used to specify when a
+     Check runs, or it can be used within part of an Alert Plan to
+     determine how often alert notifications should be transmitted.
+
+     <PRE>
+     schedule sample1 {
+       from 22:00 until 07:59 never
+       from 08:00 until 21:59 every hour
+     }
+     </PRE>
+
+ <LI>A Schedule defining a frequency of every 15 minutes at all times
+     weekdays, and every 30 minutes on weekends.
+
+     <PRE>
+     schedules sample2 {
+       from saturday 00:00 until sunday 23:59 every 30 minutes
+       every 15 minutes
+     }
+     </PRE>
+     
+ <LI>A Schedule defining an explicit time (an <I>at</I> Schedule) with
+     an implied frequency of <I>once</I>.  A Check using the following
+     Schedule would execute Mondays at 9:30am and every day at 5:30pm.
+
+     <PRE>
+     schedule sample3 {
+       at { monday 09:30 }
+       at { 17:30 }
+     }
+     </PRE>
+
+ <LI>A Schedule to define nights and weekends.
+
+     <PRE>
+     schedule sample4 {
+       from friday 22:00 until monday 07:59 every hour
+       from 22:00 until 07:59 every hour
+     }
+     </PRE>
+ </OL>
+
+ <P>
+  
+ <A ID="alertplans"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Alert Plans
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alertplan</B> &lt;name> <B>{</B>
+         (<B>on return value</B>[<B>s</B>] &lt;number> [...] |
+	  <B>on returngroup</B> &lt;name> |
+	  <B>default</B>) <B>{</B>
+	     [<B>after</B> &lt;number> <B>check failure</B>[<B>s</B>]]
+	     <B>using</B> &lt;name> <B>schedule {</B>
+	         <B>try</B> [&lt;number> <B>time</B>[<B>s</B>]] <B>{</B>
+		     [<B>allow</B> &lt;number> <B>failed host</B>[<B>s</B>] [<B>during</B> &lt;name> <B>schedule</B>]]
+		     (<B>alert</B> &lt;name>
+		      [...]
+		     |<B>attempt fix</B> [<B>if defined</B>]
+		      [<B>tell</B> &lt;name>
+		       [...]])
+		     [<B>flag escalated</B>]
+		 <B>}</B>
+		 [...]
+	     <B>}</B>
+	 <B>}</B>
+         [...]
+	 [<B>notify</B> [<B>using</B> &lt;name> <B>schedule</B>] <B>on clear</B> | <B>do not notify on clear</B>]
+	 [<B>do not clear state on return values</B> <B>{</B> &lt;number> [...] <B>}</B>
+	 |<B>always clear state</B>]
+	 [<B>clear state honors returngroups {</B> &lt;name> [...] <B>}</B>
+	 |<B>clear state honors all returngroups</B>
+	 |<B>clear state ignores returngroups</B>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="alertplan-about"></A>
+ <H3>About Alert Plans</H3>
+
+ An <I>alert plan</I> stanza defines how alert notifications are
+ transmitted and how Fixes are attempted when a Check returns an
+ error.  An Alert Plan consists of one or more <I>return value
+ stanzas</I>, which define actions for specific return values obtained
+ from Checks.
+
+ <A ID="alertplan-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The Call List specified by the <TT>alert</TT> or <TT>tell</TT>
+     keywords must be defined in <A HREF=cf-calllist.html>calllist.cf</A>.
+ <LI>The Schedule specified by the <TT>using</TT> keyword must be
+     defined by a <TT>schedule</TT> stanza before the Alert Plan
+     that uses it is defined.
+ </UL>
+
+ <A ID="alertplan-keywords"></A>
+ <H3>Alert Plan Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alertplan"></A>
+  <B>alertplan</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Alert Plan.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-returnstanza"></A>
+  <B>on return value</B>[<B>s</B>] &lt;number>
+  <P>
+  <B>on returngroup</B> &lt;name>
+  <P>
+  <B>default</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Begin a new return value stanza.  Return value stanzas define actions
+  for specific return values obtained from Checks.  If more than one
+  return value stanza is defined for the same return value, then the
+  first stanza meeting the specified minimum number of check failures
+  (via <A HREF=#kw-after><TT>after <I>n</I> check failures</TT></A>)
+  will be the one used.
+
+  <P>
+
+  Frequently used sets of return values may be defined into
+  <A HREF=#rtgroups>Return Groups</A>, which may be referenced by
+  defining a return value stanza using the <TT>on returngroup</TT>
+  keyword.
+
+  <P>
+  
+  A return value stanza using the <TT>default</TT> keyword matches all
+  return values.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-after"></A>
+  <B>after</B> &lt;number> <B>check failures</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the number of consecutive Check failures that must occur before
+  the return value stanza is in effect.  This is useful to prevent
+  transient failures from generating spurious alerts.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-using"></A>
+  <B>using</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Begin a new schedule stanza.  When the named Schedule is in effect,
+  the try stanzas defined within the schedule stanza will be used.
+  If more than one schedule stanza is defined within the return value
+  stanza, then the first Schedule in effect will be used.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-try"></A>
+  <B>try</B> &lt;number> <B>times</B>
+  <P>
+  <B>try</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Begin a new try stanza.  When a schedule stanza matches, a try stanza
+  defined within it will be selected to determine what actions to take.
+  Each try stanza must contain either an <TT>alert</TT> or an
+  <TT>attempt fix</TT> keyword.
+  
+  <P>
+
+  The try stanza is selected according to the number of alert
+  notifications for the same status that have already been transmitted.
+  A try stanza defined without a number of <TT>times</TT> indicated
+  will match by default if no previous stanza matches.
+
+  <P>
+
+  Defining multiple try stanzas allows an alert notification to escalate.
+
+  <P>
+
+  Note that a status change is not necessarily the same as a problem
+  clearing.  If a status changes from <TT>PROBLEM</TT> to <TT>WARNING</TT>,
+  any escalation will reset, the same as for <TT>PROBLEM</TT> to <TT>OK</TT>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allow"></A>
+  <B>allow</B> &lt;number> <B>failed host</B>[<B>s</B>]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify degraded mode, allowing the specified number of hosts in the
+  same group to fail without triggering an alert notification.  This
+  is useful if a redundant host fails when there is plenty of capacity
+  on the other available hosts.
+
+  <P>
+
+  Hosts are considered redundant when
+  <OL>
+  <LI>The hosts are in the same <A HREF=cf-host.html>Group</A>
+  <LI>The hosts use the same Alert Plan (whether defined via the Check
+      or via the HostClass)
+  </OL>
+  <P>
+
+  When degraded mode is in effect, alert actions for redundant hosts
+  are executed when
+  <OL>
+  <LI>Non-zero return codes are found for at least the specified number
+      of hosts (the return codes need not match)
+  <LI>Each host meets the specified minimum number of Check failures
+      (via <A HREF=#kw-after><TT>after <I>n</I> Check failures</TT></A>)
+  </OL>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-during"></A>
+  <B>during</B> &lt;name> <B>schedule</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify when degraded mode is in effect.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alert"></A>
+  <B>alert</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify which <A HREF=cf-calllist.html>Call List(s)</A> to notify.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-flag"></A>
+  <B>flag escalated</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify at which point the problem is considered escalated.  This is
+  for the <A HREF=sw.html>web interface</A> to know when to call
+  additional attention to a problem.  By default, the second try
+  stanza is the point of escalation for the web interface.
+
+  <P>
+
+  This flag has no bearing on the normal escalation mechanism by
+  which subsequent try stanzas are attempted.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-attempt"></A>
+  <B>attempt fix</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that the predefined Fix for the problem should be attempted.
+  For more information on Fixes, see <A
+  HREF=cf-check.html#fixes><TT>check.cf</TT></A>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-ifdefined"></A>
+  <B>if defined</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that the predefined Fix for the problem should be attempted
+  if one exists, otherwise move to the next alert action and do not
+  generate a misconfiguration error.  This is useful to define
+  Alert Plans that can be used with different Checks regardless of
+  whether or not each Check has a Fix defined.  However, use of this
+  keyword will make it more difficult to detect errors in configuration
+  (ie: when a Fix was intended but not actually defined).
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-tell"></A>
+  <B>tell</B>
+ </TD>
+ <TD CLASS=kwdef>
+  When a Fix is attempted, specify which <A HREF=cf-calllist.html>Call
+  List(s)</A> to notify.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-notify"></A>
+  <B>notify on clear</B>
+  <P>
+  <B>notify using </B>&lt;schedule><B> on clear</B>
+  <P>
+  <B>do not notify on clear</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify when notification is to be sent on a problem clearing (returning
+  to state <TT>OK</TT>).  Whoever was last notified about the problem
+  will receive the clear notification, even if they are no longer on call.
+
+  <P>
+
+  If a Schedule is specified, then notification will only be sent when
+  that Schedule is in effect.  While Schedules require a frequency,
+  frequencies do not make sense for clear notifications, which are
+  transmitted only once.  The scheduler will ignore any frequency
+  specifications in the Schedule, including <I>never</I>.
+
+  <P>
+
+  If a problem is acknowledged or alerts for the service or host are
+  inhibited, then no notification will be transmitted when the problem
+  clears.  If the Check is manually rescheduled and the problem no
+  longer exists, no notification will be sent.
+
+  <P>
+
+  If a clear notification is not transmitted successfully for any
+  reason, it will not be requeued because the no longer valid alert
+  state must be cleared by the scheduler.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-noclear"></A>
+  <B>do not clear state on return values</B>
+  <P>
+  <B>always clear state</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify when return-value dependent state should be cleared.
+  Ordinarily, alert and fix state (including acknowledgements) is
+  cleared when the return value of a Check changes, for example from
+  <TT>WARNING</TT> to <TT>PROBLEM</TT>.  This is equivalent to
+  <TT>always clear state</TT>.
+  <P>
+
+  When return values are specified, state will not be cleared when the
+  return value of a Check changes to or from a return value listed.
+  The exception is if the return value is changing from a specified
+  value to <TT>OK</TT>, in which case the state is always cleared.  
+  <P>
+
+  Note that these keywords do not affect the rules for
+  <TT><A HREF="kw-try">try</A></TT> stanzas.  However, this is subject
+  to change in a future release.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clearrg"></A>
+  <B>clear state honors returngroups</B>
+  <P>
+  <B>clear state honors all returngroups</B>
+  <P>
+  <B>clear state ignores returngroups</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify when return-value dependent state should be cleared.
+  Ordinarily, alert and fix state (including acknowledgements) is
+  cleared when the return value of a check changes, for example from
+  <TT>WARNING</TT> to <TT>PROBLEM</TT>.  This is equivalent to
+  <TT>clear state ignores returngroups</TT>.
+  <P>
+
+  When Return Groups are specified, state will not be cleared when the
+  return value that a Check changes from <I>and</I> to are both members
+  of a specified Return Group.  The exception is if the return value is
+  changing to <TT>OK</TT>, in which case the state is always cleared.
+  <P>
+
+  Note that these keywords do not affect the rules for
+  <TT><A HREF="kw-try">try</A></TT> stanzas.  However, this is subject
+  to change in a future release.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="kw-default-failures"></A>
+ <TABLE BORDER=0>
+ <TR>
+ <TD CLASS=hltitle>
+ default check failures
+ </TD>
+ <TD CLASS=highlight>
+ The default number of Check failures is 1.  In order to increase
+ the readability of the configuration file, the default number of
+ Check failures may be changed outside of an Alert Plan.  The new
+ default will apply to any Alert Plans defined after it, until the
+ end of the file or until the default is changed again.  For example:
+
+ <PRE>
+ # Require all Checks to fail twice before any Alert Plan does anything.
+ default after 2 check failures
+
+ alertplan sample1c {
+   on return values 1 5 {
+     using sample1 schedule {
+       ...
+     }
+   }
+   default {
+     using sample1 schedule {
+       ...
+     }
+   }
+ }
+ </PRE>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ <A ID="kw-default-notify"></A>
+ default notify on clear
+ </TD>
+ <TD CLASS=highlight>
+ The default notify on clear state is to not notify on clear.
+ To avoid having to specify <TT>notify on clear</TT> for each
+ Alert Plan, the default state can be changed outside of an
+ alert plan stanza.  The new default will apply to Alert Plans
+ defined after it, until the end of the file or until the default is
+ changed again.  For example:
+
+ <PRE>
+ # Notify on clear for all subsequent alertplans
+ default notify using sample1 schedule on clear
+ </PRE>
+
+ To restore the default back to no notification, or to override
+ notification within an Alert Plan, use <TT>do not notify</TT>
+ instead.  For example:
+
+ <PRE>
+ alertplan sample1d {
+   default {
+     ...
+   }
+   do not notify on clear
+ }
+ 
+ # Or turn it off for all subsequent Alert Plans
+ default do not notify on clear
+ </PRE>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ <A ID="kw-default-noclear"></A>
+ default do not clear state
+ </TD>
+ <TD CLASS=highlight>
+ The default is to clear state whenever the return value of a Check
+ changes.  To avoid having to specify <TT>do not clear state</TT> for
+ each Alert Plan, the default can be changed outside of an Alert Plan
+ stanza.  The new default will apply to Alert Plans defined after it,
+ until the end of the file or until the default is changed again.  For
+ example:
+
+ <PRE>
+ # Don't clear state if a module is misconfigured
+ default do not clear state on return values { 4 }
+ </PRE>
+
+ To restore the default back to always clearing state, or to override
+ clearing state within an Alert Plan, use <TT>always clear state</TT>
+ instead.  For example:
+
+ <PRE>
+ alertplan sample1e {
+   default {
+     ...
+   }
+   always clear state
+ }
+ 
+ # Or always clear state for all subsequent Alert Plans
+ default always clear state
+ </PRE>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ <A ID="kw-default-clearrg"></A>
+ default clear state honors returngroups
+ </TD>
+ <TD CLASS=highlight>
+ The default is to clear state whenever the return value of a Check
+ changes.  To avoid having to specify <TT>clear state honors
+ returngroups</TT> for each Alert Plan, the default can be changed
+ outside of an Alert Plan stanza.  The new default will apply to Alert
+ Plans defined after it, until the end of the file or until the
+ default is changed again.  For example:
+
+ <PRE>
+ # define a returngroup
+ returngroup problem { 1 5 }
+ 
+ # PROBLEM and TIMEDOUT are basically the same, so don't clear state
+ # if the return code swaps between them
+ default clear state honors returngroups { problem }
+ </PRE>
+
+ To not clear state when a return code swaps within any Return Group
+ defined so far:
+
+ <PRE>
+ default clear state honors all returngroups
+ </PRE>
+ 
+ To restore the default back to always clearing state, or to override
+ clearing state within an Alert Plan, use
+ <TT>clear state ignores returngroups</TT> instead.  For example:
+
+ <PRE>
+ alertplan sample1f {
+   default {
+     ...
+   }
+   clear state ignores returngroups
+ }
+ 
+ # Or always clear state for all subsequent alertplans
+ default clear state ignores returngroups
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <P>
+
+ <A ID="alertplans-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>First, the basic structure of an Alert Plan consists of one or
+     more return value stanzas, which define actions according to
+     the return values obtained from the Check modules.  In the
+     following example, three different return values stanzas are
+     specified: one for return values 1 and 5 (generally interpreted
+     as <TT>PROBLEM</TT> and <TT>TIMED OUT</TT>), one for return
+     value 4 (<TT>MISCONFIGURATION</TT>), and one for any other
+     return value:
+
+     <PRE>
+     alertplan sample1 {
+       on return values 1 5 {
+         ...
+       }
+       on return value 4 {
+         ...
+       }
+       default {
+         ...
+       }
+     }
+     </PRE>
+
+ <LI>Notification on clear is also set at the top level of an Alert Plan.
+     In this example, when this Alert Plan is used and when the
+     <TT>sample1</TT> Schedule is in effect, notification will be sent
+     when a problem clears:
+     
+     <PRE>
+     alertplan sample2 {
+       on return values 1 5 {
+         ...
+       }
+       default {
+         ...
+       }
+       notify using sample1 schedule on clear
+     }
+     </PRE>
+
+ <LI>Each return value stanza holds instructions on when to transmit
+     alert notifications.  In this example, two consecutive Check
+     failures are required before any requested alert actions are
+     taken, and then only if the <TT>sample1</TT> Schedule is in
+     effect.
+
+     <PRE>
+     alertplan sample3 {
+       on return values 1 5 {
+         after 2 check failures
+
+	 using sample1 schedule {
+	   ...
+	 }
+       }
+       default {
+         after 2 check failures
+
+	 using sample1 schedule {
+	   ...
+	 }
+       }
+     }
+     </PRE>
+
+ <LI>This next example illustrates the use of multiple try stanzas
+     to handle escalations:
+
+     <PRE>
+     alertplan sample4 {
+       default {
+         using sample1 schedule {
+	   try 2 times {
+	     # Alert the first level response list not more than two times
+	     # after the check has failed twice during the sample1 schedule.
+	     alert oncall-list
+	   }
+	   try 2 times {
+	     # Consider the alert escalated and alert the second level
+	     # response list not more than two times since the first level
+	     # response list has not cleared the problem.
+	     alert backup-list
+	     alert oncall-list
+	   }
+	   try {
+	     # Consider the alert escalated and alert the oncall managers
+	     # until the problem clears.
+	     alert oncall-list
+	     alert backup-list
+	     alert managers
+	     flag escalated
+	   }
+	 }
+       }
+     }
+     </PRE>
+
+ <LI>This example tries the predefined Fix before escalating:
+ 
+     <PRE>
+     alertplan sample5 {
+       default {
+         using sample1 schedule {
+	   try 1 time {
+	     attempt fix
+	     tell oncall-list
+	   }
+	   try {
+	     alert oncall-list
+	   }
+	 }
+       }
+     }
+     </PRE>
+ </OL>
+
+ <P>
+
+ <A ID="apaliases"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Alert Plan Aliases
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alias</B> &lt;name> <B>to</B> &lt;name> (<B>replacing</B> &lt;name> <B>with</B> &lt;name>
+                            |<B>adding</B> &lt;name>)
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="apaliases-about"></A>
+ <H3>About Alert Plan Aliases</H3>
+
+ An Alert Plan Alias duplicates an Alert Plan, but replaces references
+ to one of its Call Lists with another, or adds a Call List to the
+ source's set of Call Lists.  Currently, only one Call List may be
+ replaced or added in an Alert Plan Alias, although an Alias can be
+ aliased.  Future releases may permit multiple substitutions or
+ additions within the same Alias.
+
+ <P>
+
+ <A ID="apaliases-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>An Alert Plan must be defined before it can be aliased.
+ </UL>
+
+ <A ID="apaliases-keywords"></A>
+ <H3>Alert Plan Alias Stanza Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alias"></A>
+  <B>alias</B> &lt;name> <B>to</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Define a new Alert Plan Alias.  <TT>alias</TT> specifies the
+   Alert Plan to copy, <TT>to</TT> specifies the name of the new
+   Alert Plan.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-replacing"></A>
+  <B>replacing</B> &lt;name> <B>with</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Change the occurrences of the Call List specified by <TT>replacing</TT>
+   to the Call List specified by <TT>with</TT> in the new Alert Plan.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-with"></A>
+  <B>adding</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Add the Call List specified to the new Alert Plan.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="apaliases-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, the <TT>sample4</TT> Alert Plan defined above
+     is reused, but <TT>net-oncall</TT> becomes the first Call List,
+     instead of <TT>oncall-list</TT>.
+
+     <PRE>
+     alias sample4 to sample6 replacing oncall-list with net-oncall
+     </PRE>
+
+ <LI>In this example, <TT>net-oncall</TT> is added in addition to
+     <TT>oncall-list</TT> (and all the others) rather than replacing it.
+
+     <PRE>
+     alias sample4 to sample7 adding net-oncall
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="rtgroups"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Return Groups
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>returngroup</B> &lt;name> <B>{</B> &lt;number> <B>... }</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="rtgroups-about"></A>
+ <H3>About Return Groups</H3>
+
+ To avoid having to specify similar sets of return codes over and
+ over again, Return Groups can be defined and then used within
+ Alert Plans.
+
+ <P>
+
+ <A ID="rtgroups-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="rtgroups-keywords"></A>
+ <H3>Return Group Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-returngroup"></A>
+  <B>returngroup</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+   Define a new Return Group, consisting of the return codes specified.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="returngroup-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, return codes 1 and 5 are defined into one
+     Return Group, which is then used in a simple Alert Plan.
+
+     <PRE>
+     returngroup problem { 1 5 }
+
+     alertplan simple {
+       on returngroup problem {
+         using halfhourly schedule
+	 try { alert rotating }
+       }
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="throttle"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Alert Throttle
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>throttle</B> &lt;number>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="throttle-about"></A>
+ <H3>About Alert Throttle</H3>
+
+ Alert Throttle restricts the number of alert notifications that may
+ be queued per minute.  Any alert notifications that have not been
+ queued when the throttle value is reached will be queued (up to the
+ throttle value) at the next scheduler run.
+
+ <P>
+
+ If the <TT>throttle</TT> keyword is not specified in
+ <TT>schedule.cf</TT>, the default value of 10 will be used.
+
+ <P>
+
+ If an Alert Plan specified that two or more Call Lists are to be
+ notified, that is considered one "logical" alert notification for
+ purposes of calculating the Alert Throttle.
+
+ <P>
+
+ If a clear alert notification is not queued because the Alert Throttle
+ has been reached, that alert will <I>not</I> be requeued because the
+ no longer valid alert state must be cleared by the scheduler.
+
+ <P>
+
+ <A ID="throttle-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="throttle-keywords"></A>
+ <H3>Alert Throttle Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-throttle"></A>
+  <B>throttle</B> &lt;number>
+ </TD>
+ <TD CLASS=kwdef>
+   Set the Alert Throttle to the specified number of messages per
+   minute.  If a value of 0 is specified, no throttling is performed.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="throttle-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, no more than two alert notifications per minute
+     are permitted:
+
+     <PRE>
+     throttle 2
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="shift"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Alert Shift
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>alert shift</B> &lt;number> &lt;interval>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="shift-about"></A>
+ <H3>About Alert Shift</H3>
+
+ Alert Shift offsets all Schedules used in any Alert Plan by the
+ amount of time specified.  (The Schedules are unmodified for Check
+ purposes.)  This is useful to avoid situations where an alert
+ notification is executed before the Check status it has been
+ examining has been updated, and is exceptionally useful
+ for <TT>at</TT> Schedules.
+
+ <P>
+
+ <A ID="shift-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="shift-keywords"></A>
+ <H3>Alert Shift Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-shift"></A>
+  <B>alert shift</B> &lt;number> &lt;interval>
+ </TD>
+ <TD CLASS=kwdef>
+   Set the Alert Shift to the interval specified.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="shift-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, Checks using the <TT>sample1</TT> Schedule will
+     execute at 9:30am, while Alert Plans using the same Schedule will
+     execute at 9:32am.
+
+     <PRE>
+     alert shift 2 minutes
+     
+     schedule sample1 {
+       at { 09:30 }
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ Next: <A HREF=cf-host.html><TT>host.cf</TT></A>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 14:08:11 $</I><BR>
+ <I>$Revision: 0.15 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-after>after</A><BR>
+ <A CLASS="keywords" HREF=#kw-alert>alert</A><BR>
+ <A CLASS="keywords" HREF=#kw-shift>alert shift</A><BR>
+ <A CLASS="keywords" HREF=#kw-alertplan>alertplan</A><BR>
+ <A CLASS="keywords" HREF=#kw-alias>alias</A><BR>
+ <A CLASS="keywords" HREF=#kw-allow>allow</A><BR>
+ <A CLASS="keywords" HREF=#kw-noclear>always clear state</A><BR>
+ <A CLASS="keywords" HREF=#kw-at>at</A><BR>
+ <A CLASS="keywords" HREF=#kw-attempt>attempt fix</A><BR>
+ <A CLASS="keywords" HREF=#kw-clearrg>clear state honors</A><BR>
+ <A CLASS="keywords" HREF=#kw-clearrg>clear state ignores</A><BR>
+ <A CLASS="keywords" HREF=#kw-returnstanza>default</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-failures>default check failures</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-noclear>default do not clear state</A><BR>
+ <A CLASS="keywords" HREF=#kw-default-notify>default notify on clear</A><BR>
+ <A CLASS="keywords" HREF=#kw-noclear>do not clear state</A><BR>
+ <A CLASS="keywords" HREF=#kw-notify>do not notify on clear</A><BR>
+ <A CLASS="keywords" HREF=#kw-during>during</A><BR>
+ <A CLASS="keywords" HREF=#kw-every>every</A><BR>
+ <A CLASS="keywords" HREF=#kw-flag>flag escalated</A><BR>
+ <A CLASS="keywords" HREF=#kw-from>from</A><BR>
+ <A CLASS="keywords" HREF=#kw-ifdefined>if defined</A><BR>
+ <A CLASS="keywords" HREF=#kw-notify>notify on clear</A><BR>
+ <A CLASS="keywords" HREF=#kw-returngroup>returngroup</A><BR>
+ <A CLASS="keywords" HREF=#kw-returnstanza>on return value</A><BR>
+ <A CLASS="keywords" HREF=#kw-returnstanza>on returngroup</A><BR>
+ <A CLASS="keywords" HREF=#kw-schedule>schedule</A><BR>
+ <A CLASS="keywords" HREF=#kw-tell>tell</A><BR>
+ <A CLASS="keywords" HREF=#kw-throttle>throttle</A><BR>
+ <A CLASS="keywords" HREF=#kw-try>try</A><BR>
+ <A CLASS="keywords" HREF=#kw-from>until</A><BR>
+ <A CLASS="keywords" HREF=#kw-using>using</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

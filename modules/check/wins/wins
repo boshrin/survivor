@@ -1,0 +1,65 @@
+#! /usr/bin/perl -w
+
+# wins check module
+
+# Version: $Revision: 0.5 $
+# Author: Matt Selsky <selsky@columbia.edu>
+#   (Based on monitor originally written for Mon monitoring system)
+# Date: $Date: 2003/01/29 01:32:24 $
+
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("name" => "string");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&WinsValidate);
+
+my $NMBLOOKUP = $sc->Which('nmblookup');
+unless(defined $NMBLOOKUP) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, 'nmblookup executable not found');
+}
+
+my $r = $sc->Exec( \&WinsCheck);
+
+exit($r);
+
+sub WinsValidate {
+    return(MODEXEC_OK, 0, "Wins OK");
+}
+
+sub WinsCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $name = $self->Arg('name');
+
+    my $ok;
+    open(NMB, "$NMBLOOKUP -R -U $host $name 2>&1|");
+
+    my $line;
+    while( defined($line = <NMB>) ) {
+        chomp $line;
+        if( $line =~ /\s+$name<00>$/ ) {
+            $ok = 1;
+            last;
+        }
+    }
+
+    close(NMB);
+
+    if(defined $ok ) {
+	return(MODEXEC_OK, 1, "NetBIOS name '$name' found");
+    } else {
+	return(MODEXEC_PROBLEM, 0, "NetBIOS name '$name' not found");
+    }
+}

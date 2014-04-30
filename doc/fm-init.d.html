@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Init.D Fix Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>init.d</TT> Fix Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>init.d</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>init.d</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="fix"><A HREF="fm-about.html">fix</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module init.d {</B>
+       <B>service</B> &lt;string>
+       [<B>service</B> ...]
+       [<B>stop</B> &lt;boolean>]
+       [<B>order</B> &lt;string>]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-service"></A><B>service</B></TD>
+ <TD CLASS=kwref>string list</TD>
+ <TD CLASS=kwdef>
+   The names of the <TT>init.d</TT> scripts to run.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-stop"></A><B>stop</B></TD>
+ <TD CLASS=kwref>optional boolean, default is yes</TD>
+ <TD CLASS=kwdef>
+   Whether to try stopping the service(s) before starting.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-order"></A><B>order</B></TD>
+ <TD CLASS=kwref>optional string, one of "fifo" or "filo", default
+   is "fifo"</TD>
+ <TD CLASS=kwdef>
+   If more than one <I>service</I> is provided, and <I>stop</I> is
+   true, the order to execute the scripts in when starting, as compared
+   to stopping.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>init.d</TT> module runs scripts under <TT>/etc/init.d</TT> in
+ an attempt to restart failed services.  The module can optionally
+ try stopping the service before restarting, and can run multiple
+ scripts in series.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, <TT>/etc/init.d/syslogd start</TT> will be run when
+     this fix is executed:
+     <PRE>
+     module init.d {
+       service  syslogd
+       stop     no
+     }
+     </PRE>
+
+ <LI>In this example, the sequence run will be
+     <OL>
+     <LI><TT>/etc/init.d/init.d1 stop</TT>
+     <LI><TT>/etc/init.d/init.d2 stop</TT>
+     <LI><TT>/etc/init.d/init.d2 start</TT>
+     <LI><TT>/etc/init.d/init.d1 start</TT>
+     </OL>
+     <PRE>
+     module init.d {
+       service  init.d1
+       service  init.d2
+       order    filo
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 22:39:20 $</I><BR>
+ <I>$Revision: 0.5 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-order">order</A><BR>
+ <A CLASS="keywords" HREF="#kw-service">service</A><BR>
+ <A CLASS="keywords" HREF="#kw-stop">stop</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

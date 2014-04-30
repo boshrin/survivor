@@ -1,0 +1,73 @@
+# Common Makefile for Survivor
+# @configure_input@
+
+# Version: $Revision: 0.19 $
+# Date: $Date: 2006/10/15 14:19:55 $
+#
+# Copyright (c) 2003 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Set the paths to the source
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# Set the C++ compiler
+CCC=@CXX@
+
+# Set up C++ flags.  For simplicity in subdirectory Makefiles,
+# relative paths to include/ are provided here.
+CCFLAGS=-I../@srcdir@/include -I../include @CXXFLAGS@ @DEFS@
+
+# ldflags useful to all components
+# -lsrv must be incorporated before and after -lparsexml because of a problem
+# with gcc evaluating mutual dependencies 
+CORELDFLAGS=-L../libsrv -L../libparsexml -L../libdebug -lsrv -lparsexml -lsrv -ldebug @LEXLIB@ @LDFLAGS@ @LIBNSL@ @LIBINTL@ @LIBTHREADCORE@
+
+# Core libs for dependencies
+CORELIBS=../libdebug/libdebug.a ../libparsexml/libparsexml.a ../libsrv/libsrv.a
+
+# and ldflags useful to some components
+NETLDFLAGS=@LIBSOCKET@
+
+# and ldflags for threaded components
+# Note we must use posix threads on Solaris since Solaris threads fork()
+# semantics are different (we would need to use fork1() instead)
+THREADLDFLAGS=-lpthread @LIBRT@
+
+# For Check Modules, if they so choose
+CMCCFLAGS=-I../../../@srcdir@/include -I../../../include
+CMLDFLAGS=-L../../../libsrv -L../../../libparsexml -L../../../libdebug -L../../../libcm -lcm
+
+# Ranlib, for platforms that require it
+RANLIB=@RANLIB@
+
+# Use the lex program we found
+LEX=@LEX@
+
+# If we're using SSL
+SSLCCFLAGS=@SSL_CCFLAGS@
+SSLLDFLAGS=@SSL_LDFLAGS@
+
+# Install directories
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+# Defaults for the protocol module.
+# XXX These should be set by configure in config.H
+# The page the protocol module will try to retrieve for HTTP checking
+HTTPCHECK=-DHTTP_GET=\"/icons/folder.gif\"
+# The return address the protocol module will send for SMTP checking
+SMTPCHECK=@INST_USER@@@HOSTNAME@
+
+# Linux (gnu make) requires an explicit .C.o rule
+# Solaris (ccs make) does not require this rule, although it is now
+# useful with VPATH
+
+.C.o:
+	$(CCC) -c $(CCFLAGS) $< -o $@
+
+.cc.o:
+	$(CCC) -c $(CCFLAGS) $< -o $@

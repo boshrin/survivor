@@ -1,0 +1,1439 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: sw Specification</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: sw Specification</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About the Web Interface</A>
+  <UL>
+  <LI><A HREF=#flagvstag>Flags vs Tags</A>
+  </UL>
+ <LI><A HREF=#query>Query Specification</A>
+ <LI><A HREF=#pagefilters>Page Filters</A>
+  <UL>
+  <LI><A HREF=#pagesets>PageSets</A>
+  <LI><A HREF=#entrypoints>Entry Points</A>
+  <LI><A HREF=#filtering>Page Filtering</A>
+  <LI><A HREF=#keywords>Page Filter Keywords (Tags)</A>
+  <LI><A HREF=#examples>Examples</A>
+  </UL>
+ </UL>
+ 
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About the Web Interface
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+ 
+  sw[?&lt;flag>=&amp;lt;value>[&amp;&lt;flag>=&lt;value>[...]]]
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ The web interface is used to provide read-only and read-write access
+ to the survivor state.  The interface provides access to all
+ configured instances, and provides limited additional functionality.
+
+ <P>
+ 
+ <A ID="flagvstag"></A>
+ <H3>Flags vs Tags</H3>
+
+ <I>Flags</I> are the options passed as part of an <TT>HTTP</TT>
+ request.  Generally speaking, no state is maintained except in
+ Clipboards, and so URLs may be constructed of any appropriate flags.
+
+ <P>
+
+ <I>Tags</I> are commands delimited by <TT>@{}</TT> in pages delivered
+ by <TT>sw</TT>.  Tags are processed as the page is delivered, during
+ this processing the values of any provided flags may be analyzed.
+
+ <P>
+ 
+ <A ID="query"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Query Specification
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>sw</TT> generally accepts flags via both <TT>HTTP GET</TT> and
+ <TT>HTTP POST</TT>.  <I>Required Authorization</I> indicates the
+ minimum authorization in an already established session for the
+ requested flag to be processed.  <I>Multiple Values Permitted</I>
+ indicates that the flag may be provided more than once.
+ 
+ <P>
+
+ Flag processing, with limited exceptions, is driven by the page
+ being delivered.  Flags provided but not required are ignored.
+ 
+ <P>
+
+ <TABLE>
+ <TR>
+  <TH CLASS="default">Flag</TH>
+  <TH CLASS="default">Definition</TH>
+  <TH CLASS="default">Required Authorization</TH>
+  <TH CLASS="default">Multiple Values Permitted?</TH>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>a</TT></TD>
+  <TD CLASS="default">
+   Action to perform.  Only the first unique characters are significant.
+   Valid actions apply over a service specified by <TT>s</TT>, a host
+   specified by <TT>h</TT>, a hostclass specified by <TT>hc</TT>, and/or
+   service@host pairs specified by <TT>sh</TT>, and include
+    <UL>
+    <LI><TT>acknowledge</TT>
+    <LI><TT>check</TT>
+    <LI><TT>escalate</TT>
+    <LI><TT>inhibit</TT>
+    <LI><TT>reschedule</TT>
+    <LI><TT>unacknowledge</TT>
+    <LI><TT>uninhibit</TT>
+    </UL>
+   After an action is performed, the client will be redirected back to
+   the original URI, minus any action related flags.
+  </TD>
+  <TD CLASS="default">rw</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>ca</TT></TD>
+  <TD CLASS="default">
+   Clipboard action to perform.  Only the first unique characters are
+   significant.  Valid actions apply over the clipboard specified
+   by <TT>cn</TT>, and include
+    <UL>
+    <LI><TT>add*</TT>
+    <LI><TT>clear</TT>
+    <LI><TT>delete*</TT>
+    <LI><TT>save</TT>
+    <LI><TT>send</TT>
+    </UL>
+   After an action is performed, the client will be redirected back to
+   the original URI, minus any action related flags.
+  </TD>
+  <TD CLASS="default">
+   clipboard<BR>
+   (* requires admin)
+  </TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>cc</TT></TD>
+  <TD CLASS="default">
+   Contents for clipboard actions (<TT>ca</TT>).
+  </TD>
+  <TD CLASS="default">clipboard</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>ce</TT></TD>
+  <TD CLASS="default">
+   Clipboard sender email contact.
+  </TD>
+  <TD CLASS="default">clipboard</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>cn</TT></TD>
+  <TD CLASS="default">
+   Clipboard name for clipboard actions (<TT>ca</TT>).
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>cmt</TT></TD>
+  <TD CLASS="default">
+   Comment for actions (<TT>a</TT>).
+  </TD>
+  <TD CLASS="default">rw</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>cp</TT></TD>
+  <TD CLASS="default">
+   Clipboard sender phone contact.
+  </TD>
+  <TD CLASS="default">clipboard</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>cti</TT></TD>
+  <TD CLASS="default">
+   Clipboard individual recipient.
+  </TD>
+  <TD CLASS="default">clipboard</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>ctl</TT></TD>
+  <TD CLASS="default">
+   Clipboard CallList recipient.
+  </TD>
+  <TD CLASS="default">clipboard</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>error</TT></TD>
+  <TD CLASS="default">
+   An error message from the previous transaction.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>file</TT></TD>
+  <TD CLASS="default">
+   File to filter and deliver from the current PageSet.
+   <TT>.in</TT> is appended to the requested filename, which may
+   not contain slashes (<TT>/</TT>).
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>hc</TT></TD>
+  <TD CLASS="default">
+   Specify a HostClass, as defined in the current instance's
+   <A HREF="cf-host.html"><TT>host.cf</TT></A>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">Yes</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>h</TT></TD>
+  <TD CLASS="default">
+   Host name to use, as defined in <A HREF="cf-host.html"><TT>host.cf</TT></A>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">Yes</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>i</TT></TD>
+  <TD CLASS="default">
+   Instance to use, as defined in <A
+   HREF=cf-instance.html><TT>instance.cf</TT></A>.  All operations
+   other than Clipboard actions require an instance.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>info</TT></TD>
+  <TD CLASS="default">
+   An informational message from the previous transaction.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>l</TT></TD>
+  <TD CLASS="default">
+   Request login (if value is <TT>1</TT>) or logout (if value is
+   <TT>0</TT>).  After a login or logout operation is completed,
+   the client will be redirected to the original URI requested,
+   minus the <TT>l</TT> flag.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>pageset</TT></TD>
+  <TD CLASS="default">
+   PageSet to use, as found in the <A HREF=cf-cgi.html#kw-srcdir>srcdir</A>
+   directory specified by <TT>cgi.cf</TT>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>r</TT></TD>
+  <TD CLASS="default">
+   Page refresh interval, in seconds.  If not specified, the default
+   value is 600.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD> 
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>ret</TT></TD>
+  <TD CLASS="default">
+   After an action (specified by the <TT>a</TT> flag) is performed,
+   return the browser to the address provided.
+  </TD>
+  <TD CLASS="default">rw</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>reverse</TT></TD>
+  <TD CLASS="default">
+   For report module execution, process the most recent history records
+   first.  This will result in more efficient performance when the
+   desired history is recent.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>rm</TT></TD>
+  <TD CLASS="default">
+   Report module to execute.  The module name may not contain slashes
+   (<TT>/</TT>).
+  </TD>
+  <TD CLASS="default">exec</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+
+ <TR>
+  <TD CLASS="default"><TT>s</TT></TD>
+  <TD CLASS="default">
+   Service (check) name to use, as defined in
+   <A HREF="cf-check.html"><TT>check.cf</TT></A>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">Yes</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>sh</TT></TD>
+  <TD CLASS="default">
+   Service (check) name and host name to use, separated by an <TT>@</TT>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">Yes</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>status</TT></TD>
+  <TD CLASS="default">
+   Status information to obtain.  The reply will be a <A
+   HREF="survivor.dtd">SurvivorStatus</A> document.  Valid status
+   requests include
+    <UL>
+    <LI><TT>all</TT>: Obtain all available information.
+    </UL>
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>style</TT></TD>
+  <TD CLASS="default">
+   For report module execution, the output style.  Valid styles include
+   <TT>html</TT> and <TT>text</TT>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tfile</TT></TD>
+  <TD CLASS="default">
+   File to deliver (unfiltered) from temporary file directory.  The file
+   name may not contain slashes (<TT>/</TT>).
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tmf</TT></TD>
+  <TD CLASS="default">
+   Month portion of <I>from</I> time specification, from 1 through 12.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tdf</TT></TD>
+  <TD CLASS="default">
+   Day portion of <I>from</I> time specification, valued 1 through 31.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tyf</TT></TD>
+  <TD CLASS="default">
+   Year portion of <I>from</I> time specification, as a four digit number.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>thf</TT></TD>
+  <TD CLASS="default">
+   Hour portion of <I>from</I> time specification, from 0 through 23.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tnf</TT></TD>
+  <TD CLASS="default">
+   Minute portion of <I>from</I> time specification, from 0 through 59.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tmu</TT></TD>
+  <TD CLASS="default">
+   Month portion of <I>until</I> time specification, from 1 through 12.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tdu</TT></TD>
+  <TD CLASS="default">
+   Day portion of <I>until</I> time specification, valued 1 through 31.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tyu</TT></TD>
+  <TD CLASS="default">
+   Year portion of <I>until</I> time specification, as a four digit number.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>thu</TT></TD>
+  <TD CLASS="default">
+   Hour portion of <I>until</I> time specification, from 0 through 23.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>tnu</TT></TD>
+  <TD CLASS="default">
+   Minute portion of <I>until</I> time specification, from 0 through 59.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>vf</TT></TD>
+  <TD CLASS="default">
+   Specify a view flag.  Valid view flags include
+    <UL>
+    <LI><TT>error</TT>: Show by outstanding error
+    <LI><TT>addressed</TT>: Show inhibited and acknowledged
+    <LI><TT>escalated</TT>: Show escalated
+    </UL>
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>vt</TT></TD>
+  <TD CLASS="default">
+   Specify a view type.  Valid types include
+    <UL>
+    <LI><TT>grid</TT>: Show service@host information in a grid fashion.
+    <LI><TT>summary</TT>: Show a summary of service@host information as
+     one column.
+    </UL>
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="default"><TT>which</TT></TD>
+  <TD CLASS="default">
+   For report module execution, which data to process.  Valid options
+   include <TT>alert</TT>, <TT>check</TT>, <TT>command</TT>, and <TT>fix</TT>.
+  </TD>
+  <TD CLASS="default">None</TD>
+  <TD CLASS="default">No</TD>
+ </TR>
+ </TABLE>
+ 
+ <P>
+ 
+ <A ID="pagefilters"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Page Filters
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="pagesets"></A>
+ <H3>PageSets</H3>
+
+ PageSets are collections of source files that <TT>sw</TT> reads and
+ processes to deliver content.  PageSets are intended to allow
+ multiple customizations to exist concurrently.  For example PageSets
+ can exist for different languages, or for views customized for
+ specific audiences (operators, administrators, managers).
+
+ <P>
+
+ <TT>sw</TT> will only use one PageSet per transaction.
+
+ <OL>
+ <LI>If a <TT>pageset</TT> flag is provided, that PageSet will be
+     used if found.
+ <LI>Otherwise, the <A HREF=cf-cgi.html#kw-pageset>pageset</A> specified
+     by <TT>cgi.cf</TT> will be used.
+ </OL>
+ 
+ <A ID="entrypoints"></A>
+ <H3>Entry Points</H3>
+
+ <OL>
+ <LI>If no file is specified in the query string, <TT>sw</TT>
+     will retrieve the page <TT>index.html.in</TT> from the
+     current PageSet.
+ </OL>
+ 
+ <A ID="filtering"></A>
+ <H3>Page Filtering</H3>
+
+ <TT>sw</TT> delivers each requested page by looking for the file
+ <TT>$<A HREF=cf-cgi.html#kw-srcdir>srcdir</A>/$pageset/$file.in</TT>.
+ Tags may be embedded within the page, and begin with <TT>@{</TT> and
+ end with <TT>}</TT>.  The contents of each tag are described below.
+
+ <P>
+
+ Variables may be referenced anywhere in a tag as <TT>$varname</TT>.
+ Variables are case sensitive, and are evaluated before the tag is
+ processed.
+
+ <P>
+
+ If <TT>#</TT> is the first character of a tag, the tag is ignored.
+ For example, <TT>@{# This is a comment}</TT>.
+ 
+ <A ID="keyword"></A>
+ <H3>Page Filter Keywords (Tags)</H3>
+
+ When tags are processed, their results are incorporated into the
+ document in place of the tag.  Unless otherwise noted, tags do not
+ require any special privilege to execute.
+
+ <P>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alertplan"></A>
+  <B>ALERTPLAN</B> host=&lt;host> service=&lt;service>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the name of the AlertPlan used by <I>service</I>@<I>host</I>.
+
+  <P>
+
+  Example: <TT>@{ALERTPLAN host=snoopy service=ping}</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-alertstatus"></A>
+  <B>ALERTSTATUS</B> type=&lt;type><BR>
+  [ host=&lt;host> ]<BR>
+  [ service=&lt;service> ]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate alert status information of the specifed <I>type</I>:
+
+  <UL>
+  <LI><TT>acknowledged</TT><BR>
+      If <I>service</I>@<I>host</I> is currently inhibited, incorporate
+      who inhibited it.
+  <LI><TT>acknowledgedfor</TT><BR>
+      If <I>service</I>@<I>host</I> is currently inhibited, incorporate
+      the comment explaining why it was inhibited.
+  <LI><TT>alerts</TT><BR>
+      Incorporate the number of alerts that have been generated for
+      <I>service</I>@<I>host</I>.
+  <LI><TT>escalated</TT><BR>
+      Incorporate 1 if <I>service</I>@<I>host</I> is currently escalated,
+      0 if not.
+  <LI><TT>first</TT><BR>
+      Incorporate the first alert time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>inhibited</TT><BR>
+      If <I>service</I>@<I>host</I> is currently inhibited, incorporate
+      who inhibited it.
+  <LI><TT>inhibitedfor</TT><BR>
+      If <I>service</I>@<I>host</I> is currently inhibited, incorporate
+      the comment explaining why it was inhibited.
+  <LI><TT>last</TT><BR>
+      Incorporate the last alert time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>lastnotify</TT><BR>
+      Incorporate who was notified by the last alert for
+      <I>service</I>@<I>host</I>.
+  <LI><TT>manualescalated</TT><BR>
+      If <I>service</I>@<I>host</I> has been manually escalated,
+      incorporate the level to which it was escalated.
+  <LI><TT>quiet</TT><BR>
+      Incorporate 1 if <I>service</I>@<I>host</I> is currently acknowledged
+      or inhibited, 0 if not.
+  </UL>
+
+  <P>
+
+  <B>Authorization</B>: This tag requires read only or greater access.
+
+  <P>
+
+  Example: <TT>@{ALERTSTATUS type=last host=snoopy service=ping}</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-authlevel"></A>
+  <B>AUTHLEVEL</B> [&lt;authlevel>]
+ </TD>
+ <TD CLASS=kwdef>
+  If no <I>authlevel</I> is provided, incorporate the current
+  authorization level, as defined in <A
+  HREF="cf-cgi.html#authz"><TT>cgi.cf</TT></A>.
+
+  <P>
+
+  If <I>authlevel</I> is provided, incorporate 1 if the current user
+  has at least the requested authorization level, 0 otherwise.
+
+  <P>
+
+  Example: <TT>@{AUTHLEVEL rw}</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkschedule"></A>
+  <B>CHECKSCHEDULE</B> host=&lt;host> service=&lt;service>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the name of the Check schedule used by
+  <I>service</I>@<I>host</I>.
+
+  <P>
+
+  Example: <TT>@{CHECKSCHEDULE host=snoopy service=ping}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checkstatus"></A>
+  <B>CHECKSTATUS</B> type=&lt;type><BR>
+  [ hostclass=&lt;status> ]<BR>
+  [ host=&lt;host> ]<BR>
+  [ service=&lt;service> ]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate check status information of the specifed <I>type</I>:
+
+  <UL>
+  <LI><TT>comment</TT><BR>
+      Incorporate the current check comment for <I>service</I>@<I>host</I>.
+  <LI><TT>duration</TT><BR>
+      Incorporate the execution duration for <I>service</I>@<I>host</I> in
+      milliseconds.
+  <LI><TT>first</TT><BR>
+      Incorporate the first check time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>instances</TT><BR>
+      Incorporate the number of consecutive instances of <I>rc</I> for
+      <I>service</I>@<I>host</I>.
+  <LI><TT>last</TT><BR>
+      Incorporate the last check time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>next</TT><BR>
+      Incorporate the estimated next check time for <I>service</I>@<I>host</I>
+      in the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>rc</TT><BR>
+      Incorporate composite status information, ie the composite status of
+      all requested services and hosts.  Status is composited the same
+      way as for required <A HREF="cf-check.html#composites">Composite
+      Checks</A>.  The numerical returncode (0, 1, 2, etc) will be returned.
+
+      <P>
+
+      <OL>
+      <LI>If both <I>host</I> and <I>service</I> are provided, the status
+          of <I>service</I>@<I>host</I> is obtained.
+      <LI>If only <I>host</I> is provided, the composite status of all
+          services monitored for <I>host</I> is obtained.
+      <LI>If only <I>service</I> is provided, the composite status of all
+          hosts monitored for <I>service</I> is obtained.
+      <LI>If only <I>hostclass</I> is provided, the composite status of all
+          services monitored for all hosts within <I>hostclass</I> is
+	  obtained.
+      </OL>
+  </UL>
+
+  <P>
+
+  <B>Authorization</B>: This tag requires read only or greater access.
+
+  <P>
+
+  Example: <TT>@{CHECKSTATUS type=rc service=ldap}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clipboard"></A>
+  <B>CLIPBOARD</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the contents of the clipboard <I>name</I>.
+
+  <P>
+
+  <B>Authorization</B>: This tag requires clipboard or greater access.
+
+  <P>
+
+  Example: <TT>@{CLIPBOARD Notes}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clipemail"></A>
+  <B>CLIPEMAIL</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the default email contact address for sent clipboards,
+  as defined by the <A
+  HREF="cf-cgi.html#kw-clipemail"><TT>clipemail</TT></A> keyword in
+  <TT>cgi.cf</TT>.
+
+  <P>
+
+  <B>Authorization</B>: This tag requires clipboard or greater access.
+
+  <P>
+
+  Example: <TT>@{CLIPEMAIL}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-clipphone"></A>
+  <B>CLIPPHONE</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the default phone contact for sent clipboards, as
+  defined by the <A HREF="cf-cgi.html#kw-clipphone"><TT>clipphone</TT></A>
+  keyword in <TT>cgi.cf</TT>.
+
+  <P>
+
+  <B>Authorization</B>: This tag requires clipboard or greater access.
+
+  <P>
+
+  Example: <TT>@{CLIPPHONE}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-echo"></A>
+  <B>ECHO</B> &lt;string>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the provided <I>string</I>.
+
+  <P>
+
+  Example: <TT>@{ECHO Hello, world!}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-error"></A>
+  <B>ERROR</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the error message generated by the prior request (if any).
+
+  <P>
+
+  Example: <TT>@{ERROR}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fixstatus"></A>
+  <B>FIXSTATUS</B> type=&lt;type><BR>
+  [ host=&lt;host> ]<BR>
+  [ service=&lt;service> ]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate fix status information of the specifed <I>type</I>:
+
+  <UL>
+  <LI><TT>attempts</TT><BR>
+      Incorporate the number of fix attempts that have been executed for
+      <I>service</I>@<I>host</I>.
+  <LI><TT>comment</TT><BR>
+      Incorporate the current fix comment for <I>service</I>@<I>host</I>.
+  <LI><TT>first</TT><BR>
+      Incorporate the first fix time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>last</TT><BR>
+      Incorporate the last fix time for <I>service</I>@<I>host</I> in
+      the format returned by <TT>ctime(3)</TT>.
+  <LI><TT>rc</TT><BR>
+      Incorporate the status information for the executed fix.
+      The numerical returncode (0, 1, 2, etc) will be returned.
+  <LI><TT>who</TT><BR>
+      Incorporate who requested the fix for <I>service</I>@<I>host</I>
+  </UL>
+
+  <P>
+
+  <B>Authorization</B>: This tag requires read only or greater access.
+
+  <P>
+
+  Example: <TT>@{FIXSTATUS type=attempts host=snoopy service=ping}</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-flag"></A>
+  <B>FLAG</B> &lt;flag>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the value of the specified <I>flag</I>.  (Where <I>flag</I>
+  can accept more than one value, use a <TT>FOREACH</TT> loop instead.)
+
+  <P>
+
+  Example: <TT>@{FLAG h}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-foreach"></A>
+  <B>FOREACH</B> [<B>SORT</B> &lt;order>] &lt;name> &lt;type> [&lt;x> ...]
+ </TD>
+ <TD CLASS=kwdef>
+  For each item <I>x</I> of type <I>type</I>, set the variable
+  <I>name</I> to an appropriate value and incorporate the contents of
+  the source document until a corresponding <TT>@{ENDEACH}</TT> tag
+  is found.
+
+  <P>
+
+  If <TT>SORT</TT> is provided, the values will be sorted according to
+  <I>order</I>, which may be one of the following:
+
+  <UL>
+  <LI><TT>ASC</TT>: Ascending
+  <LI><TT>ASCIN</TT>: Ascending, case insensitive
+  <LI><TT>DESC</TT>: Descending
+  <LI><TT>DESCIN</TT>: Descending, case insensitive
+  </UL>
+
+  <P>
+
+  The following types of items are understood:
+
+  <UL>
+  <LI><TT>ADDRESSED</TT><BR>
+      Set the variable <I>name</I> to each <TT>service@host</TT>
+      pair that is currently acknowledged or inhibited.
+  <LI><TT>ALLACTIVE</TT><BR>
+      Set the variable <I>name</I> to each <TT>service@host</TT>
+      pair that is currently defined.
+  <LI><TT>CALLLISTADDRESS</TT><BR>
+      Set the variable <I>name</I> to each CallList defined in each
+      instance.  <I>x</I> is not used.
+  <LI><TT>CLIPBOARD</TT><BR>
+      Set the variable <I>name</I> to each defined clipboard.
+      <I>x</I> is not used.
+  <LI><TT>ERRORSTATE</TT><BR>
+      Set the variable <I>name</I> to each <TT>service@host</TT>
+      pair that is currently not <TT>MODEXEC_OK</TT>.
+  <LI><TT>ESCALATED</TT><BR>
+      Set the variable <I>name</I> to each <TT>service@host</TT>
+      pair that is currently escalated.
+  <LI><TT>FLAG</TT><BR>
+      The item <I>x</I> is a flag (only one flag is permitted).  Set the
+      variable <I>name</I> to the value of the flag.
+  <LI><TT>GROUPMEMBER</TT><BR>
+      The item <I>x</I> is a group (service) name (only one flag is
+      permitted).  Set the variable <I>name</I> to each host that is
+      a member of the group.
+  <LI><TT>GROUPS</TT><BR>
+      Set the variable <I>name</I> to each group (with an associated
+      defined Check) that at least one host <I>x</I> is a member of.
+  <LI><TT>HOST</TT><BR>
+      Set the variable <I>name</I> to each host defined in the current
+      instance, based on every member of every HostClass.  <I>x</I> is
+      not used.
+  <LI><TT>HOSTCLASS</TT><BR>
+      Set the variable <I>name</I> to each HostClass defined in
+      the current instance.  <I>x</I> is not used.
+  <LI><TT>HOSTCLASSMEMBER</TT><BR>
+      The item <I>x</I> is a HostClass name (only one flag is permitted).
+      Set the variable <I>name</I> to each host that is a member of
+      the HostClass.
+  <LI><TT>INSTALLEDMODULES</TT><BR>
+      The item <I>x</I> is a module type, as available under
+      <TT>$INSTDIR/mod/</TT>.  (Only one module type is permitted.)
+  <LI><TT>INSTANCE</TT><BR>
+      Set the variable <I>name</I> to each instance defined in
+      <A HREF="cf-instance.html"><TT>instance.cf</TT></A>.  <I>x</I>
+      is not used.
+  <LI><TT>PERSONADDRESS</TT><BR>
+      Set the variable <I>name</I> to the address of each Person
+      in each CallList defined in each instance.  <I>x</I> is not used.
+  <LI><TT>SERVICE</TT><BR>
+      Set the variable <I>name</I> to each service (check) defined in
+      the current instance.  <I>x</I> is not used.
+  <LI><TT>SERVICES</TT><BR>
+      Synonym for <TT>GROUPS</TT>.
+  <LI><TT>SERVICEMEMBER</TT><BR>
+      Synonym for <TT>GROUPMEMBER</TT>.
+  <LI><TT>STRING</TT><BR>
+      Each item <I>x</I> is a string.  Set the variable <I>name</I> to
+      the contents of the string.
+  </UL>
+
+  <P>
+
+  <TT>FOREACH</TT> tags may be nested.
+
+  <P>
+
+  Example:
+   <PRE>
+   @{FOREACH foo STRING word1 word2 word3}
+   Word @{ECHO $foo} is the word.&lt;P>
+   @{ENDEACH}
+
+   @{FOREACH SORT ASCIN h HOST}
+   @{ECHO $h}&lt;BR>
+   @{ENDEACH}
+   </PRE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-helpfile"></A>
+  <B>HELPFILE</B> &lt;service>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the contents of the help file for <I>service</I>.
+
+  <P>
+  
+  <B>Authorization</B>: This tag requires read only or greater access.
+   
+  <P>
+
+  Example: <TT>@{HELPFILE http}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-hostclass"></A>
+  <B>HOSTCLASS</B> &lt;host>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the name of the HostClass of which <I>host</I> is a member.
+
+  <P>
+
+  Example: <TT>@{HOSTCLASS snoopy}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-if"></A>
+  <B>IF</B> &lt;expression>
+ </TD>
+ <TD CLASS=kwdef>
+  If <I>expression</I> evaluates to true, incorporate the contents of
+  the source document until either a corresponding <TT>@{ELSE}</TT> or
+  <TT>@{ENDIF}</TT> tag is found.  If <I>expression</I> evaluates to
+  false, incorporate the contents of the source document from a
+  corresponding <TT>@{ELSE}</TT> tag (if any) until a corresponding
+  <TT>@{ENDIF}</TT> tag is found.
+
+  <P>
+
+  The following expressions are understood:
+
+  <UL>
+  <LI><TT>AUTHENTICATED</TT><BR>
+      There is a currently authenticated user with at least
+      <A HREF="cf-cgi.html#authz">read only</A> access.
+  <LI><TT>DEFINED FLAG x</TT><BR>
+      The flag <I>x</I> is defined with one or more values.
+  <LI><TT>NOTDEFINED FLAG x</TT><BR>
+      The flag <I>x</I> is not defined.
+  <LI><TT>DEFINED STRING x</TT><BR>
+      The string <I>x</I> is defined.
+  <LI><TT>NOTDEFINED STRING x</TT><BR>
+      The string <I>x</I> is not defined.
+  <LI><TT>NUMBER x < y</TT><BR>
+      The number <I>x</I> is less than the number <I>y</I>.
+  <LI><TT>NUMBER x > y</TT><BR>
+      The number <I>x</I> is greater than the number <I>y</I>.
+  <LI><TT>NUMBER x = y</TT><BR>
+      The numbers <I>x</I> and <I>y</I> are equal.
+  <LI><TT>NUMBER x != y</TT><BR>
+      The numbers <I>x</I> and <I>y</I> are not equal.
+  <LI><TT>STRING x = y</TT><BR>
+      The strings <I>x</I> and <I>y</I> are identical.
+  <LI><TT>STRING x != y</TT><BR>
+      The strings <I>x</I> and <I>y</I> are not identical.
+  <LI><TT>STRING EMPTY x</TT><BR>
+      The string <I>x</I> is empty.
+  <LI><TT>STRING NOTEMPTY x</TT><BR>
+      The string <I>x</I> is not empty.
+  </UL>
+
+  <P>
+
+  <TT>IF</TT> tags may be nested.
+  
+  <P>
+
+  Example:
+   <PRE>
+   @{IF STRING $foo = $bar}
+   &lt;B>Match!&lt;/B>
+   @{ELSE}
+   @{ECHO $foo} is not @{ECHO $bar}
+   @{ENDIF}
+   </PRE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-include"></A>
+  <B>INCLUDE</B> &lt;filename>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the contents of <I>filename</I>.  Any tags found within
+  the file are processed.
+
+  <P>
+
+  Example: <TT>@{INCLUDE /var/survivor/header.html.in}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-instance"></A>
+  <B>INSTANCE</B>
+ </TD>
+ <TD CLASS=kwdef>
+  If an instance has been selected, incorporate the name of the instance.
+
+  <P>
+
+  Example: <TT>@{INSTANCE}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-pageset"></A>
+  <B>PAGESET</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the name of the current PageSet.
+  
+  <P>
+
+  Example: <TT>@{PAGESET}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-rctext"></A>
+  <B>RCTEXT</B> &lt;rc>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the text description corresponding to the return code <I>rc</I>.
+
+  <P>
+
+  Example: <TT>@{RCTEXT 0}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-referer"></A>
+  <B>REFERER</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the contents of the <TT>HTTP_REFERER</TT> environment
+  variable.
+
+  <P>
+
+  Example: <TT>@{REFERER}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-refresh"></A>
+  <B>REFRESH</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the current refresh interval, as specified by the
+  <TT>r</TT> flag.
+
+  <P>
+
+  Example: <TT>@{REFRESH}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-runningstate"></A>
+  <B>RUNNINGSTATE</B> &lt;arg>=&lt;value>
+ </TD>
+ <TD CLASS=kwdef>
+  Determine the requested running state.  The following state is available,
+  via <I>arg</I>:
+
+   <UL>
+   <LI><TT>lastrun</TT><BR>
+       Incorporate the time, in minutes, since the last run of the
+       specified scheduler.  <I>value</I> may be <TT>alert</TT> or
+       <TT>check</TT>.
+   </UL>
+
+  <P>
+
+  <B>Authorization</B>: This tag requires read only or greater access.
+   
+  <P>
+
+  Example: <TT>@{RUNNINGSTATE lastrun=alert}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-set"></A>
+  <B>SET</B> &lt;name>=&lt;string>
+ </TD>
+ <TD CLASS=kwdef>
+  Define or redefine the variable <I>name</I> to <I>string</I>.  The
+  variable is then accessible as <TT>$name</TT>.  <I>Name</I> is case
+  sensitive.
+
+  <P>
+
+  If <I>string</I> is of the form <TT>@[TAG]</TT>, then process
+  <TT>TAG</TT> as <TT>@{TAG}</TT>, as long as it is not <TT>FOREACH</TT>
+  or <TT>IF</TT>.
+
+  <P>
+
+  <B>Important</B>: Spaces should not be placed immediately on either
+  side of the <TT>=</TT>.
+  
+  <P>
+
+  Example: <TT>@{SET foo="This is foo"}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-split"></A>
+  <B>SPLIT</B> &lt;string> &lt;chars> &lt;name> [&lt;name> ...]
+ </TD>
+ <TD CLASS=kwdef>
+  Split <I>string</I> on any character provided in <I>chars</I>,
+  storing each token in variables named using the provided
+  <I>name</I>s.
+
+  <P>
+
+  Example: <TT>@{SPLIT service@host @ $service $host}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-time"></A>
+  <B>TIME</B> [field=&lt;field>] [offset=&lt;number>]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the current time.  By default, the format is that returned
+  by <TT>ctime(3)</TT>.  If <I>offset</I> is provided, the current time
+  is adjusted by the provided number of seconds.  If <I>field</I> is
+  provided, only that field is returned, with the following defined fields:
+
+  <UL>
+  <LI><TT>hour</TT><BR>
+      The hour, 0 through 23.
+  <LI><TT>mday</TT><BR>
+      The day of the month, 1 through 31.
+  <LI><TT>min</TT><BR>
+      The minute, 00 through 59.
+  <LI><TT>mon</TT><BR>
+      The numeric value of the month, 1 through 12.
+  <LI><TT>year</TT><BR>
+      The year, as a four digit number.
+  </UL>
+
+  <P>
+
+  Example: <TT>@{TIME}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-uri"></A>
+  <B>URI</B> [&lt;flag>=&lt;value> ...]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate a relative URI that will regenerate the current page.
+  If provided, the optional <I>flag</I>/<I>value</I> pairs will be
+  appended to the URI, properly escaped.  If <I>value</I> is omitted,
+  <I>flag</I> will be excluded from the generated URI.
+
+  <P>
+
+  Example: <TT>@{URI l=1 r=}</TT>
+
+  <P>
+
+  To replace the existing value of a flag with a new value, both
+  omit and add it.
+
+  <P>
+
+  Example: <TT>@{URI file= file=new-file.html}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-uritags"></A>
+  <B>URITAGS</B> style=&lt;style> [&lt;omit>=&lt;value>[,&lt;value>,...]]
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the tags used to generate the current page, optionally
+  omitting the tags specified by <I>omit</I>.  <I>style</I> indicates
+  the output type, of the following:
+
+   <UL>
+   <LI><TT>hidden</TT><BR>
+       As hidden input values of a form.
+   </UL>
+
+  <P>
+
+  Example: <TT>@{URITAGS style=hidden omit=hc,v}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-uritop"></A>
+  <B>URITOP</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate a relative URI that will regenerate the top (entry) page.
+
+  <P>
+
+  Example: <TT>@{URITOP}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-username"></A>
+  <B>USERNAME</B>
+ </TD>
+ <TD CLASS=kwdef>
+  If the current session is authenticated, incorporate the name of
+  the authenticated user.
+
+  <P>
+
+  Example: <TT>@{USERNAME}</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-version"></A>
+  <B>VERSION</B> type=&lt;type>
+ </TD>
+ <TD CLASS=kwdef>
+  Incorporate the package version information, according to the
+  selected <I>type</I>:
+
+   <UL>
+   <LI><TT>build</TT><BR>
+       Full build information, including compilation timestamp.
+   <LI><TT>package</TT><BR>
+       Just the version number, for example <TT>0.9.4</TT>.
+   </UL>
+
+  <P>
+
+  Example: <TT>@{VERSION type=package}</TT>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ For examples of source pages, see the PageSets included as part of
+ the distribution, either in <TT>src/cgi/pagesets</TT> or
+ <TT>$INSTDIR/html/sw</TT>.
+
+ <HR>
+ <I>$Date: 2006/11/20 00:16:27 $</I><BR>
+ <I>$Revision: 0.13 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-alertplan>alertplan</A><BR>
+ <A CLASS="keywords" HREF=#kw-alertstatus>alertstatus</A><BR>
+ <A CLASS="keywords" HREF=#kw-authlevel>authlevel</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkschedule>checkschedule</A><BR>
+ <A CLASS="keywords" HREF=#kw-checkstatus>checkstatus</A><BR>
+ <A CLASS="keywords" HREF=#kw-clipboard>clipboard</A><BR>
+ <A CLASS="keywords" HREF=#kw-clipemail>clipemail</A><BR>
+ <A CLASS="keywords" HREF=#kw-clipphone>clipphone</A><BR>
+ <A CLASS="keywords" HREF=#kw-echo>echo</A><BR>
+ <A CLASS="keywords" HREF=#kw-error>error</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixstatus>fixstatus</A><BR>
+ <A CLASS="keywords" HREF=#kw-flag>flag</A><BR>
+ <A CLASS="keywords" HREF=#kw-foreach>foreach</A><BR>
+ <A CLASS="keywords" HREF=#kw-helpfile>helpfile</A><BR>
+ <A CLASS="keywords" HREF=#kw-hostclass>hostclass</A><BR>
+ <A CLASS="keywords" HREF=#kw-if>if</A><BR>
+ <A CLASS="keywords" HREF=#kw-include>include</A><BR>
+ <A CLASS="keywords" HREF=#kw-instance>instance</A><BR>
+ <A CLASS="keywords" HREF=#kw-pageset>pageset</A><BR>
+ <A CLASS="keywords" HREF=#kw-rctext>rctext</A><BR>
+ <A CLASS="keywords" HREF=#kw-referer>referer</A><BR>
+ <A CLASS="keywords" HREF=#kw-refresh>refresh</A><BR>
+ <A CLASS="keywords" HREF=#kw-runningstate>runningstate</A><BR>
+ <A CLASS="keywords" HREF=#kw-set>set</A><BR>
+ <A CLASS="keywords" HREF=#kw-split>split</A><BR>
+ <A CLASS="keywords" HREF=#kw-time>time</A><BR>
+ <A CLASS="keywords" HREF=#kw-uri>uri</A><BR>
+ <A CLASS="keywords" HREF=#kw-uritags>uritags</A><BR>
+ <A CLASS="keywords" HREF=#kw-uritop>uritop</A><BR>
+ <A CLASS="keywords" HREF=#kw-username>username</A><BR>
+ <A CLASS="keywords" HREF=#kw-version>version</A><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

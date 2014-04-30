@@ -1,0 +1,25 @@
+----------------------------
+revision 0.6
+date: 2004/05/03 22:18:24;  author: benno;  state: Exp;  lines: +2 -3
+Don't use exit() on failed fork, it parses incorrectly in Perl 5.004
+----------------------------
+revision 0.5
+date: 2003/10/06 22:26:21;  author: benno;  state: Exp;  lines: +30 -16
+Use IO::Select
+----------------------------
+revision 0.4
+date: 2003/03/07 18:05:42;  author: benno;  state: Exp;  lines: +50 -37
+Remove dependency on creating /tmp files by closing std* instead
+----------------------------
+revision 0.3
+date: 2003/03/04 17:34:16;  author: benno;  state: Exp;  lines: +3 -3
+Fix @sb test
+----------------------------
+revision 0.2
+date: 2003/01/29 01:36:27;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.1
+date: 2002/12/31 04:19:47;  author: benno;  state: Exp;
+Initial revision
+=============================================================================

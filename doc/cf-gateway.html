@@ -1,0 +1,460 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: gateway.cf</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: gateway.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>gateway.cf</TT></A>
+ <LI><A HREF=#debug>Debug Level</A>
+  <UL>
+  <LI><A HREF=#debug-about>About Debug Level</A>
+  <LI><A HREF=#debug-dependencies>Dependencies</A>
+  <LI><A HREF=#debug-keywords>Debug Level Keywords</A>
+  <LI><A HREF=#debug-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#domains>Relay Domains</A>
+  <UL>
+  <LI><A HREF=#domains-about>About Relay Domains</A>
+  <LI><A HREF=#domains-dependencies>Dependencies</A>
+  <LI><A HREF=#domains-keywords>Relay Domain Keywords</A>
+  <LI><A HREF=#domains-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#targets>Relay Targets</A>
+  <UL>
+  <LI><A HREF=#targets-about>About Relay Targets</A>
+  <LI><A HREF=#targets-dependencies>Dependencies</A>
+  <LI><A HREF=#targets-keywords>Relay Targets Keywords</A>
+  <LI><A HREF=#targets-examples>Examples</A>
+  </UL>
+ </UL>
+ 
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>gateway.cf</TT>
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;argname> : [a-zA-Z0-9\._-]+
+     &lt;argvalue> : [^ \n\t][^\n]*
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+     &lt;number> : [0-9]+
+     &lt;path> : [^\n]*
+     &lt;regex> : [^ \n\t]*
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>gateway.cf</TT> controls the behavior of the <A HREF=sg.html>Mail
+ Gateway</A>.  The file is optional, if it does not exist message
+ relaying will be disabled.  There are no two-way message handling
+ configuration options, and that service is always enabled.
+
+ <P>
+
+ <A ID="debug"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Debug Level
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>debug level</B> &lt;number>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="debug-about"></A>
+ <H3>About Debug Level</H3>
+
+ The Debug Level keyword enables debugging output, which is sent to
+ the <TT>mail.debug</TT> syslog facility.  It is functionally
+ equivalent to the <TT>-d</TT> flag in the <A HREF="sc.html">command
+ line interface</A> and <A HREF="ss.html">scheduler</A>, except that
+ debugging cannot be enabled until the configuration file is parsed.
+ For this reason, debugging is automatically set to
+ <TT>DEBUG_CONFIG</TT> when the configuration file fails to parse.
+ 
+ <A ID="debug-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+ 
+ <A ID="debug-keywords"></A>
+ <H3>Debug Level Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-debuglevel"></A>
+  <B>debug level</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Set debugging to the specified level, if debugging was enabled at
+  compile time.  See <TT>include/debug.H</TT> for the level definitions,
+  only the numeric values may be specified.  <TT>DEBUG_PARSER</TT>
+  will likely be the most useful level.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="debug-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Enable debugging of message parsing:
+
+     <PRE>
+     debug level 8192
+     </PRE>
+ </OL>
+ 
+ <A ID="domains"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Relay Domains
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>relay domain {</B>
+         &lt;regex>
+	 [...]
+     <B>}</B>
+
+     <B>relay all domains</B>
+
+     <B>relay localhost</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="domains-about"></A>
+ <H3>About Relay Domains</H3>
+
+ Relay Domains specify which messages <TT>sg</TT> will accept for
+ relay and to which addresses.  If no domains are specified, message
+ relaying is disabled.  Domains are relevant to the destination
+ (<TT>To</TT> or <TT>Cc</TT>) addresses in a message received by the
+ gateway.  For example, if the gateway receives a message with the
+ headers
+
+ <PRE>
+  To: jsmith@monitor.site.edu
+  Cc: tsmith@foo.org
+  From: lsmith@bar.com
+ </PRE>
+
+ The domains <TT>monitor.site.edu</TT> and <TT>foo.org</TT> would be
+ evaluated against the specified Relay Domains.  If the domains matched,
+ the message would be accepted for relay for the matching address.
+
+ <P>
+
+ The gateway cannot relay messages to addresses specified by <TT>Bcc</TT>.
+ Only the <TT>Subject</TT> header and the message body are maintained
+ during relay, all other header fields are modified or dropped.
+
+ <A ID="domains-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+ 
+ <A ID="domains-keywords"></A>
+ <H3>Relay Domain Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-relaydomain"></A>
+  <B>relay domain</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify one or more regular expressions describing which destination
+  domains are to be accepted for relay.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-relayall"></A>
+  <B>relay all domains</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that all destination domains are to be accepted for relay.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-relaylocal"></A>
+  <B>relay localhost</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that destination domains equivalent to the name of the host
+  the gateway is installed on are to be accepted for relay.
+  Currently, this is defined as destination domains equivalent to the
+  fully qualified domain name of the gateway host, the string
+  <TT>localhost</TT>, or where the destination domain is an alias
+  for the FQDN of the gateway host.
+
+  <P>
+
+  To determine what the host FQDN is, use <TT>sc -o test=fqdn dtest</TT>.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <P>
+
+ <A ID="domains-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>Relay messages destined for <TT>pager.site.org</TT>:
+
+     <PRE>
+     relay domain {
+       ^pager\.site\.org$
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <A ID="targets"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Relay Targets
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>relay user &lt;name> {</B>
+         <B>calllist</B> &lt;name>
+         <B>instance</B> &lt;name>
+     <B>}</B>
+
+     <B>relay user &lt;name> {</B>
+         <B>person</B> &lt;name>
+         <B>via</B> &lt;name>
+         <B>instance</B> &lt;name>
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="targets-about"></A>
+ <H3>About Relay Targets</H3>
+
+ After an address matches a Relay Domain and is accepted for relay,
+ Relay Targets determine to which Person or CallList the message will
+ be relayed to.  The Relay Target is determined by the user component
+ of the address.  For example, if the gateway receives a message with
+ the headers
+
+ <PRE>
+  To: jsmith@monitor.site.edu
+  Cc: person.sample.tsmith.mail@foo.org
+  From: lsmith@bar.com
+ </PRE>
+
+ The Relay Targets would be based on <TT>jsmith</TT> and
+ <TT>person.sample.tsmith.mail</TT>, assuming the domains were
+ defined as Relay Domains.
+ 
+ <P>
+
+ Relay Targets come in two forms.  <I>Mapped</I> targets are defined
+ in this configuration file, as explained below.  <I>Implied</I>
+ targets are obtained from the destination address in the message
+ being processed, and come in two forms:
+
+ <UL>
+ <LI><TT>calllist.<I>instance</I>.<I>name</I>@domain</TT><BR>
+     where <I>instance</I> is an instance as defined in
+     <A HREF="cf-instance.html"><TT>instance.cf</TT></A>, and <I>name</I>
+     is the name of a <A HREF="cf-calllist.html#calllists">CallList</A>.
+ <LI><TT>person.<I>instance</I>.<I>name</I>.<I>module</I>@domain</TT><BR>
+     where <I>instance</I> is an instance as defined in
+     <A HREF="cf-instance.html"><TT>instance.cf</TT></A>, <I>name</I>
+     is the name of a <A HREF="cf-calllist.html#persons">Person</A>,
+     and <I>via</I> is the name of an <A
+     HREF="cf-calllist.html#alerts">Alert module</A> defined within the
+     instance to use for relaying.  Note that only the <A
+     HREF="tmm-about.html">transmit module</A> specified will be used,
+     the format module will be ignored.
+ </UL>
+ 
+ <A ID="targets-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The Instance specified by the <TT>instance</TT> keyword must be
+     defined in <A HREF="cf-instance.html"><TT>instance.cf</TT></A>.
+ <LI>The CallList specified by the <TT>calllist</TT> keyword must be
+     defined in <A HREF="cf-calllist.html"><TT>calllist.cf</TT></A>.
+ <LI>The Person specified by the <TT>person</TT> keyword must be
+     defined in <A HREF="cf-calllist.html"><TT>calllist.cf</TT></A>.
+ <LI>The Alert specified by the <TT>via</TT> keyword must be
+     defined in <A HREF="cf-calllist.html"><TT>calllist.cf</TT></A>.
+ </UL>
+ 
+ <A ID="targets-keywords"></A>
+ <H3>Relay Target Keywords</H3>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-relayuser"></A>
+  <B>relay user</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Relay Target.  <I>name</I> is the user component
+  of the address being processed for relay.  If a message accepted
+  for relay contains a destination address that matches <I>name</I>,
+  the contents of the Relay Target will be used to determine where
+  the message is relayed to.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-calllist"></A>
+  <B>calllist</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Relay messages for the Relay Target to the CallList <I>name</I>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-instance"></A>
+  <B>instance</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Use the <A HREF="cf-instance.html#instances">Instance</A> <I>name</I> to
+  determine the definition of the specified Person or CallList.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-person"></A>
+  <B>person</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Relay messages for the Relay Target to the Person <I>name</I>.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-via"></A>
+  <B>via</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  When relaying messages to a Person, use the Alert module <I>name</I>.
+  Note that only the <A HREF="tmm-about.html">transmit module</A>
+  specified will be used, the format module will be ignored.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <P>
+
+ <A ID="targets-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To map messages destined for <TT>jsmith</TT> to the Person
+     <TT>jsmith</TT> in the instance <TT>sample</TT> and to send
+     messages to that Person with the <TT>mail</TT> Alert module:
+
+     <PRE>
+     relay user jsmith {
+       instance sample
+       person   jsmith
+       via      mail
+     }
+     </PRE>
+ </OL>
+ 
+ <HR>
+ 
+ <I>$Date: 2006/11/19 16:52:30 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-calllist>calllist</A><BR>
+ <A CLASS="keywords" HREF=#kw-debuglevel>debuglevel</A><BR>
+ <A CLASS="keywords" HREF=#kw-instance>instance</A><BR>
+ <A CLASS="keywords" HREF=#kw-person>person</A><BR>
+ <A CLASS="keywords" HREF=#kw-relayall>relay all domains</A><BR>
+ <A CLASS="keywords" HREF=#kw-relaydomain>relay domain</A><BR>
+ <A CLASS="keywords" HREF=#kw-relaylocal>relay localhost</A><BR>
+ <A CLASS="keywords" HREF=#kw-relayuser>relay user</A><BR>
+ <A CLASS="keywords" HREF=#kw-via>via</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

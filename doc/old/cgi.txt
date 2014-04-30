@@ -1,0 +1,24 @@
+				The CGI
+
+About
+-----
+The cgi is a web gateway for examining check, alert, and configuration
+state.  Currently, the cgi is read only.
+
+Usage
+-----
+The cli accepts the following variables.
+
+	h=host
+	i=instance
+	s=service
+	(all other flags)
+
+- /etc/survivor/cgi.cf (also write a spec for this)
+
+- How to set up logins (always > host > user)
+
+- installed setgid, to avoid this and still have write access the web
+  server must run the exectuable as INSTUSER or a user in INSTGROUP
+
+- mkdir statedir w/correct permissions?  (or will verify_directory do this?)

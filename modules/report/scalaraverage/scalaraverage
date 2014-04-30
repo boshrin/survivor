@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+
+# scalaraverage report module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2005/11/05 03:14:53 $
+#
+# Copyright (c) 2004 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Report;
+
+# Create a new Report object.
+
+my $sw = new Survivor::Report();
+
+my $pok = $sw->ParseReportRequest();
+
+if($pok == MODEXEC_OK) {
+    if($sw->Style() eq "html")
+    {
+	print ("<HTML><PRE>\n");
+	print ("<H1>Scalar Average Report</H1>\n");
+    }
+    elsif($sw->Style() eq "text")
+    {
+	print ("Scalar Average Report\n\n");
+    }
+
+    my @dataset = $sw->DataSet();
+
+    foreach my $d (@dataset)
+    {
+	my $total = 0;
+	my $seen = 0;
+	
+	foreach my $cr (@{${%$d}{"checkdata"}}) {
+	    $total += ${%$cr}{"scalar"};
+	    $seen++;
+	}
+
+	my $avg = 0;
+
+	if($seen > 0) {
+	    $avg = $total / $seen;
+	}
+	
+        if($sw->Style() eq "check") {
+	    print ${%$d}{"service"} . " " . ${%$d}{"host"} . " ";
+	} else {
+	    print ${%$d}{"service"} . "@" . ${%$d}{"host"} . ": ";
+        }
+
+        print $avg . "\n";
+    }
+    
+    if($sw->Style() eq "html")
+    {
+	print ("</PRE></HTML>\n");
+    }
+} else {
+    print "Error: $pok\n";
+}
+
+exit MODEXEC_OK;

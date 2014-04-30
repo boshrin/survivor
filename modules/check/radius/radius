@@ -1,0 +1,86 @@
+#!/usr/bin/perl -w
+
+# radius check module
+
+# Version: $Revision: 0.8 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/01/29 01:27:08 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ("username" => "string",
+              "password" => "password",
+	      "secret" => "password");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&RadiusValidate);
+
+my $RADTEST = $sc->Which('radtest');
+
+defined $RADTEST or
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, 'radtest executable not found');
+
+my $r = $sc->Exec( \&RadiusCheck);
+
+exit($r);
+
+sub RadiusValidate {
+    my $self = shift;
+
+    defined $self->Which('radtest') or
+	return(MODEXEC_MISCONFIG, 0, 'radtest executable not found');
+
+    return(MODEXEC_OK, 0, "Radius OK");
+}
+
+sub RadiusCheck {
+    my $self = shift;
+    my $host = shift;
+
+    # Hard-code port ID since it doesn't matter
+    my $nasportid = 0;
+
+    # XXX we should switch to radclient since radtest is now a wrapper script
+    open(ANSWER, $RADTEST.' '.$self->Arg('username').' '.
+	 $self->Arg('password').' '.$host.' '.$nasportid.' '.
+	 $self->Arg('secret').' 2>&1 |');
+    
+    my $lastline = '';
+    my $problemline = '';
+    while(<ANSWER>) {
+	chomp;
+	s/://;
+	$lastline = $_;
+	if (/^Warning/ || /Access denied./) {
+	    if (length $problemline) {
+		$problemline .= ', '.$_;
+	    }
+	    else {
+		$problemline .= $_;
+	    }
+	}
+    }
+    close(ANSWER);
+    
+    if ($? == 0) {
+	if ($problemline) {
+	    return(MODEXEC_PROBLEM, 0, $problemline);
+	}
+	else {
+	    return(MODEXEC_OK, 1, 'Authentication successful');
+	}
+    }
+    else {
+	return(MODEXEC_PROBLEM, 0, $lastline);
+    }
+}

@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Mail Gateway (sg)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Mail Gateway</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>sg</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+  <UL>
+  <LI><A HREF=#mail>Configuring the Mail System</A>
+  <LI><A HREF=#syslog>Syslogging</A>
+  <LI><A HREF=#sg-nextel>With Nextel Two-Way Messaging</A>
+  <LI><A HREF=#sg-sms>With SMS Text Messages</A>
+  <LI><A HREF=#sg-relay>Relaying Messages</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>sg</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+ 
+    sg
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Survivor Mail Gateway allows email based reply messages to affect
+ the system state.  It reads the messages on stdin, executes any valid
+ commands found, and records its actions via syslog.  The gateway can
+ also relay messages to Persons and Call Lists.
+
+ <P>
+
+ The gateway is used to accept replies in response to previously
+ generated alert notifications.  It is not intended to be a general
+ purpose interface.  Tokens are required in replies to prevent delayed
+ replies from inadvertantly changing state when they are no longer
+ relevant, and to provide a frustration against nuisance attacks
+ against the gateway.  Tokens are not guaranteed to be secure against
+ more sophisticated attacks.
+
+ <P>
+
+ The gateway will not accept messages larger than <TT>MAXMESSAGESIZE</TT>
+ as defined in <TT>include/gateway.H</TT>.  This value defaults to
+ 50,000 bytes.
+ 
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The gateway must run on the same host as the scheduler.
+ <LI><TT>sg</TT> uses the standard instance configuration file
+     <TT>/etc/survivor/instance.cf</TT> to obtain information
+     about the configured Instances.  The location of this file
+     cannot be overridden.
+ </UL>
+
+ <P>
+
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The gateway is installed in <TT>$INSTDIR/sbin/sg</TT>.  Two-way
+ reply messages must be piped into <TT>sg</TT>, the specific
+ method for doing so is dependent on the mail system in use.
+
+ <P>
+ 
+ <A ID="mail"></A>
+ <H3>Configuring the Mail System</H3>
+ 
+ By default, alert notifications sent by the scheduler should have a
+ return address of <TT>$INSTUSER@<I>schedulerhost</I></TT>, although
+ this is dependent on the local mail configuration.  The key
+ installation step is to intercept reply messages sent to this address
+ and direct them to <TT>sg</TT>.  An easy way to do this is by creating
+ <TT>$INSTUSER/.forward</TT> with contents like
+
+ <PRE>
+ |$INSTDIR/sbin/sg
+ </PRE>
+
+ or, to keep a copy of each messages received
+
+ <PRE>
+ |$INSTDIR/sbin/sg,\$INSTUSER
+ </PRE>
+
+ <TT>$INSTDIR</TT> and <TT>$INSTUSER</TT> must be replaced with their
+ actual values.  Additionally, some mail handlers may require the
+ entire line to be surrounded by quotes (<TT>"</TT>).  Note that for
+ Sendmail, <TT>sg</TT> may need to be run via <TT>smrsh</TT>.
+
+ <P>
+
+ Using procmail, <TT>$INSTUSER/.procmailrc</TT> could contain an entry
+ like
+
+ <PRE>
+ # Pipe all mail to sg for processing two-way replies
+ :0 H
+ * ^To:.*$INSTUSER@schedulerhost
+ | $INSTDIR/sbin/sg
+ </PRE>
+
+ Again, <TT>$INSTDIR</TT> and <TT>$INSTUSER</TT> must be replaced with their
+ actual values.
+
+ <P>
+
+ It may also make sense to intercept the messages at a system-wide
+ level, rather than wait until delivery to the local user.  This would
+ require changes to <TT>/etc/aliases</TT>, <TT>/etc/mail/aliases</TT>,
+ the global <TT>procmailrc</TT>, <TT>sendmail.cf</TT>, or any other
+ relevant file.
+
+ <P>
+ 
+ <A ID="syslog"></A>
+ <H3>Syslogging</H3>
+
+ The gateway syslogs as follows:
+
+  <UL>
+  <LI><TT>mail.debug</TT>: Debugging information, including configuration
+      file parse errors.  It is possible to enable additional debugging
+      to this facility with the <A HREF="cf-gateway.html#debuglevel"><TT>debug
+      level</TT></A> keyword in <A
+      HREF="cf-gateway.html"><TT>gateway.cf</TT></A>.
+  <LI><TT>mail.warning</TT>: Warnings and errors other than configuration.
+  <LI><TT>mail.info</TT>: Non-critical message processing information.
+  </UL>
+ 
+ In order to generate appropriate processing logs, configure these service in
+ <TT>/etc/syslog.conf</TT>.
+
+ <A ID="sg-nextel"></A>
+ <H3>With Nextel Two-Way Messaging</H3>
+
+ Messages formatted with the <A HREF=fmm-nextel.html><TT>nextel</TT>
+ format module</A> are capable of being replied to and processed by
+ the gateway.  Messages must be transmitted via Nextel's two-way
+ messaging infrastructure, which as of this writing is not available
+ via TAP (modem transmission of pages).  Simply select the appropriate
+ command when replying to the alert notification.
+
+ <P>
+ 
+ <TABLE BORDER=0>
+ <TR>
+ <TD CLASS=hltitle>
+  message syntax
+ </TD>
+ <TD CLASS=highlight>
+  <PRE>
+  From: &lt;address>
+  Subject: [optional unrelated text] ALERT: &lt;service>@&lt;hostname>
+
+  &lt;replycommand>
+  Token=&lt;token>
+  Instance=&lt;instance>
+  </PRE>
+  
+  where
+
+  <UL>
+  <LI><B>address:</B> The sender of the reply command
+  <LI><B>service:</B> The name of the service (Check) the reply is for
+  <LI><B>hostname:</B> The name of the host the reply is for
+  <LI><B>replycommand:</B> One of <TT>Acknowledge</TT>, <TT>Escalate</TT>,
+     or <TT>Inhibit</TT>
+  <LI><B>token:</B> The same token than was transmitted in the original alert
+     notification
+  <LI><B>instance:</B> The name of the Instance that the original alert
+     notification was generated from
+  </UL>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+  example reply
+ </TD>
+ <TD CLASS=highlight>
+  <PRE>
+  From: foo@bar.com
+  Date: Mon, 06 Aug 2001 11:01:06 -0400
+  To: survivor@bar.com
+  Subject: RE: ALERT: test1@apple
+
+  Acknowledge
+
+  In Reply To Your Message
+  
+  Connection refused
+  11:00:21 08/06/2001
+  Token=1811060716
+  Instance=test
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="sg-sms"></A>
+ <H3>With SMS Text Messages</H3>
+
+ Messages formatted with the <A HREF=fmm-sms.html><TT>sms</TT> format
+ module</A> are capable of being replied to and processed by the
+ gateway, however the mechanism is more complicated due to the
+ limitations of SMS text messaging.
+
+ <P>
+
+ First, the mail system must be capable of delivering messages
+ addressed to <TT>$INSTUSER+x@scheduler</TT>, where <I>x</I> is the
+ one letter command described below.  For example,
+ <TT>survivor+e@monitor.foo.edu</TT> must be delivered to
+ <TT>survivor@monitor.foo.edu</TT>.  Sendmail sites may already have
+ this functionality enabled.  Other sites may need to make
+ adjustments.  One approach would be to define aliases in
+ <TT>/etc/aliases</TT> (if appropriate for the local mail system):
+
+ <PRE>
+ survivor+a: survivor
+ survivor+e: survivor
+ survivor+i: survivor
+ </PRE>
+
+ <P>
+
+ In order to reply to an alert notification, <I>forward</I> the
+ message (do not reply to it) to the address for the appropriate
+ command:
+
+ <UL>
+ <LI><B><TT>+a</TT></B>: Acknowledge
+ <LI><B><TT>+e</TT></B>: Escalate
+ <LI><B><TT>+i</TT></B>: Inhibit
+ </UL>
+ 
+ <P>
+ 
+ <TABLE BORDER=0>
+ <TR>
+ <TD CLASS=hltitle>
+  message limitations
+ </TD>
+ <TD CLASS=highlight>
+  The length of the address the reply message is forwarded to
+  <I>plus</I> the length of the address the reply message is
+  sent from (usually of the form <I>phonenumber@provider.com</I>)
+  cannot exceed 60 characters.  Note the message body consists
+  of one line.
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+  message syntax
+ </TD>
+ <TD CLASS=highlight>
+  <PRE>
+  From: &lt;address>
+  To: &lt;survivor>+&lt;command>@&lt;scheduler>
+  Subject: [optional unrelated text]ALERT: &lt;service>@&lt;hostname>
+
+  [optional unrelated text]T=&lt;token>,I=&lt;instance> \
+  [optional unrelated text]
+  </PRE>
+  
+  or
+ 
+  <PRE>
+  From: &lt;address>
+  To: &lt;survivor>+&lt;command>@&lt;scheduler>
+
+  [optional unrelated text]ALERT: &lt;service>@&lt;hostname>/\
+  [optional unrelated text]T=&lt;token>,I=&lt;instance> \
+  [optional unrelated text]
+  </PRE>
+  
+  where
+
+  <UL>
+  <LI><B>address:</B> The sender of the reply command
+  <LI><B>command:</B> One of <TT>a</TT>, <TT>e</TT>, or <TT>i</TT>
+  <LI><B>service:</B> The name of the service (Check) the reply is for
+  <LI><B>hostname:</B> The name of the host the reply is for
+  <LI><B>scheduler:</B> The host the scheduler runs on
+  <LI><B>survivor:</B> The name of the survivor user
+  <LI><B>token:</B> The same token than was transmitted in the original alert
+     notification
+  <LI><B>instance:</B> The name of the instance that the original alert
+     notification was generated from
+  </UL>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+  example reply
+ </TD>
+ <TD CLASS=highlight>
+  <PRE>
+  Date: Mon, 27 Jan 2003 15:48:42 -0500 (EST)
+  From: foo@mar.com
+  To: survivor+e@bar.com
+  Subject: ALERT: test1@apple
+
+  T=Q874954334,I=test  No response from host  15:10:04 01/27/2003
+  </PRE>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+  example reply
+ </TD>
+ <TD CLASS=highlight>
+  <PRE>
+  Date: Mon, 27 Jan 2003 15:48:42 -0500 (EST)
+  From: foo@mar.com
+  To: survivor+e@bar.com
+
+  ALERT: test1@apple/ T=Q874954334,I=test  No response from host \
+  15:10:04 01/27/2003
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="sg-relay"></A>
+ <H3>Relaying Messages</H3>
+
+ The gateway can accept messages and relay them to Persons or Call Lists.
+ By default, this functionality is disabled.  To enable message relaying,
+ edit the configuration file <A HREF="cf-gateway.html"><TT>gateway.cf</TT></A>.
+ 
+<HR>
+<I>$Date: 2006/11/19 17:33:07 $</I><BR>
+<I>$Revision: 0.12 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+(sg)
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

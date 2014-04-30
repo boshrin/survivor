@@ -1,0 +1,43 @@
+----------------------------
+revision 0.10
+date: 2006/01/23 02:18:15;  author: benno;  state: Exp;  lines: +8 -4
+Add ReplyTo
+----------------------------
+revision 0.9
+date: 2003/06/01 10:07:50;  author: selsky;  state: Exp;  lines: +3 -3
+Fix syntax problem
+----------------------------
+revision 0.8
+date: 2003/05/30 01:28:59;  author: selsky;  state: Exp;  lines: +6 -6
+Use single quotes
+perl -w
+----------------------------
+revision 0.7
+date: 2003/05/30 01:27:37;  author: selsky;  state: Exp;  lines: +8 -9
+Use Mail::Mailer
+----------------------------
+revision 0.6
+date: 2003/05/28 23:58:00;  author: benno;  state: Exp;  lines: +28 -156
+Now a Transmit module instead of an Alert module
+----------------------------
+revision 0.5
+date: 2003/03/05 03:27:45;  author: benno;  state: Exp;  lines: +44 -11
+Cap sms message contents to 100 characters
+----------------------------
+revision 0.4
+date: 2003/03/04 17:42:40;  author: benno;  state: Exp;  lines: +16 -12
+Change ignore to inhibit
+Add sms version
+----------------------------
+revision 0.3
+date: 2002/12/31 04:22:32;  author: benno;  state: Exp;  lines: +30 -7
+Add fix flags
+----------------------------
+revision 0.2
+date: 2002/04/04 20:54:52;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:25:04;  author: benno;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,57 @@
+----------------------------
+revision 0.14
+date: 2004/09/16 14:54:34;  author: benno;  state: Exp;  lines: +32 -5
+Detect undeliverable messages
+----------------------------
+revision 0.13
+date: 2004/06/12 00:12:06;  author: benno;  state: Exp;  lines: +13 -5
+Better reporting of server counts
+----------------------------
+revision 0.12
+date: 2003/01/29 01:17:49;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.11
+date: 2002/12/31 04:05:39;  author: benno;  state: Exp;  lines: +6 -5
+Use default for directory
+----------------------------
+revision 0.10
+date: 2002/12/16 00:24:01;  author: benno;  state: Exp;  lines: +174 -209
+Convert to named arguments
+----------------------------
+revision 0.9
+date: 2002/09/06 06:41:29;  author: selsky;  state: Exp;  lines: +7 -4
+Remove junk before '<' and after '>'
+----------------------------
+revision 0.8
+date: 2002/08/22 14:35:30;  author: selsky;  state: Exp;  lines: +7 -4
+use lc instead and clean up comment
+----------------------------
+revision 0.7
+date: 2002/08/21 21:29:19;  author: benno;  state: Exp;  lines: +11 -5
+case insensitive addresses
+----------------------------
+revision 0.6
+date: 2002/07/10 15:37:09;  author: benno;  state: Exp;  lines: +11 -4
+don't assume stat is successful
+----------------------------
+revision 0.5
+date: 2002/07/09 19:10:11;  author: benno;  state: Exp;  lines: +6 -3
+can't have permission denied when there are no files
+----------------------------
+revision 0.4
+date: 2002/06/07 21:32:05;  author: benno;  state: Exp;  lines: +8 -3
+exit with a return code
+----------------------------
+revision 0.3
+date: 2002/06/04 02:28:18;  author: selsky;  state: Exp;  lines: +8 -13
+remove AccResultClear() call, clean up error messages
+----------------------------
+revision 0.2
+date: 2002/06/02 16:14:59;  author: selsky;  state: Exp;  lines: +72 -58
+port to Survivor.pm
+----------------------------
+revision 0.1
+date: 2002/04/22 00:23:53;  author: benno;  state: Exp;
+initial revision
+=============================================================================

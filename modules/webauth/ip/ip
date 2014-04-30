@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+# ip based webauth module
+#
+# Version: $Revision: 0.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2004/03/02 17:46:53 $
+#
+# Copyright (c) 2003 - 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::WebAuth;
+
+use Socket;  # For hostname lookup
+
+# Create a new WebAuth object.
+
+my $sw = new Survivor::WebAuth();
+
+my %argfmt = ("validhost" => "optional relation");
+
+$sw->ParseWebAuthRequest(\%argfmt);
+
+# Look up the source IP, and return it as the username.
+# We always return success (it's up to the authz mechanism to
+# control access), so if the lookup fails we'll just return
+# the numeric IP.
+
+my @hent = gethostbyaddr(inet_aton($sw->SourceIP()), AF_INET);
+my $host = $hent[0] ? $hent[0] : $sw->SourceIP();
+my $authok = "no";
+my $err = undef;
+
+if($sw->Arg("validhost")) {
+    my $rel = $sw->Arg("validhost");
+    my %relhash = %$rel;
+
+    if(defined $relhash{"s"} && $host =~ /$relhash{"s"}/) {
+	$authok = "yes";
+    }
+} else {
+    $authok = "yes";
+}
+
+if($authok eq "no") {
+    $err = "Unauthorized host";
+}
+
+$sw->GenerateWebAuthResult($authok, $host, undef, $err, undef, undef);
+
+exit MODEXEC_OK;

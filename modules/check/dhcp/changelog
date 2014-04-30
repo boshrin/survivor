@@ -1,0 +1,47 @@
+revision 0.11
+date: 2003/01/29 01:10:24;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.10
+date: 2002/12/31 04:02:21;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.9
+date: 2002/12/12 19:24:41;  author: selsky;  state: Exp;  lines: +3 -3
+$sc, not $self
+----------------------------
+revision 0.8
+date: 2002/11/10 09:05:40;  author: selsky;  state: Exp;  lines: +34 -32
+Update for Survivor::Check
+Use Net::Domain instead of Sys::Hostname
+Actually make use of Socket module by calling inet_ntoa()
+Explicitly disable parallelization
+----------------------------
+revision 0.7
+date: 2002/05/26 18:33:35;  author: selsky;  state: Exp;  lines: +22 -18
+port to Survivor.pm
+----------------------------
+revision 0.6
+date: 2002/04/04 20:57:00;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.5
+date: 2002/04/03 20:44:13;  author: benno;  state: Exp;  lines: +4 -0
+add rcs header
+----------------------------
+revision 0.4
+date: 2002/02/27 23:28:27;  author: johan;  state: Exp;  lines: +1 -1
+up default timeout
+----------------------------
+revision 0.3
+date: 2001/11/14 18:59:50;  author: selsky;  state: Exp;  lines: +1 -1
+one more time
+----------------------------
+revision 0.2
+date: 2001/11/14 18:56:26;  author: selsky;  state: Exp;  lines: +1 -1
+change handling of ':'
+----------------------------
+revision 0.1
+date: 2001/11/14 18:41:57;  author: selsky;  state: Exp;
+Initial revision
+=============================================================================

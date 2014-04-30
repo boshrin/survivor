@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Processinfo Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>processinfo</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>processinfo</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>processinfo</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module processinfo {</B>
+       [<B>warncpu</B> &lt;number>]
+       [<B>probcpu</B> &lt;number>]
+       [<B>warnmem</B> &lt;number>]
+       [<B>probmem</B> &lt;number>]
+       [<B>warntime</B> &lt;number>]
+       [<B>probtime</B> &lt;number>]
+       [<B>op</B> (<B>any</B> | <B>all</B>)]
+       <B>name</B> &lt;string>
+       [<B>name</B> ...]
+       [<B>matchtype</B> (<B>a</B> | <B>i</B>)+]
+       [<B>uid</B> &lt;relation>]
+       [<B>userid</B> &lt;relation>]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warncpu"></A><B>warncpu</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a warning if a matching process has exceeded the specified
+   number of CPU seconds.
+ </TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probcpu"></A><B>probcpu</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a problem if a matching process has exceeded the specified
+   number of CPU seconds.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warnmem"></A><B>warnmem</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a warning if a matching process has exceeded the specified
+   amount of memory in KB (virtual total).
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probmem"></A><B>probmem</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a problem if a matching process has exceeded the specified
+   amount of memory in KB (virtual total).
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warntime"></A><B>warntime</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a warning if a matching process has exceeded the specified
+   number of real seconds.  This test is not available on BSD systems.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-probtime"></A><B>probtime</B></TD>
+ <TD CLASS=kwref>optional number between 1 and infinity</TD>
+ <TD CLASS=kwdef>
+   Test: Generate a problem if a matching process has exceeded the specified
+   number of real seconds.  This test is not available on BSD systems.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-op"></A><B>op</B></TD>
+ <TD CLASS=kwref>optional string, one of 'any' or 'all', default is 'any'</TD>
+ <TD CLASS=kwdef>
+   Determine how to join results together.  <I>any</I> indicates
+   that any test specified for a given level (warning or problem)
+   that fails will generate an error at that level.  <I>all</I>
+   indicates that all requested tests must fail at a given level for
+   an error to be generated at that level.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-name"></A><B>name</B></TD>
+ <TD CLASS=kwref>required string list</TD>
+ <TD CLASS=kwdef>
+   Filter: The regular expression used to match the process.  If more than
+   one is provided, each process found with a matching name must match
+   the tests specified.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-matchtype"></A><B>matchtype</B></TD>
+ <TD CLASS=kwref>optional flags <TT>a</TT>,<TT>i</TT></TD>
+ <TD CLASS=kwdef>
+   If not provided, only the name of the program (argv[0]) is examined
+   to compare against the <I>name</I> filter.
+   <UL>
+   <LI><TT>a</TT> indicates to examine the name of the program plus all
+       of the arguments.
+   <LI><TT>i</TT> indicates the program is run through an interpreter,
+       and so the name of the program begins with the second token.
+   </UL>
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-uid"></A><B>uid</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Filter: Match only those processes owned by a numeric uid described by the
+   specified relation.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-userid"></A><B>userid</B></TD>
+ <TD CLASS=kwref>optional relation</TD>
+ <TD CLASS=kwdef>
+   Filter: Match only those processes owned by a user described by
+   the specified relation.  If the userid is specified as a numeric
+   uid (via the <I>uid</I> argument) rather than a username, this
+   module may run significantly faster on hosts with slow name
+   service backends.
+ </TD>
+ </TR>
+</TABLE>
+
+ <P>
+
+ At least one test must be specified.
+
+ <P>
+ 
+ On older BSD systems, only <I>uid</I> or <I>userid</I> may be specified.
+ 
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>processinfo</TT> module determines processes matching the
+ specified filters are running with the characteristics described by
+ the specified tests.  For SYSV environments, <TT>ps -e -o
+ user,uid,pid,time,args</TT> is used, for BSD environments, <TT>ps -a
+ -o user,uid,pid,time,command</TT> is used if it can be determined
+ that such options are supported, otherwise <TT>ps -aux</TT> is used.
+
+ <P>
+
+ The <I>matchtype</I> argument can be used to adjust how matching
+ occurs.  By default, only the name of the program is matched.
+ However, in some cases (<TT>a</TT>), the full argument string (as
+ obtained via <TT>ps</TT>) is necessary for comparison.  In other
+ cases (<TT>i</TT>), programs are run through an interpreter (eg:
+ <TT>/usr/bin/perl</TT> or <TT>java</TT>), and the program name is
+ actually an argument to the interpreter running it.  For more examples,
+ see the <A HREF="cm-process.html">process</A> module.
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To warn when the process <I>leaker</I> owned by the user <I>bloat</I>
+     has consumed 100MB of memory:
+     <PRE>
+     module processinfo {
+       userid   reg[^bloat$]
+       name     .*leaker
+       warnmem  100000
+     }
+     via remote
+     </PRE>
+
+ <LI>To look for non-system processes on a timeshare using excessive CPU
+     and that are at least a few hours old:
+     <PRE>
+     module processinfo {
+       uid      gt[100]
+       name     .*
+       warncpu  1000
+       probcpu  2000
+       warntime 14400
+       probtime 21600
+       op       all
+     }
+     via remote
+    </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 21:17:56 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-matchtype">matchtype</A><BR>
+ <A CLASS="keywords" HREF="#kw-name">name</A><BR>
+ <A CLASS="keywords" HREF="#kw-op">op</A><BR>
+ <A CLASS="keywords" HREF="#kw-probcpu">probcpu</A><BR>
+ <A CLASS="keywords" HREF="#kw-probmem">probmem</A><BR>
+ <A CLASS="keywords" HREF="#kw-probtime">probtime</A><BR>
+ <A CLASS="keywords" HREF="#kw-uid">uid</A><BR>
+ <A CLASS="keywords" HREF="#kw-userid">userid</A><BR>
+ <A CLASS="keywords" HREF="#kw-warncpu">warncpu</A><BR>
+ <A CLASS="keywords" HREF="#kw-warnmem">warnmem</A><BR>
+ <A CLASS="keywords" HREF="#kw-warntime">warntime</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

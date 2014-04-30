@@ -1,0 +1,122 @@
+<HEAD>
+<TITLE>SURVIVOR: @{ECHO $title}</TITLE>
+<!-- @{VERSION type=build} -->
+<META HTTP-EQUIV="Expires" CONTENT="-1">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no cache">
+@{IF NOTDEFINED STRING norefresh}
+<META HTTP-EQUIV="refresh" CONTENT="@{REFRESH};">
+@{ENDIF}
+@{INCLUDE style.html}
+@{SET encoded=@[URI]}
+@{SET instance=@[INSTANCE]}
+@{IF DEFINED FLAG sort}
+@{SET sort=@[FLAG sort]}
+@{SET sort=SORT $sort}
+@{ENDIF}
+</HEAD>
+
+<BODY>
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+<FONT CLASS="navspacer">SURVIVOR</FONT>
+</TD>
+</TR>
+</TABLE>
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="infobar">
+ <TR CLASS="infobar">
+ <TH CLASS="infobar">Auth Status</TH>
+ <TH CLASS="infobar">Status As Of</TH>
+@{IF STRING NOTEMPTY $instance}
+ <TH CLASS="infobar">Scheduler Status</TH>
+@{ENDIF}
+ </TR>
+
+ <TR CLASS="infobar">
+ <TD CLASS="infobar">
+ @{IF AUTHENTICATED}
+ Logged in as <B>@{USERNAME}</B> (@{AUTHLEVEL})
+ (<A HREF="@{URI l=0}">logout</A>)
+ @{ELSE}
+ Not logged in (<A HREF="@{URI l=1}">login</A>)
+ @{ENDIF}
+ </TD>
+ <TD CLASS="infobar">@{TIME}</TD>
+@{IF STRING NOTEMPTY $instance}
+ <TD CLASS="infobar">
+  @{SET asched=@[RUNNINGSTATE lastrun=alert]}
+  @{SET csched=@[RUNNINGSTATE lastrun=check]}
+  @{IF NUMBER $asched < 0}
+   Failed to verify scheduler state
+  @{ELSE}
+   @{IF NUMBER $asched < 10}
+    @{IF NUMBER $csched < 10}
+    Schedulers are running
+    @{ELSE}
+    <FONT CLASS="rc1">
+    Check scheduler has not run in @{ECHO $csched} minutes
+    </FONT>
+    @{ENDIF}
+   @{ELSE}
+    @{IF NUMBER $csched < 10}
+    <FONT CLASS="rc1">
+    Alert scheduler has not run in @{ECHO $asched} minutes
+    </FONT>
+    @{ELSE}
+    <FONT CLASS="rc1">
+    Alert scheduler has not run in @{ECHO $asched} minutes<BR>
+    Check scheduler has not run in @{ECHO $csched} minutes
+    </FONT>
+    @{ENDIF}
+   @{ENDIF}
+  @{ENDIF}
+ </TD>
+@{ENDIF}
+ </TR>
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+
+@{IF DEFINED FLAG error}
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="errorbar">
+ <TR CLASS="errorbar">
+  <TH CLASS="errorbar">Error</TH>
+ </TR>
+ <TR CLASS="errorbar">
+  <TD CLASS="errorbar">@{FLAG error}</TD>
+ </TR>
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+@{ENDIF}
+@{IF DEFINED FLAG info}
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="infobar">
+ <TR CLASS="infobar">
+  <TH CLASS="infobar">Information</TH>
+ </TR>
+ <TR CLASS="infobar">
+  <TD CLASS="infobar">@{FLAG info}</TD>
+ </TR>
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+@{ENDIF}

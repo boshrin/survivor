@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+# wind based webauth module
+#
+# Version: $Revision: 0.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2004/03/02 17:47:21 $
+#
+# Copyright (c) 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::WebAuth;
+
+use URI;
+use URI::Escape;
+use HTTP::Request::Common;
+use LWP::UserAgent;
+
+# Create a new WebAuth object.
+
+my $sw = new Survivor::WebAuth();
+
+my %argfmt = ("loginuri" => "string",
+	      "validateuri" => "string",
+	      "service" => "optional string");
+
+$sw->ParseWebAuthRequest(\%argfmt);
+
+if($sw->RequestedURI() =~ /ticketid/) {
+    # Parse out ticketid and validate it
+    my $req = uri_unescape($sw->RequestedURI());
+    $req =~ s/.*\?//;
+    my (@flags) = split(/&/, $req);
+    my $tid = "";
+    my $err = "";
+    my $reply = "no";
+    my $user = "";
+    my $groups;
+
+    foreach my $f (@flags) {
+	my ($n, $v) = split(/=/, $f);
+
+	if($n eq "ticketid") {
+	    $tid = $v;
+	}
+    }
+
+    if($tid ne "") {
+	my $vuri = new URI($sw->Arg("validateuri") . "?ticketid=" . $tid);
+	my $ua = new LWP::UserAgent();
+	my $res = $ua->get($vuri);
+
+	my @rep = split(/\n/, ${$res->content_ref});
+
+        $reply = shift(@rep);
+
+        if($reply eq "yes") {
+	    $user = shift(@rep);
+	    $groups = \@rep;
+        } else {
+	    $err = "Permission denied";
+	}
+    } else {
+	$err = "No ticketid received";
+    }
+
+    my @skip = ("ticketid");
+
+    $sw->GenerateWebAuthResult($reply, $user, $groups, $err, undef, \@skip);
+} else {
+    my $goto = "";
+
+    if(defined $sw->Arg("service")) {
+	$goto = sprintf("%s?service=%s&amp;destination=%s",
+			$sw->Arg("loginuri"), $sw->Arg("service"),
+			uri_escape($sw->RequestedURI()));
+    } else {
+	$goto = sprintf("%s?destination=%s", $sw->Arg("loginuri"),
+			uri_escape($sw->RequestedURI()));
+    }
+    
+    $sw->GenerateWebAuthResult("deferred", undef, undef, undef,
+			       "<HTML><HEAD><META HTTP-EQUIV=\"refresh\" CONTENT=\"1;URL=" . $goto ."\"></HEAD><BODY BGCOLOR=gray></BODY></HTML>",
+			       undef);
+}
+
+# need to exit with modexec deferred here since xml and browser redirect
+# can't both happen on standard out
+# no : deferral output must be in xml, and echoed by sw
+exit MODEXEC_OK;

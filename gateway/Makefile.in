@@ -1,0 +1,40 @@
+# Makefile for Survivor email gateway.
+
+# Version: $Revision: 0.11 $
+# Date: $Date: 2006/10/15 14:21:54 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../Makefile.inc
+
+OBJS=main.o Reply.o SMSReply.o TwoWayReply.o
+LDFLAGS = -L../libui -lui -L../libparse822 -lparse822 ${CORELDFLAGS}
+
+# Set the paths to the source
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# Where to find install
+INSTALL=@INSTALL@
+
+all: sg
+
+install-remote:
+
+install: all
+	${INSTALL} -o @INST_USER@ -g @INST_GROUP@ -m 2555 sg \
+	${DESTDIR}@sbindir@/sg
+
+sg: ${OBJS} ${CORELIBS} ../libui/libui.a
+	${CCC} -o sg ${OBJS} ${LDFLAGS}
+
+veryclean: clean
+	rm -f *.o *~
+
+clean:
+	rm -f sg ${OBJS}

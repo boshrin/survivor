@@ -1,0 +1,29 @@
+----------------------------
+revision 0.7
+date: 2003/01/29 01:20:23;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:07:59;  author: benno;  state: Exp;  lines: +5 -5
+Adjust lists
+----------------------------
+revision 0.5
+date: 2002/12/16 00:22:59;  author: benno;  state: Exp;  lines: +60 -57
+Convert to named arguments
+----------------------------
+revision 0.4
+date: 2002/06/12 21:43:57;  author: selsky;  state: Exp;  lines: +6 -3
+fix uninitialized variable warning
+----------------------------
+revision 0.3
+date: 2002/05/27 19:46:02;  author: selsky;  state: Exp;  lines: +34 -20
+port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 21:00:14;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 21:12:07;  author: benno;  state: Exp;
+initial revision
+=============================================================================

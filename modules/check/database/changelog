@@ -1,0 +1,29 @@
+----------------------------
+revision 0.7
+date: 2006/12/10 01:40:50;  author: benno;  state: Exp;  lines: +9 -6
+Add oracleic (instant client)
+----------------------------
+revision 0.6
+date: 2005/08/10 12:36:42;  author: benno;  state: Exp;  lines: +6 -4
+Convert hostname to uppercase when constructing DSN for Sybase
+----------------------------
+revision 0.5
+date: 2003/01/29 01:08:51;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.4
+date: 2002/12/31 04:01:46;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.3
+date: 2002/12/10 08:51:55;  author: selsky;  state: Exp;  lines: +3 -3
+update for new list argument return type
+----------------------------
+revision 0.2
+date: 2002/12/03 23:16:39;  author: selsky;  state: Exp;  lines: +74 -107
+Update for Survivor::Check
+----------------------------
+revision 0.1
+date: 2002/06/13 19:25:13;  author: selsky;  state: Exp;
+initial revision
+=============================================================================

@@ -1,0 +1,452 @@
+#!/usr/bin/perl -w
+
+# storedge-t3 module
+
+# Version: $Revision: 0.6 $
+# Author: Matt Selsky
+# Date: $Date: 2007/02/11 02:05:33 $
+#
+# Copyright (c) 2003 - 2007
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use SNMP;
+
+my %argfmt = ('community' => 'optional string default(public)',
+	      'snmpversion' => 'optional string one(1,2,2c,3) default(1)',
+	      'snmptimeout' => 'optional number between(1,inf) default(5)');
+
+my $sc = new Survivor::Check();
+
+# Disable threading pending threadsafe SNMP.
+$sc->UseThreads(0);
+
+$sc->GetOpt(\%argfmt, \&Storedge_t3Validate);
+
+# Calculate timeout in microseconds
+
+my $snmptimeout = $sc->Arg('snmptimeout') * 1000000;
+
+my $r = $sc->Exec( \&Storedge_t3Check);
+
+exit($r);
+
+sub Storedge_t3Validate {
+    return(MODEXEC_OK, 0, 'Storedge-t3 OK');
+}
+
+sub Storedge_t3Check {
+    my $self = shift;
+    my $host = shift;
+
+    my $nrError = 0;
+    my $nrNotice = 0;
+
+    my(@value, $nrUnit, $nrFRU, $fru, $nrDisk, $nrCtlr, $nrPower);
+
+    my $community = $self->Arg('community');
+
+    my $sess = new SNMP::Session( DestHost => $host,
+				  Community => $community,
+				  UseLongNames => 1,
+				  UseNumeric => 1,
+				  Version => $sc->Arg("snmpversion"),
+				  Timeout => $snmptimeout );
+
+    if(!defined $sess) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to resolve hostname');
+    }
+
+    # Determine the number of units
+
+    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.2.1.0');
+
+    if($#value != 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to determine number of units');
+    }
+
+    $nrUnit = shift @value;
+
+    # Determine the number of FRUs
+
+    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.1.0');
+
+    if($#value != 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to determine number of FRUs');
+    }
+
+    $nrFRU = shift @value;
+
+    # Determine the ID of FRUs
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxFRU (0 .. $nrFRU/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.2.1.2.'.$idxUnit.'.'.$idxFRU);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine id of unit '.($idxUnit+1).', FRU '.($idxFRU+1));
+	    }
+
+	    my $id = shift @value;
+
+	    $fru->{$idxUnit}{$idxFRU}{'id'} = $id;
+	}
+    }
+
+    # Determine the type of FRUs
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxFRU (0 .. $nrFRU/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.2.1.3.'.$idxUnit.'.'.$idxFRU);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine type of unit '.($idxUnit+1).', FRU '.($idxFRU+1));
+	    }
+
+	    my $type = shift @value;
+
+	    my $name;
+
+	    if($type == 1) {
+		$name = 'disk';
+	    } elsif($type == 2) {
+		$name = 'controller';
+	    } elsif($type == 3) {
+		$name = 'loop';
+	    } elsif($type == 4) {
+		$name = 'power';
+	    } elsif($type == 5) {
+		$name = 'midplane';
+	    } else {
+		return(MODEXEC_MISCONFIG, 0, 'Unexpected type($type) for unit '.($idxUnit+1).', FRU '.($idxFRU+1));
+	    }
+
+	    $fru->{$idxUnit}{$idxFRU}{'type'} = $name;
+	}
+    }
+
+    # Determine the status of FRUs
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxFRU (0 .. $nrFRU/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.2.1.4.'.$idxUnit.'.'.$idxFRU);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine status of '.
+		       $fru->{$idxUnit}{$idxFRU}{'type'}.' '.$fru->{$idxUnit}{$idxFRU}{'id'});
+	    }
+
+	    my $status = shift @value;
+
+	    # ready = 3
+	    if($status != 3) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Status of '.
+				    $fru->{$idxUnit}{$idxFRU}{'type'}.' '.$fru->{$idxUnit}{$idxFRU}{'id'}.
+				    " is not 'ready'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the state of FRUs
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxFRU (0 .. $nrFRU/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.2.1.5.'.$idxUnit.'.'.$idxFRU);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine state of '.
+		       $fru->{$idxUnit}{$idxFRU}{'type'}.' '.$fru->{$idxUnit}{$idxFRU}{'id'});
+	    }
+
+	    my $state = shift @value;
+
+	    # enabled = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'State of '.
+				    $fru->{$idxUnit}{$idxFRU}{'type'}.' '.$fru->{$idxUnit}{$idxFRU}{'id'}.
+				    " is not 'enabled'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the number of disks
+
+    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.3.0');
+
+    if($#value != 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to determine number of disks');
+    }
+
+    $nrDisk = shift @value;
+
+    # Determine the state of port 1 on disks
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxDisk (0 .. $nrDisk/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.4.1.2.'.$idxUnit.'.'.$idxDisk);
+	    
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine state of port 1 for disk u'.($idxUnit+1).'d'.($idxDisk+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # ready = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'State of port 1 for disk u'.($idxUnit+1).'d'.($idxDisk+1)." is not 'ready'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the state of port 2 on disks
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxDisk (0 .. $nrDisk/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.4.1.3.'.$idxUnit.'.'.$idxDisk);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine state of port 2 for disk u'.($idxUnit+1).'d'.($idxDisk+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # ready = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'State of port 2 for disk u'.($idxUnit+1).'d'.($idxDisk+1)." is not 'ready'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the status code of disks
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxDisk (0 .. $nrDisk/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.4.1.5.'.$idxUnit.'.'.$idxDisk);
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine status code for disk u'.($idxUnit+1).'d'.($idxDisk+1));
+	    }
+
+	    my $statusCode = shift @value;
+
+	    # all-ok = 0
+	    if($statusCode != 0) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Status code for disk u'.($idxUnit+1).'d'.($idxDisk+1).' is non-zero');
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the number of controllers
+
+    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.5.0');
+
+    if($#value != 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to determine number of controllers');
+    }
+
+    $nrCtlr = shift @value;
+
+    # Determine the state of controllers
+
+    foreach my $idxCtlr (0 .. $nrCtlr - 1) {
+	@value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.6.1.4.'.$idxCtlr.'.9');
+
+	if($#value != 0) {
+	    return(MODEXEC_PROBLEM, 0, 'Unable to determine state of controller '.($idxCtlr+1));
+	}
+
+	my $state = shift @value;
+
+	# online = 3
+	if($state != 3) {
+	    $self->AccResultAdd($host, MODEXEC_PROBLEM, 'State of controller '.($idxCtlr+1)." is not 'online'");
+	    $nrError++;
+	}
+    }
+
+    # Determine the number of power/cooling units
+
+    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.9.0');
+
+    if($#value != 0) {
+	return(MODEXEC_PROBLEM, 0, 'Unable to determine number of power/cooling units');
+    }
+
+    $nrPower = shift @value;
+
+    # Determine the power output state of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.1.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine power output state for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # normal = 2
+	    if($state != 2) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Power output state for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'normal'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the power input source of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.2.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine power input source for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $source = shift @value;
+
+	    # line = 1
+	    if($source != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Power input source for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'line'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the power temperature state of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.3.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine power temperature state for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # normal = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Power temperature state for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'normal'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the fan 1 state of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.4.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine fan 1 state for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # normal = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Fan 1 state for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'normal'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the fan 2 state of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.5.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine fan 2 state for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # normal = 1
+	    if($state != 1) {
+		$self->AccResultAdd($host, MODEXEC_PROBLEM, 'Fan 2 state for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'normal'");
+		$nrError++;
+	    }
+	}
+    }
+
+    # Determine the battery charge state of power/cooling units
+
+    foreach my $idxUnit (0 .. $nrUnit - 1) {
+	foreach my $idxPower (0 .. $nrPower/$nrUnit - 1) {
+	    @value = &snmpwalk($sess, '.1.3.6.1.4.1.42.2.28.2.2.3.10.1.6.'.$idxUnit.'.'.($idxPower+12));
+
+	    if($#value != 0) {
+		return(MODEXEC_PROBLEM, 0, 'Unable to determine battery charge state for u'.($idxUnit+1).'pcu'.($idxPower+1));
+	    }
+
+	    my $state = shift @value;
+
+	    # normal = 2
+	    # fault = 3
+	    # refreshing = 4
+	    if($state != 2) {
+		if($state == 3 || $state == 4) {
+		    $self->AccResultAdd($host, MODEXEC_NOTICE,
+					'Battery for u'.($idxUnit+1).'pcu'.($idxPower+1)." is in refresh cycle");
+		    $nrNotice++;
+		} else {
+		    $self->AccResultAdd($host, MODEXEC_PROBLEM,
+					'Battery charge state for u'.($idxUnit+1).'pcu'.($idxPower+1)." is not 'normal'");
+		    $nrError++;
+		}
+	    }
+	}
+    }
+
+    if( ($nrError + $nrNotice) == 0) {
+	$self->AccResultAdd($host, MODEXEC_OK, 'Status is normal');
+    }
+
+    return($self->AccResultGet($host, $nrError));
+}
+
+sub snmpwalk {
+    my $session = shift;
+    my $oid = shift;
+
+    my @result;
+
+    my $vb = new SNMP::Varbind([$oid]);
+
+    # Get first tuple
+    $session->get($vb);
+
+    # Loop through OID tree
+    while(1) {
+	# Did we actually get anything?  Maybe OID has children which
+	# contain data... Or maybe host isn't responding.
+	if( defined $vb->val() && $vb->val() ne '' ) {
+	    # Check that current OID has the same prefix as the OID we
+	    # requested, otherwise break out
+	    last if( $vb->name() !~ /^$oid/ );
+
+	    push @result, $vb->val();
+	}
+	# try to get the next tuple
+	last unless defined $session->getnext($vb);
+    }
+
+    return @result;
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Mounts Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>mounts</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>mounts</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>mounts</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module mounts {</B>
+       [<B>filesystem</B> &lt;string>]
+       [<B>filesystem</B> ...]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-filesystem"></A><B>filesystem</B></TD>
+ <TD CLASS=kwref>optional string list</TD>
+ <TD CLASS=kwdef>
+   Filesystem(s) (not a regex) to be checked.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>mounts</TT> module reads the file specifying what should be
+ mounted (<TT>/etc/vfstab</TT> or <TT>/etc/fstab</TT>) and compares
+ the contents with the file specifying what is mounted
+ (<TT>/etc/mnttab</TT> or <TT>/etc/mtab</TT>).
+
+ <P>
+
+ If filesystem(s) is (are) specified, then those filesystems must be
+ present in the file specifying what is mounted.  Otherwise, all
+ filesystems listed in <TT>vfstab</TT> or <TT>fstab</TT> (except
+ special filesystems like <TT>swap</TT>) must be found.  Any expected
+ filesystem that is not found in <TT>mnttab</TT> or <TT>mtab</TT> will
+ generate a problem alert.
+
+ <P>
+
+ Note that the test used currently is rather basic: the file listing
+ what should be mounted is compared against the file listing what the
+ OS thinks is mounted.  No verification is done beyond this, including
+ whether the correct device is mounted or whether it is mounted with
+ the correct options.  This is subject to change in a future release.
+
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To test all mounts:
+     <PRE>
+     module mounts {}
+     via remote
+     </PRE>
+
+ <LI>To test only <TT>/var</TT> and <TT>/mnt</TT>:
+     <PRE>
+     module mounts {
+       filesystem /var
+       filesystem /mnt
+     }
+     via remote
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 20:24:24 $</I><BR>
+ <I>$Revision: 0.8 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-filesystem">filesystem</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

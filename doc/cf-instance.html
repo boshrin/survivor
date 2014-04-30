@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: instance.cf</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: instance.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>instance.cf</TT></A>
+ <LI><A HREF="#instances">Instances</A>
+  <UL>
+  <LI><A HREF="#instances-about">About Instances</A>
+  <LI><A HREF="#instances-dependencies">Dependencies</A>
+  <LI><A HREF="#instances-keywords">Instance Stanza Keywords</A>
+  <LI><A HREF="#instances-examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>instance.cf</TT>
+ </TD>
+ </TR>
+    
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+<P>
+
+ <TT>instance.cf</TT> defines <A CLASS=kwlink
+ HREF=#instances>Instances</A>, which allow for multiple concurrent
+ configurations on the same server, for ease of maintenance,
+ bureaucratic division, or fun.  The expected location of this file
+ is <TT>/etc/survivor/instance.cf</TT>.  While some utilities allow an
+ alternate location to be specified, it is generally advisable to use
+ the default location.
+ 
+ <P>
+
+ <A ID="instances"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Instances
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>instance</B> &lt;name> <B>{</B>
+         <B>configdir</B> &lt;name>
+	 <B>statedir</B> &lt;name>
+	 <B>historydir</B> &lt;name>
+	 [<B>helpdir</B> &lt;name>]
+	 [<B>tmpdir</B> &lt;name>]
+	 [<B>allow archive</B>]
+	 [<B>allow root</B>]
+	 [<B>require comment</B>]
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="instances-about"></A>
+ <H3>About Instances</H3>
+
+ An <I>Instance</I> defines a set of configuration files, a state
+ directory, a history directory, a help directory, and some optional
+ behaviors.  This allows separate configurations to be run concurrently,
+ for example to allow two groups within an organization to separately
+ maintain their own configurations.
+
+ <P>
+
+ Different parts of the package handle Instances differently.
+ For example, one <A HREF=ss.html>scheduler</A> process handles
+ exactly one Instance.  However, the <A HREF=sw.html>web interface</A>
+ will determine which Instances are available and allow the user to
+ select among them.  In general, if there is only one Instance defined
+ in <TT>instance.cf</TT>, that Instance will be selected
+ automatically.
+
+ <P>
+
+ If more than one Instance is defined, the values for
+ <TT>configdir</TT>, <TT>statedir</TT>, and <TT>historydir</TT> must
+ be different in each Instance, or data corruption and lossage will
+ result.
+ 
+ <P>
+
+ <A ID="instances-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The history directory must exist before the scheduler is started.
+     See <A HREF=#kw-historydir>below</A> for details.
+ <LI>The state directory must exist before the scheduler is started.
+     See <A HREF=#kw-statedir>below</A> for details.
+ </UL>
+
+ <A ID="instances-keywords"></A>
+ <H3>Instance Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allowarchive"></A>
+  <B>allow archive</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Enable the <A HREF=sc.html>command line</A> <TT>archive</TT>
+  command for this Instance.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allowroot"></A>
+  <B>allow root</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Permit the root user to run the <A HREF=sc.html>command line
+  interface</A>.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-configdir"></A>
+  <B>configdir</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the directory containing the configuration files for this
+  Instance.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-helpdir"></A>
+  <B>helpdir</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The directory where help files to be transmitted by alert modules
+  are stored.  File names specified in <A HREF=cf-check.html>check
+  definitions</A> are appended to this directory name and passed to
+  format modules, which may decide what to do with the filename.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-historydir"></A>
+  <B>historydir</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The directory where the history records are written for the hosts
+  and services defined in this Instance.  This directory <B>must</B>
+  exist before the scheduler starts, and must be writeable by the
+  install user.
+
+  <PRE>
+  # mkdir -m 750 $HISTORYDIR
+  # chown $INSTUSER $HISTORYDIR
+  # chgrp $INSTGROUP $HISTORYDIR
+  </PRE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-instance"></A>
+  <B>instance</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Instance.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-requirecomment"></A>
+  <B>require comment</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Require comments for <A HREF=sc.html>command line</A> operations
+  that accept them.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-statedir"></A>
+  <B>statedir</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The directory where the state files for the hosts and services
+  defined in this Instance are maintained.  This directory <B>must</B>
+  exist before the scheduler starts, and must be writeable by the
+  install user and by the install group.
+
+  <PRE>
+  # mkdir -m 770 $STATEDIR
+  # chown $INSTUSER $STATEDIR
+  # chgrp $INSTGROUP $STATEDIR
+  </PRE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-tmpdir"></A>
+  <B>tmpdir</B> &lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  The directory where temporary files may be written by any component
+  of the package.  This directory must be writeable by the install
+  user and by the install group.
+  <P>
+
+  It is recommended that this directory be periodically cleaned out.
+  <P>
+
+  If not specified, the default value of <TT>/tmp</TT> will be used.
+  This is not suitable if the package is installed on a host accessible
+  by non-trusted users.
+ </TD>
+ </TR>
+ </TABLE>
+ 
+ <A ID="instances-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, configuration files are stored in <TT>/etc</TT>
+     and state and history are written under <TT>/var</TT>:
+
+     <PRE>
+     instance default {
+       configdir  /etc/survivor
+       statedir   /var/survivor/state
+       historydir /var/survivor/history
+       helpdir    /etc/survivor/help
+     }
+     </PRE>
+
+ <LI>In this example, files are written to a separate mount point,
+     and the root user is permitted to use the command line interface:
+
+     <PRE>
+     instance networks {
+       configdir  /survivor/networks/config
+       statedir   /survivor/networks/state
+       historydir /survivor/networks/history
+       helpdir    /etc/survivor/help
+       allow root
+     }
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <HR>
+ 
+ <I>$Date: 2006/11/19 03:30:37 $</I><BR>
+ <I>$Revision: 0.6 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-allowarchive>allow archive</A><BR>
+ <A CLASS="keywords" HREF=#kw-allowroot>allow root</A><BR>
+ <A CLASS="keywords" HREF=#kw-configdir>configdir</A><BR>
+ <A CLASS="keywords" HREF=#kw-helpdir>helpdir</A><BR>
+ <A CLASS="keywords" HREF=#kw-historydir>historydir</A><BR>
+ <A CLASS="keywords" HREF=#kw-instance>instance</A><BR>
+ <A CLASS="keywords" HREF=#kw-requirecomment>require comment</A><BR>
+ <A CLASS="keywords" HREF=#kw-statedir>statedir</A><BR>
+ <A CLASS="keywords" HREF=#kw-tmpdir>tmpdir</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

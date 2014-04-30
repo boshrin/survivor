@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Configuring</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Configuring</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#terminology">Terminology</A>
+ <LI><A HREF="#configuring">Configuring</A>
+ <LI><A HREF="#starting">Starting</A>
+ <LI><A HREF="#reconfiguring">Reconfiguring</A>
+ </UL>
+
+ <A ID="terminology"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Terminology
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ When configuring SURVIVOR, it may help to clarify the differences
+ among an <I>item module</I>, an <I>item stanza</I>, and
+ an <I>Item</I>.
+
+ <UL>
+ <LI>An <I>item module</I> is an actual executable that performs the
+     function of an item.  For example, <A HREF="cm-about.html">check
+     modules</A> are installed in <TT>$INSTDIR/mod/check/</TT> and
+     perform the actual check.
+     <P>
+
+ <LI>An <I>item stanza</I> is a configuration entry that controls how
+     an item functions.  For example,
+     A <A HREF="cf-check.html#checks">check stanza</A> is defined in
+     <TT>check.cf</TT> and specifies (among other things) the
+     arguments to be passed to a check module.
+     <P>
+
+ <LI>An <I>Item</I> is defined in an item stanza and is implemented by
+     the execution of an item module.  So a <I>Check</I> is defined in
+     a check stanza and is implemented by the execution of a check
+     module.
+     <P>
+ </UL>
+
+ <P>
+ 
+ <A ID="configuring"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Configuring
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ Configuring SURVIVOR requires creating a few files and directories.
+ Setting up the files in the order described here may facilitate the
+ process.
+
+ <OL>
+ <LI><A HREF=cf-instance.html><TT>instance.cf</TT></A><BR>
+     Each survivor instance requires a configuration directory, a state
+     directory, and a history directory.  Ordinarily, only one
+     survivor instance is required.  After the instance is defined,
+     the next five configuration files must be created and installed
+     in the configuration directory for that instance.
+ <LI><A HREF=cf-calllist.html><TT>calllist.cf</TT></A>
+ <LI><A HREF=cf-schedule.html><TT>schedule.cf</TT></A>
+ <LI><A HREF=cf-host.html><TT>host.cf</TT></A>
+ <LI><A HREF=cf-check.html><TT>check.cf</TT></A>
+ <LI><A HREF=cf-dependency.html><TT>dependency.cf</TT></A>
+ <LI>Additionally, the web interface (<TT>sw</TT>) has its own
+     configuration file, <A HREF=cf-cgi.html><TT>cgi.cf</TT></A>.
+ <LI>Additionally, the mail gateway (<TT>sg</TT>) has its own
+     configuration file, <A HREF=cf-gateway.html><TT>gateway.cf</TT></A>.
+ </OL>
+
+ Sample configurations files can be found in the survivor distribution
+ in the <TT>config</TT> directory.  More information about each file can
+ be found via the links above.
+
+ <P>
+
+ These files should only be writable by trusted system administrators.
+ Many check modules pass command line arguments to executables based
+ on configuration values in these files (especially <TT>check.cf</TT>),
+ and a malicious user with write access to these files may be able to
+ craft arguments to elevate their privileges.
+
+ <P>
+
+ <A ID="starting"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Starting
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ A sample script suitable for installing (perhaps with slight
+ modification) in <TT>/etc/init.d</TT> can be found in the survivor
+ distribution at <TT>init.d/survivor</TT>.
+
+ <P>
+
+ <A ID="reconfiguring"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Reconfiguring
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ After editing the configuration files, <TT>kill -HUP</TT> the
+ scheduler, which will tell it to reparse its configuration files.
+ Watch for parsing errors, as the new configuration files may contain
+ errors.  See the documentation for <A HREF=ss.html>the scheduler</A>
+ and <A HREF=sc.html>the command line interface</A> for information on
+ how to enable debugging.
+
+ <P>
+
+ Also see the <A HREF=errors.html>Error Messages</A> information for
+ an explanation of some errors that might appear after reconfiguration.
+
+ <P>
+   
+<HR>
+<I>$Date: 2007/02/12 02:57:58 $</I><BR>
+<I>$Revision: 0.8 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

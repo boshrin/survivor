@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Web Interface (sw)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Web Interface</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>sw</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#clipboards>Clipboards</A>
+ <LI><A HREF=#reports>Reports</A>
+ <LI><A HREF=#customization>Customization</A>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>sw</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    sw?&lt;flags>
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>flags</B>: Described <A HREF=spec-sw.html>here</A>.  In
+     general, <TT>sw</TT> may be accessed with no flags, and the links
+     presented may be followed to generate desired views.  Once a view has
+     been established, the URI may be bookmarked for future direct access.
+ </UL>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The Survivor Web Interface allows the examination of, and with appropriate
+ access controls in place the manipulation of, check and alert state.
+ By default, anybody may view state who otherwise has access to the URI
+ used to access <TT>sw</TT>.
+
+ <P>
+ 
+ The user interface is not described in detail here since it
+ should be fairly self-explanatory.
+ 
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The web interface must run on the same host as the scheduler.
+ <LI><TT>sw</TT> uses the standard Instance configuration file
+     <TT>/etc/survivor/instance.cf</TT> to obtain information about the
+      configured Instances.  The location of this file cannot be overridden.
+ </UL>
+
+ <P>
+ 
+ <A ID="clipboards"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Clipboards
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ In addition to viewing and modifying survivor state, <TT>sw</TT> also
+ offers the ability to keep notes in Clipboards.  A Clipboard must be
+ configured before it can be used.  Multiple Clipboards may be configured.
+ Clipboards are <I>not</I> locked against simultaneous update, and so
+ should be restricted by policy to one owner (user or host) each.
+ Only users with proper authorization as defined in <A
+ HREF=cf-cgi.html><TT>cgi.cf</TT></A> may access Clipboards.
+
+ <P>
+
+ A Clipboard may be edited by viewing it, making changes, and then
+ updating the Clipboard.  Additionally, the details of a current
+ <TT>service@host</TT> may be appended to a Clipboard by viewing the
+ details and selecting an appropriate link.
+
+ <P>
+
+ The contents of a Clipboard may be sent to any Call List or Call List
+ member defined in the <TT>calllist.cf</TT> of any configured
+ instance.  The sending option is available when viewing the
+ Clipboard.
+
+ <P>
+
+ When the contents are sent to a Call List, Call List rotation does
+ <I>not</I> occur.  This is because Call List rotation is not atomic:
+ a value is read (lock enforced during read), a new value is computed,
+ and then the new value is written (lock enforced during write).
+ The scheduler maintains the master lock over Call List state updates,
+ and <TT>sw</TT> does not have access to this master lock.
+
+ <UL>
+ <LI>A Simple Call List will work correctly if it contains only one member.
+     If it contains multiple members, whichever address is "next in line"
+     will receive the Clipboard, and this address will remain "next in line".
+     <P>
+
+ <LI>A Broadcast CallList will work correctly.
+     <P>
+
+ <LI>A Rotating CallList will work correctly, provided the scheduler has
+     initialized the list.
+     <P>    
+ </UL>
+
+ <A HREF="cf-cgi.html#authz">clipboard authorization</A> is required
+ to manipulate Clipboards.
+ 
+ <P>
+
+ <A ID="reports"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Reports
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The web interface is capable of executing <A
+ HREF="rm-about.html">Report Modules</A>.  This option requires <A
+ HREF="cf-cgi.html#authz">exec authorization</A>.
+ 
+ <P>
+
+ <A ID="customization"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Customization
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The look and content of the web interface is fully customizable,
+ as is its authentication infrastructure.
+
+ <P>
+
+ For information on customizing the web interface, see the <A
+ HREF=spec-sw.html#pagefilters>specification</A> on Web Interface Page
+ Filters.  For information on adding custom authentication modules,
+ see the <A HREF=wam-about.html#custom>documentation</A>.
+ 
+ <P>
+ 
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The web interface is installed in <TT>$INSTDIR/sbin/sw</TT>.  It is
+ installed setgid <TT>$INSTGROUP</TT> so that it may have write access to the
+ survivor state files.  If the web interface will only be used read-only,
+ or if the web server can be configured to run <TT>sw</TT> as
+ <TT>$INSTUSER</TT> or a user in <TT>$INSTGROUP</TT>, the setgid bit may be
+ removed.
+
+ <P>
+
+ The easiest way to make <TT>sw</TT> available is to symlink to it
+ from the web server's <TT>cgi-bin</TT> directory.  This would make
+ the URI <TT>http://survivorhost/cgi-bin/sw</TT>.  Further information
+ regarding the configuration of web servers is beyond the scope of this
+ document.
+
+ <P>
+
+ <TT>sw</TT> uses its own configuration file, <A
+ HREF=cf-cgi.html><TT>cgi.cf</TT></A>, to determine some of its
+ behavior.  Among the configurations specified there, a <A
+ HREF=cf-cgi.html#kw-statedir>state directory</A> must be defined and
+ created.  This directory must be owned and writeable by the user that
+ the web server runs as, or writeable by a group that the web server
+ user is in.
+
+ <PRE>
+ survivor# mkdir $STATEDIR
+ survivor# chown $WWWUSER $STATEDIR
+ survivor# chmod 755 $STATEDIR
+ </PRE>
+ 
+ <P>
+
+ <HR>
+ <I>$Date: 2006/11/19 17:34:06 $</I><BR>
+ <I>$Revision: 0.12 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

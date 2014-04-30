@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Obscure Tasks Explained</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">survivor: Obscure Tasks Explained</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About Obscure Tasks</A>
+ <LI><A HREF=#testcf>Testing Configuration Files Before Installing</A>
+ <LI><A HREF=#workstations>Monitoring Workstations That Might Turn Off</A>
+ <LI><A HREF=#composite>Making A Test Dependent On Two Checks</A>
+ <LI><A HREF=#response>Testing Response Times</A>
+ <LI><A HREF=#flapping>Looking For Flapping</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About Obscure Tasks
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Some useful tasks are perhaps not as obvious as they could be.  This
+ document explains some examples.
+
+ <P>
+   
+ <A ID="testcf"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Testing Configuration Files Before Installing
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ In order to test configuration files before notifying the scheduler,
+ use the <A HREF="sc.html">command line interface</A>.
+
+ <PRE>
+ % sc checkcf
+ Configuration file parse successful
+ </PRE>
+  
+ <P>
+ 
+ <A ID="workstations"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Monitoring Workstations That Might Turn Off
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ To monitor workstations that might turn off, try one of these approaches:
+
+ <OL>
+ <LI>Monitor the workstations on a <A HREf="cf-schedule.html">schedule</A>
+     that does not include the hours during which the workstations might
+     be powered down.  However, this approach won't work if workstations
+     are powered down at unexpected times.
+     <P>
+
+ <LI>Define all checks to be <A HREF="cf-dependency.html">dependent</A> on
+     pinging the host, and define the ping check to use an alertplan that
+     does not actually alert.  However, this approach won't detect
+     workstations that are down for other reasons.
+     <P>
+ </OL>
+
+ <P>
+ 
+ <A ID="composite"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Making A Test Dependent On Two Checks
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Making a test dependent on two checks is simple: define the test as a
+ <A HREF="cf-check.html#composites">composite check</A>.
+ 
+ <P>
+
+ <A ID="response"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Testing Response Times
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Response times (<A HREF="td-duration.html">execution duration</A>) are
+ automatically recorded for each executed check.  To examine these times,
+ use the <A HREF="rm-responsetime.html"><TT>responsetime</TT></A> report
+ module.
+
+ <P>
+
+ To automatically monitor response times via a check, use the <A
+ HREF="cm-report.html"><TT>report</TT></A> check module.  A configuration
+ like this one might be useful:
+
+ <PRE>
+ check responsetime {
+   module report {
+     module      responsetime
+     instance    myinstance
+     service     http
+     source      check
+     recordspan  tnt[3600]     # only look at the last hour
+     warn        gt[1000]      # warn if response time is > 1 second
+     problem     gt[2000]      # problem if response time is > 2 seconds
+   }
+ }
+ </PRE>
+ 
+ <P>
+
+ <A ID="flapping"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Looking For Flapping
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Flapping can be detected with the <A HREF="rm-flap.html"><TT>flap</TT></A>
+ report module.
+
+ <P>
+
+ To automatically monitor response flapping via a check, use the <A
+ HREF="cm-report.html"><TT>report</TT></A> check module.  A configuration
+ like this one might be useful:
+
+ <PRE>
+ check responsetime {
+   module report {
+     module      flap
+     instance    myinstance
+     service     ping
+     source      check
+     recordspan  tnt[86400]     # only look at the last day
+     warn        gt[4]          # warn if > 4 flaps (eg: ok->bad->ok->bad->ok)
+     problem     gt[8]          # problem if > 8 flaps
+   }
+ }
+ </PRE>
+ 
+ <P>
+
+ <HR>
+ <I>$Date: 2007/03/29 12:26:16 $</I><BR>
+ <I>$Revision: 1.1 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Confusing Error Messages Explained</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">survivor: Confusing Error Messages Explained</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About Confusing Error Messages</A>
+ <LI><A HREF=#parsecf>Parsing Configuration Files</A>
+ <LI><A HREF=#sc>Command Interface (<TT>sc</TT>)</A>
+ <LI><A HREF=#ss>Scheduler (<TT>ss</TT>)</A>
+ <LI><A HREF=#sw>Web Interface (<TT>sw</TT>)</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About Confusing Error Messages
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ Although error messages are generally written to be transparent and
+ understandable in context, some, by virtue of the underlying code
+ design, may seem a little confusing.
+
+ <P>
+   
+ <A ID="parsecf"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Parsing Configuration Files
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <H4>Error</H4>
+
+ When parsing the configuration files, 
+
+   <PRE>
+   *lex* Unexpected token at line 79 (state 7): "#commented"
+   </PRE>
+
+ <H4>Sample</H4>
+
+   <PRE>
+   1024 *lex* Unexpected token at line 79 (state 7): "#commented"
+   1024 *lex* Unexpected token at line 79 (state 7): "out"
+   1024 *lex* Unexpected token at line 79 (state 7): "block"
+   1024 || 3 errors encountered while parsing /home/symon/sample/config/check.cf
+   sc: WARNING: Configuration parse failed
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ The configuration parser, due to the complexities of the underlying
+ parsing mechanism, requires all comments to be terminated with a
+ newline.  A comment at the end of the file might not have a newline
+ after it, causing the parser to fail.
+
+ <P>
+
+ Simply add a newline after the comment to fix this problem.
+
+ <P>
+   
+ <A ID="sc"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Command Interface (<TT>sc</TT>)
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <H4>Error</H4>
+
+   <PRE>
+   State::lock_type_state failed to open .../lock
+   </PRE>
+
+ <H4>Sample</H4>
+
+   <PRE>
+   % sc -i instance clstate oncall
+   [oncall]
+   sc: WARNING: State::lock_calllist_state failed to open
+   /var/instance/state/calllist/oncall/lock
+   sc: WARNING: State::lock_calllist_state failed to open
+   /var/instance/state/calllist/oncall/lock
+   sc: WARNING: State::lock_calllist_state failed to open
+   /var/instance/state/calllist/oncall/lock
+   -> somebody@site.org is now on call
+   </PRE>
+
+ <H4>Explanation</H4>
+   
+ When configuration files are updated, it is the responsibility of the
+ scheduler to update the state directories in accordance with the new
+ configuration.  If other utilities, such as the command interface,
+ are run with the new configuration before the scheduler is told of
+ the update, they may try to access state files or directories that do
+ not yet exist.
+
+ <P>
+
+ In the case of the sample above, the <I>oncall</I> call list was
+ added to <TT>calllist.cf</TT>.  Before the scheduler was told of the
+ update, the command interface was run to get the state of the new
+ call list.  Since the scheduler has not made the call list state
+ directories consistent, the
+ directory <TT>/var/instance/state/calllist/oncall</TT> does not yet
+ exist, and so its lock file cannot be opened.
+
+ <P>
+   
+ <A ID="ss"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Scheduler (<TT>ss</TT>)
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <H4>Error</H4>
+
+   Lots and lots of spewage in <TT>/var/log/survivor-instance.log</TT>.
+
+ <H4>Sample</H4>
+   
+   <PRE>
+   ss: WARNING: state_consistency failed to create service state directory
+   ss: WARNING: Unable to create host history directory
+   ss: WARNING: CheckState::lastcheck failed to open
+   ss: WARNING: CheckState::write_results failed to reset permissions on
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ Most likely, the user running the scheduler is not <TT>INSTUSER</TT>
+ or is not a member of <TT>INSTGROUP</TT>, and so cannot properly
+ access and update the files.  See <A HREF=building.html>the building
+ instructions</A> for more details.
+
+ <HR>
+
+ <H4>Error</H4>
+
+   On certain Linux platforms, <TT>SIGHUP</TT> sometimes causes the
+   scheduler to exit, complaining the scheduler is restarting too
+   frequently.
+
+ <H4>Sample</H4>
+
+   <PRE>   
+   ss: WARNING: Keepalive process is restarting the scheduler too frequently.
+   ss: WARNING: There may be a configuration file error or some other problem.
+   ss: WARNING: Keepalive process is exiting as a precaution.
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ This is a bug in the system's implementation of <TT>sigwait(3)</TT>.
+ Instead of returning the proper signal sent to the appropriate thread
+ (in this case, SIGHUP, or 1), the non-existant signal 0 is sent.
+ Since the scheduler cannot tell what signal 0 really means, the
+ scheduler exits.  When run under keepalive (<TT>ss -k</TT>), the
+ keepalive daemon will restart the scheduler, effectively simulating a
+ <TT>SIGHUP</TT>.  However, if this is done too often (more than once
+ per minute), the keepalive exits, assuming there is a bigger problem.
+
+ <P>
+
+ <I>Update</I>: This appears to have been fixed.  libc version 2.3.2
+ is known to work properly.
+
+ <HR>
+   
+ <H4>Error</H4>
+
+   <PRE>
+   Failed to queue check 'service' (check may already be scheduled)
+   </PRE>
+
+ <H4>Sample</H4>
+
+   <PRE>
+   ss: WARNING: Failed to queue check 'syslogd' (check may already be
+   scheduled)
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ Every minute, the check scheduler attempts to schedule any checks
+ that are due to be executed.  If a particular check takes more than a
+ minute to execute, the check scheduler will attempt to schedule that
+ check again.
+
+ <P>
+
+ To prevent the same process from being queued multiple times (and
+ thus causing backlogs or concurrency problems), the scheduler will
+ produce the above error message if a previously scheduled check with
+ the same name has not yet completed.
+
+ <HR>
+ 
+ <H4>Error</H4>
+
+   <PRE>
+   CheckState::lastcheck failed to open .../lastcheck
+   </PRE>
+
+ <H4>Sample</H4>
+
+   <PRE>
+   ss: WARNING: CheckState::lastcheck failed to open
+   /var/instance/state/host/hostname/service/lastcheck (No such file
+   or directory)
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ When a new check or host is added, there is no way to guarantee that
+ the check scheduler will notice before the alert scheduler.  When
+ both hostname and service are known to be valid, this warning may
+ still be generated.  This is due to the alert scheduler noticing the
+ new check or host before the check scheduler, and so there is no
+ lastcheck state to be examined.
+
+ <P>
+
+ This warning should not continue after a minute or two, by which time
+ the new check or host will have been queued by the check scheduler.
+ Note that setting an alert shift time in <TT>schedule.cf</TT> will
+ not eliminate this message, as the alert shift time only adjusts the
+ period during which alerts are generated, and not the relative times
+ compared to the check scheduler within that period.
+
+ <P>
+
+ <I>Update</I>: Due to changes within the scheduler, this error should
+ no longer occur.
+
+ <P>
+   
+ <A ID="sw"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Web Interface (<TT>sw</TT>)
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <H4>Error</H4>
+
+   (blank output) or
+   
+   <PRE>
+   HTTP/1.1 500 Internal Server Error
+   </PRE>
+
+ <H4>Sample</H4>
+
+   <PRE>
+   HTTP/1.1 500 Internal Server Error
+   </PRE>
+
+ <H4>Explanation</H4>
+
+ Some dynamic libraries, including the OpenSSL libraries such as <TT>libssl</TT>
+ or <TT>libcrypto</TT>, are not in the runtime <TT>LD_LIBRARY_PATH</TT> of
+ the web interface.
+
+ <P>
+
+ Ordinarily, the paths to these libraries are encoded into the
+ executable when the package is built.  If, however, these libraries
+ are moved or removed, when the program is executed the runtime linker
+ will fail to resolve symbol definitions and the program will not run.
+
+ <P>
+
+ It may be possible to replicate this failure by manually running the
+ program:
+
+ <PRE>
+ % unsetenv LD_LIBRARY_PATH
+ % ./sw
+ % ld.so.1: ./sw: fatal: libssl.so.0.9.6: open failed: No such file or directory
+ Killed
+ </PRE>
+
+ <P>
+
+ To fix this problem, replace the libraries or rebuild the package with
+ the new locations included in <TT>Makefile.inc</TT>.
+
+ <P>
+
+ <HR>
+ <I>$Date: 2006/11/20 02:54:21 $</I><BR>
+ <I>$Revision: 0.13 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

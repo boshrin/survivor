@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Known Compatibility Problems</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">survivor: Known Compatibility Problems</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#ss>Scheduler (<TT>ss</TT>)</A>
+  <UL>
+  <LI><A HREF=#solaris8>Solaris 8 Patches</A>
+  <LI><A HREF=#hardware>Hardware</A>
+  </UL>
+ <LI><A HREF=#mod>Modules (<TT>mod</TT>)</A>
+  <UL>
+  <LI><A HREF=#ldap>LDAP Check Module</A>
+  </UL>
+ <LI><A HREF=#debug>Debugging</A>
+  <UL>
+  <LI><A HREF=#vsnprintf>vsnprintf</A>
+  </UL>
+ </UL>
+
+ <A ID="ss"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Scheduler (<TT>ss</TT>)
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="solaris8"></A>
+ <H3>Solaris 8 Patches</H3>
+
+ To run under Solaris 8, patch 108991-05 or later (and dependent
+ patches) is required.  This fixes a problem where checks run by the
+ scheduler do not exit correctly.  Other patches may be required.  The
+ development host had the following patches installed:
+
+ <PRE>
+ 108528-05 108985-01 109137-01 109729-01 109783-01 108974-08 108985-02
+ 109277-01 109279-06 110283-01 110662-01 108989-02 108975-03 108974-02
+ 109041-02 109181-02 109472-04 109874-02 109898-02 108727-05 108991-05
+ 109888-02 108977-01 108968-02 108827-01 109326-01 108827-05 109322-02
+ 109461-02 110383-01 110453-01 110700-01 109667-02 109320-01 108987-02
+ </PRE>
+
+ <A ID="hardware"></A>
+ <H3>Hardware</H3>
+
+ A bad disk may manifest itself as unexpected scheduler behavior.  For
+ example, <TT>lastalert()</TT> may fail to read a file that clearly
+ exists, and thus generate false (or incorrectly scheduled) alerts.
+ Replacing the disk containing the survivor state filesystem may
+ alleviate this behavior.
+
+ <P>
+   
+ <A ID="mod"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Modules (<TT>mod</TT>)
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="ldap"></A>
+ <H3>LDAP Check Module</H3>
+
+ As of v0.8.3, the LDAP Check Module uses the <TT>Net::LDAP</TT> Perl
+ module.  Due to a problem in that module, an error message like the
+ following may appear:
+
+ <PRE>
+ Received unexpected response: /^(\\.|[^\\*]*)*\*/:
+ regexp *+ operand could be empty at /opt/perl/lib/site_perl/Net/LDAP/Filter.pm line 120.
+ </PRE>
+
+ This problem may appear under older versions of Perl, including
+ 5.004.  To fix, try upgrading to a newer version
+ of <TT>Net::LDAP</TT> or, if possible, Perl.  If upgrading does not
+ work, please <A HREF=bug-report.html>file a bug report</A>.
+
+ <P>
+
+ Additionally, <TT>Net::LDAP</TT> may have problems using older versions
+ of <TT>IO::Socket</TT>, reporting that a server is OK with the message
+
+ <PRE>
+ IO::Socket::INET: Connection refused at /opt/ACISperl5004/lib/site_perl/Net/LDAP.pm line 126
+ </PRE>
+
+ (Clearly, the server is not running, which is not OK.)  To fix, try upgrading
+ <TT>IO::Socket</TT> to a newer version.  <TT>IO::Socket</TT> v1.24,
+ part of the <TT>IO</TT> v1.20 distribution, is known to work.
+
+ <P>
+   
+ <A ID="debug"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Debugging
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="vsnprintf"></A>
+ <H3>vsnprintf</H3>
+
+ Solaris versions prior to 9 do not have a threadsafe version
+ of <TT>vsnprintf</TT>, which the debugging and warning library makes
+ extensive use of.  A workaround is implemented, but is theoretically
+ subject to buffer overrun problems.  Where possible, Solaris 9 should
+ be used.  Paranoid sites that cannot run Solaris 9 should disable all
+ debugging in the <TT><A HREF=ss.html>scheduler</A></TT>.
+
+ <HR>
+ <I>$Date: 2006/11/20 02:56:55 $</I><BR>
+ <I>$Revision: 0.8 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

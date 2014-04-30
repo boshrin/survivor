@@ -1,0 +1,7 @@
+# This file is used to specify checksums to be verified on each host.
+# The format of this file is the same as the output from cksum, ie:
+#  checksum octets filename
+#3663153827 234316 /usr/bin/ssh
+#4025749156 903340 /opt/openssh-3.9p1/bin/ssh
+#4025749156 903340 /opt/local/bin/ssh
+3996cdfb9e03285325a73bfd440352d9  /usr/bin/ssh

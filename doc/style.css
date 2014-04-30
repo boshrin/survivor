@@ -1,0 +1,189 @@
+/*
+ * survivor style sheet
+ *
+ * Version: $Revision: 0.13 $
+ * Author: Benjamin Oshrin
+ * Date: $Date: 2007/03/29 12:18:04 $
+ *
+ * Copyright (c) 2002 - 2007
+ * The Trustees of Columbia University in the City of New York
+ * Academic Information Systems
+ * 
+ * License restrictions apply, see doc/license.html for details.
+ */
+
+body {
+  color: black;
+  background-color: white;
+}
+
+td.default {
+  background-color: lightgrey;
+  text-align: left;
+}
+
+th.default {
+  font-weight: bold;
+  background-color: tan;
+  text-align: left;
+}
+
+td.info {
+  color: black;
+  background-color: lightgrey;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.args {
+  color: black;
+  background-color: lightgrey;
+}
+
+td.check {
+  color: black;
+  background-color: lightblue;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.fix {
+  color: black;
+  background-color: cyan;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.transport {
+  color: black;
+  background-color: lightgreen;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.example {
+  color: black;
+  background-color: yellow;
+}
+
+td.format {
+  color: black;
+  background-color: pink;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.report {
+  color: black;
+  background-color: wheat;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.transmit {
+  color: black;
+  background-color: pink;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.webauth {
+  color: black;
+  background-color: orange;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.scheduler {
+  color: black;
+  background-color: lightgreen;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.remote {
+  color: black;
+  background-color: yellow;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.parallel {
+  color: black;
+  background-color: peachpuff;
+  font-weight: bold;
+  text-align: center;
+}
+
+td.hltitle {
+  color: black;
+  background-color: peachpuff;
+  font-style: oblique;
+  font-weight: bold;
+}
+
+td.highlight {
+  color: black;
+  background-color: peachpuff;
+  vertical-align: top;
+}
+
+td.contents {
+  color: black;
+  border-left: solid thin black;
+  vertical-align: top;
+}
+
+td.pagetop {
+  background-color: lightgreen;
+  border-top: solid thin black;
+  font-weight: bold;
+  font-size: x-large;
+}
+
+td.section {
+  color: black;
+  background-color: yellow;
+  border-top: solid thin black;
+  font-weight: bold;
+  font-size: x-large;
+}
+
+a.keywords {
+  color: blue;
+  font-size: x-small;
+  font-family: sans-serif;
+  text-decoration: none;
+}
+
+a.kwlink {
+  color: blue;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+td.keyword {
+  color: black;
+  font-family: monospace;
+  vertical-align: top;
+  width: 20%;
+}
+
+td.kwdef {
+  color: black;
+  vertical-align: top;
+  border-bottom: solid thin black;
+}
+
+td.kwref {
+  color: black;
+  font-style: oblique;
+  vertical-align: top;
+}
+
+td.kwtop {
+  color: black;
+  font-weight: bold;
+  border-bottom: solid thin black;
+  vertical-align: top;
+}

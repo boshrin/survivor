@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET title=View By HostClass}
+@{INCLUDE header.html}
+
+<!-- view-hostclass.html.in -->
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ > <A CLASS="navspacer" HREF="@{URI hc= vt= file=}">@{ECHO $instance}</A>
+ @{IF DEFINED FLAG hc}
+ > <A CLASS="navspacer" HREF="@{URI hc= vt=}">View By HostClass</A>
+ > Custom
+ @{ELSE}
+ > View By HostClass
+ @{ENDIF}
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+
+@{IF DEFINED FLAG hc}
+ @{SET vt=@[FLAG vt]}
+ @{IF NOTDEFINED $vt}
+ @{SET vt=grid}
+ @{ENDIF}
+ @{IF STRING $vt = summary}
+  <!-- Generate HostClass Summary view -->
+  <FORM NAME="custom-hostclass-view" METHOD="get" ACTION="@{URITOP}">
+  <TABLE CLASS="spacer">
+  <TR CLASS="spacer">
+  <TD CLASS="spacer">
+   <TABLE CLASS="infobody">
+   <TR CLASS="infobody">
+   <TH CLASS="infobody" COLSPAN=2>
+    Select A HostClass or HostClass Set
+    @{URITAGS style=hidden omit=hc,vt}
+   </TH>
+   </TR>
+
+   @{FOREACH $sort hc FLAG hc}
+   @{SET rc=@[CHECKSTATUS type=rc hostclass=$hc]}
+   <TR CLASS="infobody">
+   <TD CLASS="rc@{ECHO $rc}">
+    <INPUT TYPE="checkbox" NAME="hc" VALUE="@{ECHO $hc}">
+   </TD>
+   <TD CLASS="rc@{ECHO $rc}">
+    <A CLASS="table" HREF="@{URI hc= hc=$hc vt= vt=grid}">@{ECHO $hc}</A>
+   </TD>
+   </TR>
+   @{ENDEACH}
+
+   @{INCLUDE form-common-viewtype.html}
+   
+   </TABLE>
+  </TD>
+  </TR>
+  </TABLE>
+  </FORM>
+ @{ELSE}
+  <!-- Generate HostClass Grid view -->
+  <TABLE CLASS="spacer">
+  <TR CLASS="spacer">
+  <TD CLASS="spacer">
+   <TABLE CLASS="infobody">
+   <TR CLASS="infobody">
+   <TH CLASS="infobody"></TH>
+   @{FOREACH $sort s SERVICE}
+   <TH CLASS="infobody">@{ECHO $s}</TH>
+   @{ENDEACH}
+   </TR>
+
+   @{FOREACH $sort hc FLAG hc}
+    <!-- iterate over each host in each hc -->
+    @{FOREACH $sort h HOSTCLASSMEMBER $hc}
+    <TR CLASS="infobody">
+    <TH CLASS="infobody">@{ECHO $h}</TH>
+
+     @{FOREACH $sort s SERVICE}
+     @{SET quiet=@[ALERTSTATUS type=quiet service=$s host=$h]}
+     @{SET rc=@[CHECKSTATUS type=rc service=$s host=$h]}
+     @{SET esc=@[ALERTSTATUS type=escalated service=$s host=$h]}
+     @{SET rcclass=$rc}
+     @{IF NUMBER $quiet = 1}
+     @{SET rcclass=q}
+     @{ELSE}
+      @{IF NUMBER $esc > 0}
+      @{SET rcclass=e}
+      @{ENDIF}
+     @{ENDIF}
+     <TD CLASS="rc@{ECHO $rcclass}">
+      @{IF NUMBER $rc != -1}
+      <A HREF="@{URI file= file=view-details.html s=$s h=$h hc= vt=}">@{ECHO $rc}</A>
+      @{ENDIF}
+     </TD>
+     @{ENDEACH}
+    </TR>
+    @{ENDEACH}
+   @{ENDEACH}
+  </TABLE>
+  </TD>
+  </TR>
+  </TABLE>
+ @{ENDIF}
+@{ELSE}
+ <FORM NAME="custom-hostclass-view" METHOD="get" ACTION="@{URITOP}">
+ <TABLE CLASS="spacer">
+ <TR CLASS="spacer">
+ <TD CLASS="spacer">
+  <TABLE CLASS="infobody">
+  <TR CLASS="infobody">
+  <TH CLASS="infobody" COLSPAN=2>
+   Select A HostClass or HostClass Set
+   @{URITAGS style=hidden omit=hc,vt}
+  </TH>
+  </TR>
+
+  @{FOREACH $sort hc HOSTCLASS}
+  @{SET rc=@[CHECKSTATUS type=rc hostclass=$hc]}
+  <TR CLASS="infobody">
+  <TD CLASS="rc@{ECHO $rc}">
+   <INPUT TYPE="checkbox" NAME="hc" VALUE="@{ECHO $hc}">
+  </TD>
+  <TD CLASS="rc@{ECHO $rc}">
+   <A CLASS="table" HREF="@{URI hc=$hc vt=grid}">@{ECHO $hc}</A>
+  </TD>
+  </TR>
+  @{ENDEACH}
+
+  @{INCLUDE form-common-viewtype.html}
+ 
+  </TABLE>
+ </TD>
+ </TR>
+ </TABLE>
+ </FORM>
+@{ENDIF}
+
+@{INCLUDE key.html}
+
+@{INCLUDE footer.html}
+</HTML>

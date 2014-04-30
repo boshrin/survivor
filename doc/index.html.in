@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: The Systems Monitor</TD>
+</TR>
+<TR>
+<TD COLSPAN=2 CLASS=highlight>
+ <B>S</B>ystems <B>U</B>tility for <B>R</B>eporting <B>V</B>ariable
+ <B>I</B>nformation <B>V</B>iewable <B>O</B>n <B>R</B>equest
+</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <BR>
+
+ <UL>
+ <LI><A HREF="http://www.columbia.edu/acis/dev/projects/survivor/download.shtml">Downloading</A>
+ <LI><A HREF="license.html">Copyright and License</A>
+ <LI><A HREF="overview.html">Overview</A>
+ <LI><A HREF="upgrading.html">Upgrading</A>
+ <LI><A HREF="building.html">Building and Installing</A>
+ <LI><A HREF="cf.html">Configuring</A>
+   <UL>
+   <LI><A HREF="cf-instance.html"><TT>instance.cf</TT></A>
+   <LI><A HREF="cf-calllist.html"><TT>calllist.cf</TT></A>
+   <LI><A HREF="cf-schedule.html"><TT>schedule.cf</TT></A>
+   <LI><A HREF="cf-host.html"><TT>host.cf</TT></A>
+   <LI><A HREF="cf-check.html"><TT>check.cf</TT></A>
+   <LI><A HREF="cf-dependency.html"><TT>dependency.cf</TT></A>
+   <LI><A HREF="cf-cgi.html"><TT>cgi.cf</TT></A>
+   <LI><A HREF="cf-gateway.html"><TT>gateway.cf</TT></A>
+   </UL>
+ <LI><A HREF="ss.html">Scheduler (<TT>ss</TT>)</A>
+ <LI><A HREF="sr.html">Remote Daemon (<TT>sr</TT>)</A>
+ <LI><A HREF="sc.html">Command Interface (<TT>sc</TT>)</A>
+ <LI><A HREF="sg.html">Mail Gateway (<TT>sg</TT>)</A>
+ <LI><A HREF="sw.html">Web Interface (<TT>sw</TT>)</A>
+ <LI>Check Modules (<I>to test services for failures</I>)
+   <UL>
+   <LI><A HREF="cm-about.html">About Check Modules</A>
+   <LI><A HREF="cm-cksum.html">cksum</A>: Compare file checksums
+   <LI><A HREF="cm-conserver.html">conserver</A>: Check Conserver consoles
+   <LI><A HREF="cm-cyrusstuckmailbox.html">cyrusstuckmailbox</A>: Check Cyrus mailbox creation
+   <LI><A HREF="cm-cyrussync.html">cyrussync</A>: Check Cyrus replication
+   <LI><A HREF="cm-database.html">database</A>: Database connect and ping
+   <LI><A HREF="cm-daytime.html">daytime</A>: Compare system time against
+    reference
+   <LI><A HREF="cm-dblocks.html">dblocks</A>: Monitor database locks
+   <LI><A HREF="cm-dhcp.html">dhcp</A>: Request DHCP lease
+   <LI><A HREF="cm-disk.html">disk</A>: Monitor local filesystem usage
+   <LI><A HREF="cm-exports.html">exports</A>: Verify shared filesystems via
+    <TT>exports</TT> file
+   <LI><A HREF="cm-filetest.html">filetest</A>: Complex tests on files
+   <LI><A HREF="cm-flexlm.html">flexlm</A>: Monitor FLEXlm server
+   <LI><A HREF="cm-ftpd.html">ftpd</A>: Download from FTP server
+   <LI><A HREF="cm-hplj.html">hplj</A>: Query HP LaserJet printer
+   <LI><A HREF="cm-httpurl.html">httpurl</A>: Complex HTTP transaction
+    verification
+   <LI><A HREF="cm-imap.html">imap</A>: Login to IMAP server
+   <LI><A HREF="cm-krb5.html">krb5</A>: Request Kerberos V ticket
+   <LI><A HREF="cm-ldap.html">ldap</A>: Complex LDAP query verification
+   <LI><A HREF="cm-load.html">load</A>: Examine load average
+   <LI><A HREF="cm-mailbe.html">mailbe</A>: Test delivery of mail to backends
+   <LI><A HREF="cm-mailboxcreate.html">mailboxcreate</A>: Test creation of mailboxes
+   <LI><A HREF="cm-mailfe.html">mailfe</A>: Test delivery of mail through frontends
+   <LI><A HREF="cm-mailq.html">mailq</A>: Measure outgoing mail queue
+   <LI><A HREF="cm-message.html">message</A>: Generate <TT>MODEXEC_NOTICE</TT>
+    message
+   <LI><A HREF="cm-mon.html">mon</A>: Monitor Mon
+   <LI><A HREF="cm-monfail.html">monfail</A>: Report failures recorded by Mon
+   <LI><A HREF="cm-mounts.html">mounts</A>: Verify local filesystem mounts
+   <LI><A HREF="cm-nadisk.html">nadisk</A>: Monitor NetApp filesystem usage
+   <LI><A HREF="cm-named.html">named</A>: Query DNS
+   <LI><A HREF="cm-namedSerial.html">namedSerial</A>: Verify SOA record
+    against reference
+   <LI><A HREF="cm-ndd.html">ndd</A>: Query Solaris kernel driver parameters
+   <LI><A HREF="cm-ntpc.html">ntpc</A>: Validate NTP time peers
+   <LI><A HREF="cm-oncall.html">oncall</A>: Determine who is currently on call
+   <LI><A HREF="cm-ph.html">ph</A>: Query PH server
+   <LI><A HREF="cm-ping.html">ping</A>: Ping server via ping/fping executable
+   <LI><A HREF="cm-pingx.html">pingx</A>: Ping server natively
+   <LI><A HREF="cm-process.html">process</A>: Use <TT>ps</TT> to count
+    processes
+   <LI><A HREF="cm-processinfo.html">processinfo</A>: Use <TT>ps</TT> to
+    examine process metrics
+   <LI><A HREF="cm-protocol.html">protocol</A>: Generalized text-based
+    protocol conversation
+   <LI><A HREF="cm-prtdiag.html">prtdiag</A>: Examine Solaris <TT>prtdiag</TT>
+    diagnostics
+   <LI><A HREF="cm-radius.html">radius</A>: Verify RADIUS authentication
+   <LI><A HREF="cm-raidbox.html">raidbox</A>: Monitor NetApps and JetStors
+   <LI><A HREF="cm-report.html">report</A>: Automated trend analysis
+   <LI><A HREF="cm-rtsp.html">rtsp</A>: Verify RTSP server
+   <LI><A HREF="cm-sasl.html">sasl</A>: Verify SASL auth daemon
+   <LI><A HREF="cm-showmount.html">showmount</A>: Verify shared filesystems
+    via <TT>showmount</TT>
+   <LI><A HREF="cm-sleep.html">sleep</A>: Sleep to test timeouts
+   <LI><A HREF="cm-smbd.html">smbd</A>: Query SMB server shares
+   <LI><A HREF="cm-snmp.html">snmp</A>: Query status via SNMP
+   <LI><A HREF="cm-storedge-t3.html">storedge-t3</A>: Query SUN Storedge T3 via SNMP
+   <LI><A HREF="cm-swap.html">swap</A>: Measure memory in use
+   <LI><A HREF="cm-swraid.html">swraid</A>: Examine software RAID status
+   <LI><A HREF="cm-telnet.html">telnet</A>: Look for telnet login prompt
+   <LI><A HREF="cm-test.html">test</A>: Exit with provided argument
+   <LI><A HREF="cm-tftpd.html">tftpd</A>: Download file via TFTP
+   <LI><A HREF="cm-time.html">time</A>: Compare system time against reference
+   <LI><A HREF="cm-tty.html">tty</A>: Determine tty/pts lines in use
+   <LI><A HREF="cm-ups.html">ups</A>: Monitor APC and Liebert UPSs
+   <LI><A HREF="cm-vmstat.html">vmstat</A>: Monitor memory usage via
+    <TT>vmstat</TT>
+   <LI><A HREF="cm-wins.html">wins</A>: Query WINS server
+   <LI>...
+   <LI><A HREF="cm-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Transport Modules (<I>to run check modules remotely</I>)
+   <UL>
+   <LI><A HREF="tm-about.html">About Transport Modules</A>
+   <LI><A HREF="tm-plaintext.html">plaintext</A>
+   <LI><A HREF="tm-tunnel.html">tunnel</A>
+   <LI>...
+   <LI><A HREF="tm-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Format Modules (<I>to prepare the contents of an alert</I>)
+   <UL>
+   <LI><A HREF="fmm-about.html">About Format Modules</A>
+   <LI><A HREF="fmm-compact.html">compact</A>
+   <LI><A HREF="fmm-full.html">full</A>
+   <LI><A HREF="fmm-nextel.html">nextel</A>
+   <LI><A HREF="fmm-sms.html">sms</A>
+   <LI>...
+   <LI><A HREF="fmm-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Transmit Modules (<I>to send out the contents of an alert</I>)
+   <UL>
+   <LI><A HREF="tmm-about.html">About Transmit Modules</A>
+   <LI><A HREF="tmm-mail.html">mail</A>
+   <LI>...
+   <LI><A HREF="tmm-about.html#custom">Adding Custom modules</A>
+   </UL>
+ <LI>Fix Modules (<I>to attempt a predefined repair of a failed service</I>)
+   <UL>
+   <LI><A HREF="fm-about.html">About Fix Modules</A>
+   <LI><A HREF="fm-init.d.html">init.d</A>
+   <LI>...
+   <LI><A HREF="fm-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Report Modules
+   <UL>
+   <LI><A HREF="rm-about.html">About Report Modules</A>
+   <LI><A HREF="rm-availability.html">availability</A>
+   <LI><A HREF="rm-flap.html">flap</A>
+   <LI><A HREF="rm-responsetime.html">responsetime</A>
+   <LI><A HREF="rm-scalaraverage.html">scalaraverage</A>
+   <LI><A HREF="rm-summary.html">summary</A>
+   <LI>...
+   <LI><A HREF="rm-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Web Interface Authentication Modules
+   <UL>
+   <LI><A HREF="wam-about.html">About Web Interface Authentication Modules</A>
+   <LI><A HREF="wam-getenv.html">getenv</A>
+   <LI><A HREF="wam-ip.html">ip</A>
+   <LI><A HREF="wam-wind.html">wind</A>
+   <LI>...
+   <LI><A HREF="wam-about.html#custom">Adding Custom Modules</A>
+   </UL>
+ <LI>Utilities
+   <UL>
+   <LI><A HREF="util-preparse.html"><TT>preparse</TT></A>
+   <LI><A HREF="util-xmlmaker.html"><TT>xmlmaker</TT></A>
+   <LI><A HREF="util-watcher.html"><TT>watcher</TT></A>
+   </UL>
+ <LI>Specifications
+   <UL>
+   <LI><A HREF="spec-cm.html">Check Modules</A>
+   <LI><A HREF="spec-fm.html">Fix Modules</A>
+   <LI><A HREF="spec-fmm.html">Format Modules</A>
+   <LI><A HREF="spec-history.html">History Files</A>
+   <LI><A HREF="spec-rm.html">Report Modules</A>
+   <LI><A HREF="spec-tm.html">Transport Modules</A>
+   <LI><A HREF="spec-tmm.html">Transmit Modules</A>
+   <LI><A HREF="spec-wam.html">Web Interface Authentication Modules</A>
+   <LI><A HREF="spec-xmlarg.html">Module XML Argument Specification</A>
+   <LI><A HREF="spec-libsrv.html"><TT>libsrv</TT></A>
+   <LI><A HREF="spec-sr.html"><TT>sr</TT> Protocol</A>
+   <LI><A HREF="spec-sw.html"><TT>sw</TT> Specification</A>
+   </UL>
+ <LI>Technical Documents
+   <UL>
+   <LI><A HREF="td-duration.html">Execution Duration Measurements</A>
+   <LI><A HREF="td-locking.html">Locking</A>
+   <LI><A HREF="td-porting.html">Porting</A>
+   <LI><A HREF="td-scheduling.html">Scheduling</A>
+   </UL>
+ <LI><A HREF="errors.html">Confusing Error Messages Explained</A>
+ <LI><A HREF="obscure-tasks.html">Obscure Tasks Explained</A>
+ <LI><A HREF="problems.html">Known Compatibility Problems</A>
+ <LI><A HREF="todo.html#future">Future Enhancements</A>
+ <LI><A HREF="todo.html#changelog">Change Log</A>
+ <LI><A HREF="bug-report.html">Bug Reports</A>
+ </UL>
+
+ <HR>
+ <I>$Date: 2007/03/29 12:18:54 $</I><BR>
+ <I>$Revision: 0.48 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>v@PKGVERSION@</B><BR>
+ <B>keywords</B><BR>
+ @KEYWORDS@
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

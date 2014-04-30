@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Watcher Utility (watcher)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: Watcher Utility</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>watcher</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>watcher</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    watcher -p &lt;swuri> [-i &lt;instance>] [-t &lt;timeout>] [-n &lt;notify>] [-q]
+ </PRE>
+
+ where
+
+ <UL>
+ <LI><B>swuri:</B> URI of the web interface (eg:
+     <TT>http://survivor.site.org/cgi-bin/sw</TT>).
+ <LI><B>instance:</B> The instance to examine, as selected from
+     <TT><A HREF=cf-instance.html>instance.cf</A></TT>.  If there is
+     only one instance on the scheduler host, this argument may be
+     omitted.
+ <LI><B>timeout:</B> Timeout for establishing the HTTP connection.
+     The default timeout is 30 seconds.
+ <LI><B>notify:</B> An address to send output to.  By default, output
+     will be generated to stdout or stderr.  If an address is
+     specified, any output will instead be sent there.
+ <LI><B>-q:</B> Quiet mode.  Only errors will be reported.
+ </UL>
+
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The <TT>watcher</TT> utility contacts the <A HREF=sw.html>web
+ interface</A> to determine the status of the scheduler.  It is useful
+ to ensure the scheduler is still running, that the configuration
+ files are properly configured, and to perform other validations of
+ the installation.
+
+ <P>
+
+ Upon successful completion, <TT>watcher</TT> will exit with
+ <TT>MODEXEC_OK</TT> and report the appropriate status messages if requested.
+ Upon error, appropriate messages will be generated and the exit code
+ will be <TT>MODEXEC_PROBLEM</TT>.
+
+ <P>
+
+ The functionality and implementation of this utility is subject to change in
+ a future release.  
+
+ <P>
+   
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <TT>watcher</TT> requires the following Perl modules to
+ be installed on the host from which it is run:
+
+ <UL>
+ <LI><TT>HTTP::Request::Common</TT>
+ <LI><TT>LWP::UserAgent</TT>
+ <LI><TT>Mail::Mailer</TT>
+ <LI><TT>URI</TT>
+ </UL>
+
+ <P>
+   
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The <TT>watcher</TT> utility is available in the survivor source
+ distribution, in the <TT>util</TT> directory.  It is not installed
+ by default.
+
+ <P>
+
+ The easiest way to run <TT>watcher</TT> is to install it in
+ <TT>$INSTDIR/sbin</TT>, from where it will be able to find the
+ <TT>$INSTDIR/mod</TT> subdirectory.  To install on a host that does
+ not have a full installation, a directory tree like this should
+ suffice:
+
+ <PRE>
+ survivor-lite/sbin/watcher
+ survivor-lite/mod/common/ (and its contents)
+ </PRE>
+
+ <P>
+
+ Then, call <TT>watcher</TT> from cron as often as desired.
+
+ <P>
+   
+ <HR>
+ <I>$Date: 2006/11/20 00:04:20 $</I><BR>
+ <I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

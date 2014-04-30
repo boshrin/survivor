@@ -1,0 +1,88 @@
+#!/usr/bin/perl -w
+
+# flap report module
+#
+# Version: $Revision: 1.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2007/03/29 12:24:27 $
+#
+# Copyright (c) 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Report;
+
+# Create a new Report object.
+
+my $sw = new Survivor::Report();
+
+my $pok = $sw->ParseReportRequest();
+
+if($pok == MODEXEC_OK) {
+    if($sw->Style() eq "html")
+    {
+	print ("<HTML><PRE>\n");
+    }
+
+    my @dataset = $sw->DataSet();
+
+    foreach my $d (@dataset)
+    {
+	my $seen = 0;
+	my $flaps = 0;
+	my $last = -1;
+	my %crcs;
+
+	foreach my $cr (@{${%$d}{"checkdata"}}) {
+	    $seen++;
+	    
+	    if(defined ${%$cr}{"checkrc"}) {
+		my $crc = ${%$cr}{"checkrc"};
+		$crcs{$crc}++;
+		
+		if($last == -1)
+		{
+		    $last = $crc;
+		}
+		elsif($last != $crc)
+		{
+		    $last = $crc;
+		    $flaps++;
+		}
+	    }
+	}
+	
+	if($sw->Style() eq "check") {
+	    print ${%$d}{"service"} . " " . ${%$d}{"host"} . " ";
+	    print $flaps . " " . $seen;
+
+	    for(my $k = 0;$k < 8;$k++) {
+		print " " . (defined $crcs{$k} ? $crcs{$k} : 0);
+	    }
+
+	    print "\n";
+	} else {
+	    print ${%$d}{"service"} . "@" . ${%$d}{"host"} . ": ";
+	    print $flaps . " " . ($flaps == 1 ? "flap" : "flaps")
+		. " in " . $seen . " checks\n";
+
+	    foreach my $k (sort (keys %crcs)) {
+		print " Return Code $k: " . $crcs{$k} . "\n";
+	    }
+	}
+    }
+    
+    if($sw->Style() eq "html")
+    {
+	print ("</PRE></HTML>\n");
+    }
+} else {
+    print "Error: $pok\n";
+}
+
+exit MODEXEC_OK;

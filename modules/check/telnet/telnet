@@ -1,0 +1,71 @@
+#!/usr/bin/perl -w
+
+# telnet check module
+
+# Version: $Revision: 0.2 $
+# Author: Matt Selsky
+# Date: $Date: 2003/07/28 06:00:50 $
+#
+# Copyright (c) 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::Telnet;
+
+my %argfmt = ('port' => 'optional number between(1,65535) default(23)',
+	      'prompt' => 'optional string default(login:)');
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&TelnetValidate);
+
+my $r = $sc->Exec( \&TelnetCheck);
+
+exit($r);
+
+sub TelnetValidate {
+    return(MODEXEC_OK, 0, "Telnet OK");
+}
+
+sub TelnetCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $prompt = $self->Arg('prompt');
+
+    my $telnet = Net::Telnet->new( Host => $host,
+				   Port => $self->Arg('port'),
+				   Errmode => 'return' );
+
+    unless($telnet) {
+	return(MODEXEC_PROBLEM, 0, 'Connect failed');
+    }
+
+    my $found = $telnet->waitfor( Match => "/$prompt/" );
+
+    if( defined $found ) {
+	$telnet->close;
+	return(MODEXEC_OK, 1, "Found prompt '".$prompt."'");
+    }
+
+    # Usually means other end hung-up on us.
+    elsif($telnet->eof()) {
+	$telnet->close;
+	return(MODEXEC_PROBLEM, 0, "Reached EOF without finding '".$prompt."'");
+    }
+
+    # Usually means we reached a prompt, but not the one we were looking for
+    elsif($telnet->timed_out()) {
+	$telnet->close;
+	return(MODEXEC_PROBLEM, 0, "Timeout while searching for '".$prompt."'");
+    }
+
+    return(MODEXEC_PROBLEM, 0, 'Unexpected error');
+}

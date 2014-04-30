@@ -1,0 +1,98 @@
+/* include/config.H.in.  Generated from configure.ac by autoheader.  */
+
+/* Temporary definition */
+#undef DARWIN
+
+/* Enable debugging. */
+#undef ENABLE_DEBUG
+
+/* Enable module execution serialization. */
+#undef ENABLE_MODULE_SERIALIZATION
+
+/* gethostbyname_r with 3 args */
+#undef HAVE_FUNC_GETHOSTBYNAME_R_3
+
+/* gethostbyname_r with 5 args */
+#undef HAVE_FUNC_GETHOSTBYNAME_R_5
+
+/* gethostbyname_r with 6 args */
+#undef HAVE_FUNC_GETHOSTBYNAME_R_6
+
+/* Define to 1 if you have the `getdomainname' function. */
+#undef HAVE_GETDOMAINNAME
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <pthread.h> header file. */
+#undef HAVE_PTHREAD_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Temporary definition */
+#undef LINUX
+
+/* Temporary definition */
+#undef NETBSD
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Temporary definition */
+#undef REMOTE
+
+/* Temporary definition */
+#undef SOLARIS
+
+/* Temporary definition */
+#undef SOLARIS6
+
+/* Temporary definition */
+#undef SOLARIS7
+
+/* Temporary definition */
+#undef SOLARIS8
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#undef YYTEXT_POINTER
+
+/* Enable GNU extensions on system that require them. */
+#undef _GNU_SOURCE

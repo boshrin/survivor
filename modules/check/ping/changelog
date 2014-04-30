@@ -1,0 +1,101 @@
+----------------------------
+revision 0.25
+date: 2005/01/11 22:47:49;  author: medina;  state: Exp;  lines: +6 -2
+skip fping output of annoying Phase 6 switches
+----------------------------
+revision 0.24
+date: 2004/11/05 16:28:44;  author: benno;  state: Exp;  lines: +17 -10
+Suppress multiple unreachable reports for the same host
+----------------------------
+revision 0.23
+date: 2004/11/03 15:18:33;  author: toor;  state: Exp;  lines: +108 -28
+fork(fping) to read stdout and stderr separately
+----------------------------
+revision 0.22
+date: 2004/02/03 20:21:16;  author: benno;  state: Exp;  lines: +5 -2
+Suppress "duplicate for" errors
+----------------------------
+revision 0.21
+date: 2004/01/07 21:15:29;  author: benno;  state: Exp;  lines: +21 -7
+some errors are in a different format
+----------------------------
+revision 0.20
+date: 2003/03/12 17:30:42;  author: selsky;  state: Exp;  lines: +3 -3
+Remove extraneous braces
+----------------------------
+revision 0.19
+date: 2003/03/12 17:29:15;  author: selsky;  state: Exp;  lines: +3 -3
+Remove debugging cruft which broke module when in fping mode
+----------------------------
+revision 0.18
+date: 2003/03/10 18:07:36;  author: benno;  state: Exp;  lines: +5 -2
+Add comment
+----------------------------
+revision 0.17
+date: 2003/03/10 03:11:43;  author: selsky;  state: Exp;  lines: +9 -10
+Can't check return from open() since we're sending STDERR to STDOUT
+----------------------------
+revision 0.16
+date: 2003/03/04 17:38:10;  author: benno;  state: Exp;  lines: +5 -4
+Add darwin test
+----------------------------
+revision 0.15
+date: 2003/02/14 13:40:46;  author: benno;  state: Exp;  lines: +9 -3
+Return correct exit code
+----------------------------
+revision 0.14
+date: 2003/01/29 01:23:45;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.13
+date: 2002/12/31 04:08:57;  author: benno;  state: Exp;  lines: +79 -106
+Switch to named args
+----------------------------
+revision 0.12
+date: 2002/08/15 23:02:28;  author: selsky;  state: Exp;  lines: +6 -11
+Remove 'router' option since it doesn't work and isn't portable
+----------------------------
+revision 0.11
+date: 2002/06/05 04:36:14;  author: selsky;  state: Exp;  lines: +6 -7
+use OperatingSystem()
+----------------------------
+revision 0.10
+date: 2002/05/31 23:00:05;  author: selsky;  state: Exp;  lines: +57 -58
+port to Survivor.pm
+----------------------------
+revision 0.9
+date: 2002/04/28 23:15:03;  author: toor;  state: Exp;  lines: +125 -50
+Use Net::Ping or /bin/ping if fping unavailable
+----------------------------
+revision 0.8
+date: 2002/04/23 22:05:41;  author: benno;  state: Exp;  lines: +8 -4
+provide default addr for messages when !ALL
+----------------------------
+revision 0.7
+date: 2002/04/08 18:02:40;  author: johan;  state: Exp;  lines: +6 -3
+minor typo
+----------------------------
+revision 0.6
+date: 2002/04/08 17:59:50;  author: johan;  state: Exp;  lines: +7 -4
+minor correction
+----------------------------
+revision 0.5
+date: 2002/04/04 21:01:05;  author: benno;  state: Exp;  lines: +11 -2
+copyright
+----------------------------
+revision 0.4
+date: 2002/04/04 18:12:54;  author: johan;  state: Exp;  lines: +26 -14
+properly handle multiple hosts in opt_h
+----------------------------
+revision 0.3
+date: 2002/04/04 17:47:03;  author: johan;  state: Exp;  lines: +27 -9
+add ALL ability
+----------------------------
+revision 0.2
+date: 2002/04/03 21:27:26;  author: benno;  state: Exp;  lines: +35 -56
+cleanup and reorg
+----------------------------
+revision 0.1
+date: 2002/04/03 21:26:32;  author: benno;  state: Exp;
+initial revision
+=============================================================================

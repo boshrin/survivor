@@ -1,0 +1,321 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: Mailq Check Module</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: <TT>mailq</TT> Check Module</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF="#about">About <TT>mailq</TT></A>
+  <UL>
+  <LI><A HREF="#dependencies">Dependencies</A>
+  <LI><A HREF="#arguments">Arguments</A>
+  <LI><A HREF="#description">Description</A>
+  <LI><A HREF="#examples">Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>mailq</TT>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ basics
+ </TD>
+ <TD CLASS="highlight">
+  <TABLE>
+  <TR>
+  <TD CLASS="info">Module Type</TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Scheduler</A></TD>
+  <TD CLASS="info"><A HREF="cm-about.html">Remote</A></TD>
+  </TR>
+
+  <TR>
+  <TD CLASS="check"><A HREF="cm-about.html">check</A></TD>
+  <!-- If scheduler or remote are "No", set CLASS="info" instead-->
+  <TD CLASS="info">No</TD>
+  <TD CLASS="remote">Yes</TD>
+  </TR>
+  </TABLE>
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS="hltitle">
+ syntax
+ </TD>
+ <TD CLASS="highlight">
+ <PRE>
+     <B>module mailq {</B>
+       [<B>queuedir</B> &lt;directory>]
+       [<B>age</B> &lt;number>]
+       [<B>warn</B> &lt;number>]
+       [<B>prob</B> &lt;number>]
+       [<B>deadwarn</B> &lt;number>]
+       [<B>deadprob</B> &lt;number>]
+       [<B>hostwarn</B> &lt;number>]
+       [<B>hostprob</B> &lt;number>]
+       [<B>userwarn</B> &lt;number>]
+       [<B>userprob</B> &lt;number>]
+     <B>}</B>
+     <B>via</B> &lt;transport>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <!-- Remove any irrelevant LIs -->
+ 
+ <UL>
+ <LI>None
+ </UL>
+
+ <P>
+ 
+ <A ID="arguments"></A>
+ <H3>Arguments</H3>
+
+ <P>
+ 
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=kwtop>Name</TD>
+ <TD CLASS=kwtop><A CLASS="kwlink" HREF="spec-xmlarg.html">Type</A></TD>
+ <TD CLASS=kwtop>Value</TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-queuedir"></A><B>queuedir</B></TD>
+ <TD CLASS=kwref>optional directory, default is '/var/spool/mqueue'</TD>
+ <TD CLASS=kwdef>
+   Directory containing the outgoing queue of messages.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-age"></A><B>age</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Minimum amount of time in seconds since the last modification
+   of a queue file that is required to pass before that file is
+   counted.  Setting this value is useful to prevent examination
+   of transient messages (ie: those being successfully processed).
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-warn"></A><B>warn</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages required to generate a warning.
+   0 indicates not to generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-prob"></A><B>prob</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages required to generate a problem.
+   0 indicates not to generate problems.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-deadwarn"></A><B>deadwarn</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Number of undeliverable messages required to generate a warning.
+   0 indicates not to generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-deadprob"></A><B>deadprob</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Number of undeliverable messages required to generate a problem.
+   0 indicates not to generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-hostwarn"></A><B>hostwarn</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages for any one destination host required to
+   generate a warning.  0 indicates not to generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-hostprob"></A><B>hostprob</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages for any one destination host required to
+   generate a problem.  0 indicates not to generate problems.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-userwarn"></A><B>userwarn</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages for any one recipient required to
+   generate a warning.  0 indicates not to generate warnings.
+ </TD>
+ </TR>
+   
+ <TR>
+ <TD CLASS=keyword><A ID="kw-userprob"></A><B>userprob</B></TD>
+ <TD CLASS=kwref>optional number between 0 and infinity, default is 0</TD>
+ <TD CLASS=kwdef>
+   Total number of queued messages for any one recipient required to
+   generate a problem.  0 indicates not to generate problems.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ If at least one warning or problem value is not provided, the module
+ will exit with a misconfiguration error.
+ 
+ <P>
+ 
+ <A ID="description"></A>
+ <H3>Description</H3>
+
+ The <TT>mailq</TT> module determines what, if any, backlog is present
+ in the outgoing mail queue.  It reads the <TT>qf</TT> control files
+ in the specified queue directory to determine how many outgoing
+ messages have not yet been sent.  The module can count three
+ different types of statistics, any of which can be used with any
+ other.
+
+ <OL>
+ <LI><B>Total queue size</B> simply counts the total number of messages
+    waiting to be sent.  Permission to read the queue directory is
+    required, but not to read individual files.
+    <P>
+
+ <LI><B>Destination server</B> parses the destination of each message and
+    tallies the results by server.  When the number of messages for a
+    destination has reached a threshold, an error state will be returned.
+    Permission to read the queue directory and to read individual files
+    is required.
+    <P>
+
+ <LI><B>Recipient</B> parses the destination of each message and tallies
+    the results by email address.  When the number of messages for an
+    individual address has reached a threshold, an error state will be
+    returned.  Permission to read the queue directory and to read individual
+    files is required.
+    <P>
+ </OL>
+
+ <A ID="examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>To generate a problem when at least 2000 messages are in the queue:
+     <PRE>
+     module mailq {
+       prob 2000
+     }
+     via remote
+     </PRE>
+
+ <LI>To examine files in <TT>/export/mqueue</TT> at least 30 seconds old
+     and warn when at least 1000 are found or generate a problem when
+     at least 2000 are found:
+     <PRE>
+     module mailq {
+       queuedir /export/mqueue
+       age      30
+       warn     1000
+       prob     2000
+     }
+     via remote
+     </PRE>
+
+ <LI>To examine files at least 30 seconds old and warn if at least 20 are
+     found for the same destination server or generate a problem if at
+     least 100 are found:
+     <PRE>
+     module mailq {
+       age      30
+       hostwarn 20
+       hostprob 100
+     }
+     via remote
+     </PRE>
+
+ <LI>To examine files at least 30 seconds old and warn if at least 20 are
+     found for the same recipient or generate a problem if at least 100
+     are found:
+     <PRE>
+     module mailq {
+       age      30
+       userwarn 20
+       userprob 100
+     }
+     via remote
+     </PRE>
+
+ <LI>To perform all three types of test in one check:
+     <PRE>
+     module mailq {
+       age      30
+       warn     1000
+       prob     1000
+       hostwarn 20
+       hostprob 100
+       userwarn 20
+       userprob 100
+     }
+     via remote
+     </PRE>
+ </OL>
+ 
+ <HR>
+ <I>$Date: 2006/11/19 20:21:05 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF="#kw-age">age</A><BR>
+ <A CLASS="keywords" HREF="#kw-deadwarn">deadwarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-deadprob">deadprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-hostwarn">hostwarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-hostprob">hostprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-prob">prob</A><BR>
+ <A CLASS="keywords" HREF="#kw-queuedir">queuedir</A><BR>
+ <A CLASS="keywords" HREF="#kw-userwarn">userwarn</A><BR>
+ <A CLASS="keywords" HREF="#kw-userprob">userprob</A><BR>
+ <A CLASS="keywords" HREF="#kw-warn">warn</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

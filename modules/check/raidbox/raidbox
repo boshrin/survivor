@@ -1,0 +1,402 @@
+#!/usr/bin/perl -w
+
+# raidbox module
+
+# Version: $Revision: 1.8 $
+# Author: Eric Garrido
+# Date: $Date: 2007/03/29 12:07:02 $
+#
+# Based on the SNMP module for survivor-0.9.1
+# Author: Benjamin Oshrin and Matt Selsky
+#
+# Copyright (c) 2006 - 2007
+# The Trustees of Columbia University in the City of New York
+#
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+use SNMP;
+
+my %argfmt = (
+    'community'             => 'optional string default(public)',
+    'faileddiskwarn'        => 'optional relation default(gt[0])',
+    'faileddiskprob'        => 'optional relation default(gt[1])',
+    'failedpowersupplywarn' => 'optional relation default(gt[0])',
+    'failedpowersupplyprob' => 'optional relation default(gt[1])',
+    'failedfanswarn'        => 'optional relation default(gt[0])',
+    'failedfansprob'        => 'optional relation default(gt[1])',
+    'fanspeedwarn'          => 'optional relation default(lt[1500])',
+    'fanspeedprob'          => 'optional relation default(lt[1000])',
+    'loadaveragewarn'       => 'optional relation default(gt[75])',
+    'loadaverageprob'       => 'optional relation default(gt[95])',
+    'diskspareswarn'        => 'optional relation default(lt[2])',
+    'disksparesprob'        => 'optional relation default(lt[1])',
+    'volumespeed'    => 'optional relation default(regv[^320\.0MB\/Sec])',
+    'snmpversion' => 'optional string one(1,2,2c,3) default(1)',
+    'snmptimeout' => 'optional number between(1,inf) default(5)'
+);
+
+my $sc = new Survivor::Check();
+
+# Disable threading pending threadsafe SNMP.
+$sc->UseThreads(0);
+
+$sc->GetOpt( \%argfmt, \&RaidboxValidate );
+
+# Calculate timeout in microseconds
+
+my $snmptimeout = $sc->Arg('snmptimeout') * 1000000;
+
+my $r = $sc->Exec( \&RaidboxCheck );
+
+exit($r);
+
+sub RaidboxValidate {
+    return ( MODEXEC_OK, 0, 'Raidbox OK' );
+}
+
+sub RaidboxCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $sess = new SNMP::Session(
+				 DestHost  => $host,
+				 Community => $self->Arg('community'),
+				 UseLongNames => 1,
+				 UseNumeric => 1,
+				 Version => $sc->Arg("snmpversion"),
+				 Timeout => $snmptimeout
+    );
+
+    if ( !defined $sess ) {    # bad hostname, perhaps?
+        return ( MODEXEC_PROBLEM, 0,
+            'The SNMP object could not be created: ' . $sess->{ErrorNum} );
+    }
+
+    my %oids = (
+        'netapp' => {
+            'diskfailedcount'        => '.1.3.6.1.4.1.789.1.6.4.7.0',
+            'disksparescount'        => '.1.3.6.1.4.1.789.1.6.4.8.0',
+            'failedfanscount'        => '.1.3.6.1.4.1.789.1.2.4.2.0',
+            'failedpowersupplycount' => '.1.3.6.1.4.1.789.1.2.4.4.0',
+            'reconstructing'         => '.1.3.6.1.4.1.789.1.6.4.3.0',
+            'loadaverage'            => '.1.3.6.1.4.1.789.1.2.1.3.0',
+        },
+
+        'jetstor' => {
+            'disks'         => '.1.3.6.1.4.1.14752.1.2.3.1.1.9',
+            'fans'          => '.1.3.6.1.4.1.14752.1.2.2.13.1.2',
+            'powersupplies' => '.1.3.6.1.4.1.14752.1.2.2.12.1.2',
+            'volumespeed'   => '.1.3.6.1.4.1.14752.1.2.5.1.1.17',
+        },
+    );
+
+    my $query = $sess->get('.1.3.6.1.4.1.789.1.1.2.0');
+    my $device;
+
+    if ( !defined $query ) {    # the request failed.
+        goto ERROR;
+    }
+    if ($query)
+    {    # the query succeeded, meaning that the OID is valid on that device
+        $device = 'netapp';
+    }
+    else {
+        $device = 'jetstor';
+    }
+
+    my $probcnt = 0;
+    my $warncnt = 0;
+    my $rc;
+    my $msg;
+
+    # FAILED POWER SUPPLIES
+
+    my $failedps = 0;
+    
+    if ( $device eq 'netapp' ) {
+	# Look directly at count
+
+	$failedps = $sess->get($oids{$device}->{'failedpowersupplycount'});
+    } elsif( $device eq 'jetstor' ) {
+	# Iterate through all power supplies and make count
+	
+        my $vb = new SNMP::Varbind( [ $oids{$device}->{'powersupplies'} ] );
+
+        my $result = $sess->getnext($vb);
+        if ( !defined $result ) {    # the request failed.
+            goto ERROR;
+        }
+	
+        while ( ${$vb}[0] =~ /$oids{$device}->{'powersupplies'}/o ) {
+            $failedps++ if ( $result != 1 );
+            $result = $sess->getnext($vb);
+            if ( !defined $result ) {    # the request failed.
+                goto ERROR;
+            }
+        }
+    }
+	
+    ( $rc, $msg ) =
+	$self->RelationCompare( $self->Arg('failedpowersupplyprob'),
+				$failedps );
+
+    if ($rc) {
+	$self->AccResultAdd($host, MODEXEC_PROBLEM,
+			    $failedps . ' failed power ' .
+	    (($failedps == 1) ? 'supply' : 'supplies'));
+	$probcnt++;
+    }
+    else {
+	( $rc, $msg ) =
+	    $self->RelationCompare( $self->Arg('failedpowersupplywarn'),
+				    $failedps );
+
+	$self->AccResultAdd($host, ($rc ? MODEXEC_WARNING : MODEXEC_OK),
+			    $failedps . ' failed power ' .
+			    (($failedps == 1) ? 'supply' : 'supplies'));
+	if ($rc) {
+	    $warncnt++;
+	}
+    }
+
+    # RECONSTRUCTING DISK
+
+    if ( $device eq 'netapp' ) {
+	my $reconstr = $sess->get($oids{$device}->{'reconstructing'});
+
+	if($reconstr > 0) {
+	    $self->AccResultAdd($host, MODEXEC_PROBLEM,
+				'The device is reconstructing');
+	    $probcnt++;
+	} else {
+	    $self->AccResultAdd($host, MODEXEC_OK, 'Not reconstructing');
+	}
+    }
+
+    # FAILED AND SPARE DISKS
+
+    my $faildisk = 0;
+    my $spares = 0;
+    
+    if ( $device eq 'netapp' ) {
+	$faildisk = $sess->get($oids{$device}->{'diskfailedcount'});
+	$spares = $sess->get($oids{$device}->{'disksparescount'});
+    } elsif( $device eq 'jetstor' ) {
+        my $vb = new SNMP::Varbind( [ $oids{$device}->{'disks'} ] );
+
+        my $result = $sess->getnext($vb);
+        if ( !defined $result ) {    # the request failed.
+            goto ERROR;
+        }
+
+        while ( ${$vb}[0] =~ /$oids{$device}->{'disks'}/o ) {
+            $faildisk++    if ( $result =~ /Failed/ );
+            $spares++ if ( $result =~ /Hot Spare/ );
+            $result = $sess->getnext($vb);
+            if ( !defined $result ) {    # the request failed.
+                goto ERROR;
+            }
+        }
+    }
+	
+    ( $rc, $msg ) =
+	$self->RelationCompare( $self->Arg('faileddiskprob'), $faildisk );
+
+    if ($rc) {
+	$self->AccResultAdd($host, MODEXEC_PROBLEM,
+			    $faildisk . ' failed ' .
+			    (($faildisk == 1) ? 'disk' : 'disks'));
+	$probcnt++;
+    }
+    else {
+	( $rc, $msg ) =
+	    $self->RelationCompare( $self->Arg('faileddiskwarn'), $faildisk );
+
+	$self->AccResultAdd($host, ($rc ? MODEXEC_WARNING : MODEXEC_OK),
+			    $faildisk . ' failed ' .
+			    (($faildisk == 1) ? 'disk' : 'disks'));
+	if ($rc) {
+	    $warncnt++;
+	}
+    }
+    
+    ( $rc, $msg ) =
+	$self->RelationCompare( $self->Arg('disksparesprob'), $spares );
+
+    if ($rc) {
+	$self->AccResultAdd($host, MODEXEC_PROBLEM,
+			    $spares . ' spare ' .
+			    (($spares == 1) ? 'disk' : 'disks'));
+	$probcnt++;
+    }
+    else {
+	( $rc, $msg ) =
+	    $self->RelationCompare( $self->Arg('diskspareswarn'), $spares );
+
+	$self->AccResultAdd($host, ($rc ? MODEXEC_WARNING : MODEXEC_OK),
+			    $spares . ' spare ' .
+			    (($spares == 1) ? 'disk' : 'disks'));
+	if ($rc) {
+	    $warncnt++;
+	}
+    }
+    
+    # FAILED FANS
+
+    my $failedfans = 0;
+
+    if ( $device eq 'netapp' ) {
+        $failedfans = $sess->get( $oids{$device}->{'failedfanscount'} );
+
+	( $rc, $msg ) =
+	    $self->RelationCompare( $self->Arg('failedfansprob'),
+				    $failedfans );
+
+	if ($rc) {
+	    $self->AccResultAdd($host, MODEXEC_PROBLEM,
+				$failedps . ' failed ' .
+				(($failedfans == 1) ? 'fan' : 'fans'));
+	    $probcnt++;
+	}
+	else {
+	    ( $rc, $msg ) =
+		$self->RelationCompare( $self->Arg('failedfanswarn'),
+					$failedfans );
+	    
+	    $self->AccResultAdd($host, ($rc ? MODEXEC_WARNING : MODEXEC_OK),
+				$failedfans . ' failed ' .
+				(($failedfans == 1) ? 'fan' : 'fans'));
+	    if ($rc) {
+		$warncnt++;
+	    }
+	}
+    }
+
+    # FAN SPEED
+
+    my @fanwarn = ();
+    my @fanprob = ();
+    my @fanok = ();
+    
+    if( $device eq 'jetstor' ) {
+	my $vb = new SNMP::Varbind( [ $oids{$device}->{'fans'} ] );
+        my $result = $sess->getnext($vb);
+        if ( !defined $result ) {    # the request failed.
+            goto ERROR;
+        }
+	print "result = " . $result . "\n";
+        while ( ${$vb}[0] =~ /$oids{$device}->{'fans'}/o ) {
+            ( $rc, $msg ) =
+              $self->RelationCompare( $self->Arg('fanspeedprob'), $result );
+	    
+            if ($rc) {
+		push(@fanprob, $result);
+	    } else {
+		( $rc, $msg ) =
+		    $self->RelationCompare( $self->Arg('fanspeedwarn'),
+					    $result );
+		if ($rc) {
+		    push(@fanwarn, $result);
+		} else {
+		    push(@fanok, $result);
+		}
+            }
+            $result = $sess->getnext($vb);
+            if ( !defined $result ) {    # the request failed.
+                goto ERROR;
+            }
+        }
+
+       my $fanspeeds = "Fan speeds: " . join('+', @fanwarn, @fanprob, @fanok);
+    
+       if (scalar(@fanprob) > 0) {
+	   $self->AccResultAdd($host, MODEXEC_PROBLEM, $fanspeeds);
+	   $probcnt++;
+       }
+       else {
+	   if (scalar(@fanwarn) > 0) {
+	       $self->AccResultAdd($host, MODEXEC_WARNING, $fanspeeds);
+	       $warncnt++;
+	   } else {
+	       $self->AccResultAdd($host, MODEXEC_OK, $fanspeeds);
+	   }
+       }
+    }
+    
+    # LOAD AVERAGE
+
+    my $loadav = 0;
+    
+    if ( $device eq 'netapp' ) {
+        $loadav = $sess->get( $oids{$device}->{'loadaverage'} );
+	
+	( $rc, $msg ) =
+	    $self->RelationCompare( $self->Arg('loadaverageprob'), $loadav );
+
+	if ($rc) {
+	    $self->AccResultAdd($host, MODEXEC_PROBLEM, 'Load ' . $loadav);
+	    $probcnt++;
+	}
+	else {
+	    ( $rc, $msg ) =
+		$self->RelationCompare( $self->Arg('loadaveragewarn'),
+					$loadav );
+	    
+	    $self->AccResultAdd($host, ($rc ? MODEXEC_WARNING : MODEXEC_OK),
+				'Load ' . $loadav);
+	    
+	    if ($rc) {
+		$warncnt++;
+	    }
+	}
+    }
+    
+    # VOLUME SPEED
+
+    my $badvolumes = 0;
+    my $volstat = '';
+    
+    if ( $device eq 'jetstor' ) {
+	my $vb = new SNMP::Varbind( [ $oids{$device}->{'volumespeed'} ] );
+
+	my $result = $sess->getnext($vb);
+        if ( !defined $result ) {    # the request failed.
+            goto ERROR;
+        }
+	
+	
+        while ( ${$vb}[0] =~ /$oids{$device}->{'volumespeed'}/o ) {
+            ( $rc, $msg ) =
+              $self->RelationCompare( $self->Arg('volumespeed'), $result );
+            $badvolumes++ if ($rc);
+	    $volstat .= $result . ",";
+            $result = $sess->getnext($vb);
+            if ( !defined $result ) {    # the request failed.
+                goto ERROR;
+            }
+        }
+
+	chop($volstat);
+	
+	if ( $badvolumes > 0 ) {
+	    $self->AccResultAdd($host, MODEXEC_PROBLEM,
+				'Volume speed is not normal: ' . $volstat);
+	    $probcnt++;
+	} else {
+	    $self->AccResultAdd($host, MODEXEC_OK,
+				'Volume speed is normal:' . $volstat);
+	}
+    }
+
+    return($self->AccResultGet($host, $probcnt + $warncnt));
+    
+  ERROR:
+    my @retval =
+      ( MODEXEC_PROBLEM, 0, 'The SNMP request failed: ' . $sess->{ErrorNum} );
+    return @retval;
+}
+

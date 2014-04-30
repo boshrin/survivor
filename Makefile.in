@@ -1,0 +1,94 @@
+# Top-level Makefile for Survivor
+
+# Version: $Revision: 0.19 $
+# Date: $Date: 2007/04/03 11:37:23 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+include Makefile.inc
+
+INSTDIR=${DESTDIR}@prefix@
+PKGVERSION=@PACKAGE_VERSION@
+
+ALLDIRS=libdebug libparse822 libparsecgi libparsexml libsrv libcm libui \
+ modules/check modules/common modules/fix modules/format modules/report \
+ modules/transmit modules/transport modules/webauth doc remote cgi cli \
+ gateway scheduler
+INSTCSUBDIRS=${INSTDIR}/sbin ${INSTDIR}/mod ${INSTDIR}/mod/check \
+ ${INSTDIR}/mod/common ${INSTDIR}/mod/common/Survivor ${INSTDIR}/mod/fix
+INSTSUBDIRS=${INSTDIR}/bin ${INSTCSUBDIRS} ${INSTDIR}/mod/format \
+ ${INSTDIR}/mod/report ${INSTDIR}/mod/transmit ${INSTDIR}/mod/transport \
+ ${INSTDIR}/mod/webauth ${INSTDIR}/html ${INSTDIR}/html/doc ${INSTDIR}/html/sw
+
+## Build rules
+##############
+
+all:
+	for i in ${ALLDIRS} ; do (cd $$i && echo '>>' $$i && ${MAKE} all) ;\
+	done
+
+distribution: veryclean
+	mkdir ../dist/survivor-${PKGVERSION}
+	/usr/bin/tar cfFX - tar.exc . | (cd ../dist/survivor-${PKGVERSION} ; /usr/bin/tar xfBp -)
+	./util/docbuilder.pl ./doc ../dist/survivor-${PKGVERSION}/doc ${PKGVERSION}
+	./util/logbuilder.sh . ../dist/survivor-${PKGVERSION}
+	(cd ../dist ; tar cf survivor-${PKGVERSION}.tar survivor-${PKGVERSION} ; \
+		gzip survivor-${PKGVERSION}.tar)
+	rm -fr ../dist/survivor-${PKGVERSION}
+
+## Install rules
+################
+
+do-install:
+	for i in ${INSTDIR} ${INSTSUBDIRS} ;\
+	do ( [ -z "$$i" ] || [ -d $$i ] || mkdir $$i ; chown @INST_USER@ $$i ; chgrp @INST_GROUP@ $$i ; chmod 755 $$i ) ; done
+	for i in ${ALLDIRS} ; \
+	do (cd $$i && echo '>>' $$i && ${MAKE} install) ;\
+	done
+
+do-install-remote:
+	for i in ${INSTDIR} ${INSTCSUBDIRS} ;\
+	do ( [ -z "$$i" ] || [ -d $$i ] || mkdir $$i ; chown @INST_USER@ $$i ; chgrp @INST_GROUP@ $$i ; chmod 755 $$i ) ; done
+	for i in ${ALLDIRS} ; \
+	do (cd $$i && echo '>>' $$i && ${MAKE} install-remote) ;\
+	done
+
+instuser:
+	touch /tmp/.survivor.ownertest
+	chown @INST_USER@ /tmp/.survivor.ownertest
+	chgrp @INST_GROUP@ /tmp/.survivor.ownertest
+	rm -f /tmp/.survivor.ownertest
+
+install: instuser do-install
+
+install-remote: instuser do-install-remote
+
+## Hygienic rules
+#################
+
+clean:
+	for i in ${ALLDIRS} ; do (cd $$i && echo '>>' $$i && ${MAKE} clean) ;\
+	done
+
+veryclean:
+	rm -f *~
+	for i in ${ALLDIRS} ; do (cd $$i && echo '>>' $$i && ${MAKE} veryclean) ;\
+	done
+	find . -name \*~ -exec rm {} \;
+
+## RCS rules
+############
+
+checkedin:
+	for i in `find . -name \*,v | sed 's/,v//' | sed 's/RCS\///'`; do if [ ! -f $$i ]; then echo $$i does not exist ; fi ; done
+
+# These produce filenames twice, not sure why
+checkedout:
+	find . -type f -exec rlog -L -R {} \; 2>/dev/null | sort | uniq
+
+unregistered:
+	find . -type f -exec rlog -L -R {} \; 1>/dev/null | sort | uniq

@@ -1,0 +1,516 @@
+#!/usr/bin/perl
+
+# Survivor Remote Daemon
+#
+# Version: $Revision: 0.16 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2006/10/12 02:37:45 $
+
+# sr is designed to be run from inetd.  The survivor module directory
+# must be specified in inetd.conf, and only modules in that directory
+# will be used.  sr should be run with the minimum privileges necessary
+# to execute the desired check modules.
+
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+$| = 1;
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../mod/common";
+use Survivor;
+use Survivor::XML;
+
+use Socket;
+use Sys::Syslog;
+
+my %flags = ("C" => "arg",
+	     "F" => "arg",
+	     "h" => "arg",
+	     "l" => "bool",
+	     "L" => "bool",
+	     "m" => "arg",
+	     "u" => "arg");
+my %opts;
+my $exitcode = 0;
+my $neuid = 0;
+
+# Hack to work around artificial limits in inetd.conf argument length limits.
+
+if(scalar(@ARGV) == 1) {
+    my $x = shift(@ARGV);
+    
+    @ARGV = split(/;/, $x);
+}
+
+my $err = Survivor::ParseFlags(0, \%flags, \%opts);
+
+# If we accepted additional arguments (not flags), we could access them via
+# my $extra = $opts{"args"};
+#
+# foreach my $x (@$extra) {
+#     printf("arg = $x\n");
+# }
+
+if($err ne "") {
+    result_error($err);
+    exit(1);
+}
+
+if(!exists $opts{'m'} || $opts{'m'} eq "") {
+    result_error("sr not given module directory");
+    exit(1);
+}
+
+if(exists $opts{'u'} && $opts{'u'} ne "" && $< == 0) {
+    # We can drop privs to $opt_u if requested
+
+    $neuid = (getpwnam($opts{'u'}))[2];
+}
+
+if($opts{'l'} || $opts{'L'}) {
+    openlog("sr", "pid", "daemon");
+}
+
+if(exists $opts{'h'}) {
+    # Make sure the connection is authorized
+
+    my $sockaddr = getpeername(STDIN);
+
+    if($sockaddr) {
+	my ($port, $iaddr) = unpack_sockaddr_in($sockaddr);
+	my $rhost = gethostbyaddr($iaddr, AF_INET);
+	my $raddr = inet_ntoa($iaddr);
+
+	if($rhost || $raddr) {
+	    my $ok = 0;
+
+	    foreach my $h (split(/,/, $opts{'h'})) {
+		if($h eq $rhost || $h eq $raddr) {
+		    $ok = 1;
+		}
+	    }
+
+	    if($ok) {
+		if($opts{'l'}) {
+		    syslog("info",
+			   "connection accepted from $rhost \[$raddr\]");
+		}
+	    } else {
+		result_error("Permission denied");
+		if($opts{'l'}) {
+		    syslog("info",
+			   "connection refused from $rhost \[$raddr\]");
+		}
+		$exitcode = 1;
+	    }
+	} else {
+	    result_error("Unable to resolve remote address");
+	    if($opts{'l'}) {
+		syslog("info", "unable to resolve remote address");
+	    }
+	    $exitcode = 1;
+	}
+    } else {
+	result_error("Unable to getpeername");
+	if($opts{'l'}) {
+	    syslog("info", "unable to getpeername");
+	}
+	$exitcode = 1;
+    }
+}
+
+# We start with a command (and maybe its args), then maybe read more
+
+if($exitcode == 0) {
+    while(<>) {
+	# Toss newlines and linefeeds
+	s/\012//g;
+	s/\015//g;
+
+	my ($command, $args) = split(/ /, $_, 2);
+
+	if($command eq "check" || $command eq "fix") {
+	    # $args has the module to run
+	    my $mod = $args;
+
+	    if($mod ne "") {         # Must have a module name
+		if($mod !~ /\//) {   # Name must not have a /
+		    if($opts{'L'}) {
+			syslog("info", "$command request: $mod");
+		    }
+
+		    my $modexec = $opts{'m'}."/".$command."/".$mod;
+		    
+		    if(-x $modexec) {
+			# Now we need the client to send an XML document
+
+			result_ok("send " . ($command eq "check" ?
+					     "SurvivorCheckData" :
+					     "SurvivorFixData"));
+
+			my @xmlblock = read_data();
+
+			if(defined(@xmlblock)) {
+			    # Pull out the timeout since we need it.
+			    # We pass the whole XML doc to the module,
+			    # so we don't need to figure out the args.
+
+			    my $sx = new Survivor::XML();
+
+			    my $datatop = $sx->ParseBlock(@xmlblock);
+			    my $sdatatop =
+			       $datatop->{"children"}->{"SurvivorCheckData"}[0]
+				||
+				$datatop->{"children"}->{"SurvivorFixData"}[0];
+
+			    if($datatop && $sdatatop)
+			    {
+				my $timeout = 0;
+
+				if(defined $sdatatop->{"children"}->{"Timeout"}[0]->{"text"}) {
+				    $timeout = $sdatatop->{"children"}->{"Timeout"}[0]->{"text"};
+				}
+				
+				# Exec the requested module and read the
+				# module result document
+
+				# If modules are hanging rather than exiting,
+				# especially those that fork off a daemon,
+				# then they are likely not properly closing
+				# off stdin, stdout, and stderr.  See, for an
+				# example, the init.d fix module.
+
+				# Fork off a child to handle the request.
+				# We do this rather than system() because it
+				# gives us finer control over privileges.
+				# We also need to be able to close the
+				# child's stdin after sending the XML doc.
+				
+				use IO::Handle;  # for autoflush
+
+				# [P]arent/[C]hild [R]eadsFrom [W]ritesTo
+				if(pipe(CR, PW) && pipe(PR, CW)) {
+				    PW->autoflush(1);
+				    CW->autoflush(1);
+
+				    my $pid = fork();
+
+				    if(defined $pid) {
+					if($pid == 0) {
+					    # Child.  Adjust filehandles
+					    # and maybe drop privs.
+
+					    close PR;
+					    close PW;
+					    
+					    open(STDIN, "<&CR");
+					    open(STDOUT, ">&CW");
+					    
+					    setuser($command, $mod);
+					    exec($modexec);
+					    exit(MODEXEC_PROBLEM);
+					} else {
+					    # Parent, pass the request
+					    # document, set a timeout,
+					    # and read the result.
+					    
+					    print(PW @xmlblock);
+					
+					    # Close the write channel to send
+					    # an EOF so the XML can be parsed
+
+					    close PW;
+
+					    my $alrm = 0;
+
+					    local $SIG{ALRM} =
+						sub { $alrm++; close PR; };
+
+					    # What we want to do is this:
+					    # alarm $timeout;
+					    # my @res = <PR>;
+					    # alarm 0;
+					    # But we can't, because the child
+					    # process becomes defunct, which
+					    # doesn't seem to send an EOF on
+					    # CW even though the process
+					    # technically exited.  So instead
+					    # we have the following hack...
+
+					    # Set the initial timeout on
+					    # waiting for the first line of
+					    # the response.
+
+					    my @res = ();
+
+					    alarm $timeout;
+					    my $r = <PR>;
+					    alarm 0;
+
+					    if($alrm) {
+						kill(9,$pid);
+					    
+						response_doc($command,
+							     MODEXEC_TIMEDOUT,
+							     "Timed out");
+					    } else {
+						push(@res, $r);
+						
+						# Continuing the hack, we
+						# assume all the data should
+						# be generated pretty much
+						# instantaneously.  If we
+						# wait more than 1 second,
+						# we assume we're done.
+
+						my $done = 0;
+
+						while(!$done) {
+						    eval {
+							local $SIG{ALRM} =
+							    sub {
+								$done++;
+								close PR;
+								};
+
+							alarm 1;
+							my $r = <PR>;
+							alarm 0;
+							
+							# Store what we read
+							push(@res, $r);
+						    };
+						}
+						
+						# Send the results back as a
+						# RESPONSE
+				
+						response(@res);
+					    }
+
+					    # Wait on the child pid
+
+					    close PR;
+					    waitpid($pid, 0);
+					}
+				    } else {
+					response_doc($command, MODEXEC_PROBLEM,
+						     "Fork failed");
+				    }
+				} else {
+				    response_doc($command, MODEXEC_PROBLEM,
+						 "pipe() failed");
+				}
+			    }
+			    else {
+				response_doc($command, MODEXEC_MISCONFIG,
+					     "Valid XML document not provided");
+			    }
+			} else {
+			    result_error("Did not receive expected DATA");
+			}
+		    } else {
+			result_error("$modexec is not executable");
+		    }
+		} else {
+		    result_error("Module name may not include '/'");
+		}
+	    } else {
+		result_error("sr not given module name");
+	    }
+	}
+	elsif($command eq "exit") {
+	    result_ok("Goodbye");
+	    close(STDIN);
+	}
+        elsif($command eq "version") {
+	    result_ok("v2");
+	}
+        else {
+	    result_error("Unknown command '$command'");
+        }
+    }
+}
+
+if($opts{'l'} || $opts{'L'}) {
+    closelog();
+}
+
+exit($exitcode);
+
+sub read_data {
+    # Read a DATA block from stdin and return the contents as an array
+    # of strings.  Returns undef on error.
+
+    # We need a begin line to start
+
+    my $begin = <>;
+    
+    # Toss newlines and linefeeds
+    $begin =~ s/\012//g;
+    $begin =~ s/\015//g;
+
+    if($begin eq "BEGIN DATA") {
+	my @ret = ();
+	my $done = 0;
+
+	while(!$done)
+	{
+	    # Toss linefeeds but not newlines.  We might not actually
+	    # need to do this.
+
+	    my $a = <>;
+	    $a =~ s/\015//g;
+
+	    if($a eq "END DATA\n") {
+		# Done parsing, return what we read
+
+		$done++;
+	    } else {
+		# Append this line
+
+		push(@ret, $a);
+	    }
+	}
+
+	return(@ret);
+	
+	# If we make it here, we never saw an END, so that is an error
+    }
+
+    return(undef);
+}
+
+sub response {
+    # Generate a RESPONSE with the data provided.
+
+    if($opts{'L'}) {
+	syslog("info", "response (first line): @_");
+    }
+    
+    printf("BEGIN RESPONSE\n");
+    foreach my $l (@_) {
+	print $l;
+    }
+    printf("END RESPONSE\n");
+}
+
+sub response_doc {
+    # Generate a suitable RESPONSE document for the type, return code,
+    # and comment provided.
+
+    my($dtype, $rc, $cmt) = @_;
+
+    my $doc = ($dtype eq "check" ?
+	       "SurvivorCheckResult" : "SurvivorFixResult");
+
+    my %xmltree = ("name" => "xml",
+		   "text" => "",
+		   "attrs" => {},
+		   "children" => {},
+		   "parent" => undef);
+
+    my %srdata = ("name" => $doc,
+		  "text" => "",
+		  "attrs" => {"Version" => "1.0"},
+		  "children" => {},
+		  "childorder" => ["ReturnCode", "Scalar", "Comment"],
+		  "parent" => \%xmltree);
+    $xmltree{"children"}{$doc} = [\%srdata];
+
+    my %rcdata = ("name" => "ReturnCode",
+		  "text" => $rc,
+		  "attrs" => {},
+		  "children" => {},
+		  "parent" => \%srdata);
+    $srdata{"children"}{"ReturnCode"} = [\%rcdata];
+
+    if($dtype eq "check") {
+	my %scdata = ("name" => "Scalar",
+		      "text" => "0",
+		      "attrs" => {},
+		      "children" => {},
+		      "parent" => \%srdata);
+	$srdata{"children"}{"Scalar"} = [\%scdata];
+    }
+
+    my %cmtdata = ("name" => "Comment",
+		  "text" => $cmt,
+		  "attrs" => {},
+		  "children" => {},
+		  "parent" => \%srdata);
+    $srdata{"children"}{"Comment"} = [\%cmtdata];
+
+    if($opts{'L'}) {
+	syslog("info", "response: $rc $cmt");
+    }
+
+    my $sx = new Survivor::XML();
+
+    printf("BEGIN RESPONSE\n");
+    $sx->GenerateStdout(\%xmltree);
+    printf("END RESPONSE\n");
+}
+
+sub result_error {
+    # Generate an ERROR result with the comment provided
+
+    my ($r) = @_;
+
+    if($opts{'L'}) {
+	syslog("info", "result: ERROR $r");
+    }
+    
+    printf("ERROR $r\n");
+}
+
+sub result_ok {
+    # Generate an OK result with the comment provided
+
+    my ($r) = @_;
+
+    if($opts{'L'}) {
+	syslog("info", "result: OK $r");
+    }
+    
+    printf("OK $r\n");
+}
+
+sub setuser {
+    # If running as root, set the effective user ID as required
+    # for executing the requested module.
+
+    my ($modtype, $modname) = @_;
+
+    if($< == 0) {
+	my $found = 0;
+
+	if($modtype eq "check") {
+	    foreach my $c (split(/,/, $opts{'C'})) {
+		if($c eq $modname) {
+		    # This module was listed as running with privileges
+		    $found = 1;
+		}
+	    }
+	} elsif($modtype eq "fix") {
+	    foreach my $f (split(/,/, $opts{'F'})) {
+		if($f eq $modname) {
+		    # This module was listed as running with privileges
+		    $found = 1;
+		}
+	    }
+	}
+
+	if(!$found) {
+	    # drop to nobody privileges
+
+	    $> = $neuid;
+	    $< = $>;
+	}
+    }
+}

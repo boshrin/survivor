@@ -1,0 +1,114 @@
+#!/usr/bin/perl -w
+
+# summary report module
+#
+# Version: $Revision: 0.2 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2005/11/05 03:09:39 $
+#
+# Copyright (c) 2004 - 2005
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Report;
+
+# Create a new Report object.
+
+my $sw = new Survivor::Report();
+
+my $pok = $sw->ParseReportRequest();
+
+if($pok == MODEXEC_OK) {
+    if($sw->Style() eq "html")
+    {
+	print ("<HTML><PRE>\n");
+	print ("<H1>Summary Report</H1>\n");
+    }
+    elsif($sw->Style() eq "text")
+    {
+	print ("Summary Report\n\n");
+    }
+
+    my @dataset = $sw->DataSet();
+
+    foreach my $d (@dataset)
+    {
+	my $asent = 0;
+	my $afailed = 0;
+	
+	foreach my $ar (@{${%$d}{"alertdata"}}) {
+	    if(${%$ar}{"alertrc"} == MODEXEC_OK) {
+	        $asent++;
+	    } else {
+		$afailed++;
+	    }
+        }
+
+        my $cok = 0;
+        my $cfailed = 0;
+	
+	foreach my $cr (@{${%$d}{"checkdata"}}) {
+            if(${%$cr}{"checkrc"} == MODEXEC_OK) {
+                $cok++;
+            } else {
+		$cfailed++;
+	    }
+	}
+
+	my $fok = 0;
+	my $ffailed = 0;
+	
+	foreach my $fr (@{${%$d}{"fixdata"}}) {
+	    if(${%$fr}{"fixrc"} == MODEXEC_OK) {
+		$fok++;
+	    } else {
+		$ffailed++;
+	    }
+	}
+
+        if($sw->Style() eq "check") {
+	    print ${%$d}{"service"} . " " . ${%$d}{"host"};
+
+            print " " . scalar(@{${%$d}{"alertdata"}}) . " "
+             . $asent . " " . $afailed;
+
+            print " " . scalar(@{${%$d}{"checkdata"}}) . " "
+	     . $cok . " " . $cfailed;
+
+            print " " . scalar(@{${%$d}{"commanddata"}});
+
+	    print " " . scalar(@{${%$d}{"fixdata"}}) . " "
+	     . $fok . " " . $ffailed;
+
+            print "\n";
+	} else {
+	    print ${%$d}{"service"} . "@" . ${%$d}{"host"} . ":\n";
+
+            print " " . scalar(@{${%$d}{"alertdata"}}) . " alerts executed, ";
+	    print $asent . " sent, " . $afailed . " failed\n";
+	
+            print " " . scalar(@{${%$d}{"checkdata"}}) . " checks executed, ";
+	    print $cok . " OK, " . $cfailed . " failed\n";
+	
+	    print " " . scalar(@{${%$d}{"commanddata"}})
+             . " commands executed\n";
+	
+	    print " " . scalar(@{${%$d}{"fixdata"}}) . " fixes executed, ";
+	    print $fok . " OK, " . $ffailed . " failed\n";
+        }
+    }
+    
+    if($sw->Style() eq "html")
+    {
+	print ("</PRE></HTML>\n");
+    }
+} else {
+    print "Error: $pok\n";
+}
+
+exit MODEXEC_OK;

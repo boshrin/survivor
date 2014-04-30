@@ -1,0 +1,71 @@
+----------------------------
+revision 0.16
+date: 2005/12/28 16:28:34;  author: benno;  state: Exp;  lines: +16 -100
+Use Survivor.pm routines for parsing ps
+----------------------------
+revision 0.15
+date: 2003/04/22 01:23:18;  author: selsky;  state: Exp;  lines: +3 -3
+Fix spacing in error message
+----------------------------
+revision 0.14
+date: 2003/04/15 23:10:48;  author: selsky;  state: Exp;  lines: +42 -39
+Use definedness for $user instead of empty strings
+Correctly handle cases when $user is numeric
+Convert more double quotes to single quotes
+Add 'uid' tag to output when userid is numeric
+----------------------------
+revision 0.13
+date: 2003/01/29 01:24:00;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.12
+date: 2003/01/19 16:34:33;  author: selsky;  state: Exp;  lines: +12 -12
+Add owner information to success comment
+Use single quotes more liberally
+----------------------------
+revision 0.11
+date: 2002/12/31 04:09:10;  author: benno;  state: Exp;  lines: +201 -222
+Switch to named args
+----------------------------
+revision 0.10
+date: 2002/09/30 15:03:55;  author: benno;  state: Exp;  lines: +21 -4
+add numeric uid support
+----------------------------
+revision 0.9
+date: 2002/07/31 20:37:50;  author: benno;  state: Exp;  lines: +14 -5
+remove superfluous exclamation points
+generate proper output when (eg) lt=1 is OK
+----------------------------
+revision 0.8
+date: 2002/06/28 03:43:41;  author: selsky;  state: Exp;  lines: +30 -7
+get bsd ps working better
+----------------------------
+revision 0.7
+date: 2002/06/06 23:13:16;  author: selsky;  state: Exp;  lines: +74 -79
+make module actually mostly comply with the documentation
+remove uninitialized variable warnings
+----------------------------
+revision 0.6
+date: 2002/06/02 17:45:21;  author: selsky;  state: Exp;  lines: +84 -65
+initial port to Survivor.pm
+----------------------------
+revision 0.5
+date: 2002/04/04 21:01:37;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.4
+date: 2002/04/03 21:32:38;  author: benno;  state: Exp;  lines: +5 -0
+rcs headers
+----------------------------
+revision 0.3
+date: 2002/02/01 17:48:26;  author: agt10;  state: Exp;  lines: +1 -1
+fixed bug where some queries find an extra process
+----------------------------
+revision 0.2
+date: 2002/01/17 18:50:18;  author: agt10;  state: Exp;  lines: +53 -10
+add cmdFormat option so we can check cricket
+----------------------------
+revision 0.1
+date: 2002/01/14 23:01:54;  author: agt10;  state: Exp;
+Initial revision
+=============================================================================

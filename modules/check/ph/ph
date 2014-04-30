@@ -1,0 +1,94 @@
+#!/usr/bin/perl -w
+
+# ph check module
+
+# Version: $Revision: 0.2 $
+# Author: Matt Selsky
+# Date: $Date: 2004/01/13 08:34:15 $
+#
+# Copyright (c) 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::PH;
+
+my %argfmt = ("port" => "optional number between(1,65535) default(105)",
+	      "filter" => "string",
+	      "response" => "optional string");
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&PhValidate);
+
+my $r = $sc->Exec( \&PhCheck);
+
+exit($r);
+
+sub PhValidate {
+    return(MODEXEC_OK, 0, "Ph OK");
+}
+
+sub PhCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my($ph,$query);
+
+    unless($ph = Net::PH->new($host,
+			      Port => $self->Arg('port'),
+			      Timeout => $self->Timeout())) {
+	return(MODEXEC_PROBLEM, 0, 'Connect failed');
+    }
+
+    unless($query = $ph->query($self->Arg('filter'))) {
+	return(MODEXEC_PROBLEM, 0, 'Query failed');
+    }
+
+    my $found;
+
+    foreach my $handle (@{$query}) {
+        foreach my $field (sort keys %{$handle}) {
+	    my $line = $field.'='.$handle->{$field}->text;
+	    #print "line: $line\n";
+
+	    if(defined $self->Arg('response') && !defined $found) {
+		# Look for success string
+		if($line =~ $self->Arg('response')) {
+		    # Success
+		    $found = 1;
+		}
+	    }
+        }
+    }
+
+    unless($ph->quit()) {
+	return(MODEXEC_PROBLEM, 0, 'Disconnect failed');
+    }
+
+    # Positive Success
+    if(defined $found) {
+	return(MODEXEC_OK, 1, 'Found '.$self->Arg('filter'));
+    }
+
+    # Negative Success
+    if(!$self->Arg('response') && !scalar @{$query}) {
+	return(MODEXEC_OK, 1,
+	       'Found expected empty response for '.$self->Arg('filter'));
+    }
+
+    # Failure
+    if(!scalar @{$query}) {
+	return(MODEXEC_PROBLEM, 0,
+	       'No match found for '.$self->Arg('filter'));
+    } else {
+	return(MODEXEC_PROBLEM, 0,
+	       'Unexpectedly lengthy response (query may not have matched)');
+    }
+}

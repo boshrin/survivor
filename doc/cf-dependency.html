@@ -1,0 +1,631 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: dependency.cf</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="style.css">
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: dependency.cf</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>dependency.cf</TT></A>
+ <LI><A HREF=#dep1>Type I Dependencies</A>
+  <UL>
+  <LI><A HREF=#dep1-about>About Type I Dependencies</A>
+  <LI><A HREF=#dep1-dependencies>Dependencies</A>
+  <LI><A HREF=#dep1-keywords>Type I Dependency Stanza Keywords</A>
+  <LI><A HREF=#dep1-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#dep2>Type II Dependencies</A>
+  <UL>
+  <LI><A HREF=#dep2-about>About Type II Dependencies</A>
+  <LI><A HREF=#dep2-dependencies>Dependencies</A>
+  <LI><A HREF=#dep2-keywords>Type II Dependency Stanza Keywords</A>
+  <LI><A HREF=#dep2-examples>Examples</A>
+  </UL>
+ <LI><A HREF=#max>Maximum Dependencies</A>
+  <UL>
+  <LI><A HREF=#max-about>About Maximum Dependencies</A>
+  <LI><A HREF=#max-dependencies>Dependencies</A>
+  <LI><A HREF=#max-keywords>Maximum Dependency Stanza Keywords</A>
+  <LI><A HREF=#max-examples>Examples</A>
+  </UL>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>dependency.cf</TT>
+ </TD>
+ </TR>
+  
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+  <UL>
+  <LI>Whitespace is generally ignored, unless otherwise noted.
+  <LI><B><TT>boldface</TT></B> denotes keywords.
+  <LI><TT>[brackets]</TT> denote optional keywords.
+  <LI>Separators (<TT>|</TT>) denote mutually exclusive keywords.
+  <LI>Comments begin with a <B><TT>#</TT></B> symbol, and may appear
+      anywhere.  Comments must be terminated with newlines.
+  </UL>
+  <PRE>
+     &lt;name> : [a-zA-Z0-9\.+%@_-]+
+     &lt;number> : [0-9]+
+  </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <TT>dependency.cf</TT> defines <A CLASS=kwlink HREF=#dep1>Type I</A> and
+ <A CLASS=kwlink HREF=#dep2>Type II</A> Dependencies, which prevent
+ the execution of <A HREF=cf-check.html#checks>Checks</A> and
+ <A HREF=cf-fixes.html#fixes>Fixes</A> when specified services are in
+ a failed status, and a <A CLASS=kwlink HREF=#max>Maximum
+ Dependencies</A> indication to prevent infinite recursion of Type II
+ Dependencies.  Dependencies are useful to prevent large numbers of
+ alert notificationss from being generated when a more basic or
+ underlying problem is found.
+
+ <P>
+
+ For both Type I and Type II Dependencies, when a Dependency prevents
+ a Check from running, the state for that Check will not be updated.
+ If the Check was previously in a failed state, it will not be
+ rechecked until the Dependency error clears.  However, alert
+ notifications may continue to be transmitted according to the
+ configuration.  Rescheduling the Check, or acknowledging or
+ inhibiting the service, can be used to discontinue these alerts.
+
+ <P>
+
+ When a Dependency fails, an entry is written into the Dependent
+ Check's history log.
+ 
+ <P>
+
+ <A ID="dep1"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Type I Dependencies
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>depend {</B>
+         (<B>checks {</B> &lt;name> ... <B>}</B>
+	 |<B>all checks </B>[<B>except {</B> &lt;name> [...] <B>}</B>])
+	 (<B>for hosts {</B> &lt;name> ... <B>}</B>
+	 |<B>for groups {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts except {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts except groups {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts</B>)
+	 <B>on</B> &lt;name>[<B>@</B>&lt;name>] <B>status</B>
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="dep1-about"></A>
+ <H3>About Type I Dependencies</H3>
+
+ A <I>Type I Dependency</I> prevents the execution of the specified
+ Checks (<I>Depending Checks</I>) on the specified set of hosts when
+ the specified dependency Check (<I>Dependency Check</I>) is in a
+ failed (ie: not <TT>MODEXEC_OK</TT>) status, either on the host being
+ checked or another specified host, as long as that other host is in
+ the same Group (ie: it would ordinarily be monitored with the same
+ Check).  (For hosts that are not in the same Group, use a
+ <A HREF=#dep2>Type II Dependency</A>.)
+
+ <P>
+
+ Type I Dependencies do not execute in real time, rather the
+ Dependency is based on whether or not a previous Check resulted in a
+ failed status.  If the dependency Check has not yet executed, then
+ the Type I Dependency will not prevent the depending Check from
+ executing.
+
+ <P>
+
+ Mutual Type I Dependencies are not permitted, as they can result in
+ deadlock.  For example, if <TT>mod1</TT> depends on <TT>mod2</TT>,
+ neither has an outstanding error, both are then scheduled, both fail
+ their Checks and are put into error status, then neither will be
+ rescheduled as each is dependent on the other, which is in a failed
+ state.
+ 
+ <P>
+
+ <A ID="dep1-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The Depending Checks specified by the <TT>checks</TT> keyword
+     must be defined in <A HREF=cf-check.html>check.cf</A>.
+ <LI>The Dependency Check specified by the <TT>on</TT> keyword
+     must be defined in <A HREF=cf-check.html>check.cf</A>.
+ <LI>The hosts specified by the <TT>for hosts</TT> and
+     <TT>for all hosts except</TT> keywords must be defined in
+     <A HREF=cf-host.html>host.cf</A>.
+ <LI>The host Groups specified by the <TT>for groups</TT> and
+     <TT>for all hosts except groups</TT> keywords must be defined
+     in <A HREF=cf-host.html>host.cf</A>.
+ <LI>If a hostname is provided for the <TT>on</TT> keyword, it
+     must be a member of the Group specified.
+ </UL>
+
+ <A ID="dep1-keywords"></A>
+ <H3>Type I Dependency Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-depend"></A>
+  <B>depend</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Dependency.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checks"></A>
+  <B>checks</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the Depending Checks, those Checks that depend on the
+  Dependency.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allchecks"></A>
+  <B>all checks</B> [<B>except</B>]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that all Checks are Depending Checks, except those specified
+  in the exception list.  The Dependency Check (specified by the <TT>on</TT>
+  keyword) is automatically excepted.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forhosts"></A>
+  <B>for hosts</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the hosts for which the Dependency applies.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forgroups"></A>
+  <B>for groups</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the hosts for which the Dependency applies as a list of Groups.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forallhosts"></A>
+  <B>for all hosts</B> [<B>except</B> [<B>groups</B>]]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that the Dependency applies to all hosts, except those
+  hosts or Groups explicitly listed.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-on"></A>
+  <B>on</B> &lt;name>[<B>@</B>&lt;name>]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the Dependency Check, ie: the Check whose status must be
+  <TT>MODEXEC_OK</TT> for the Depending Check to run.  If a hostname
+  is specified, then the Dependency Check must be <TT>MODEXEC_OK</TT>
+  for that host, otherwise for the host being checked.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-status"></A>
+  <B>status</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Indicate that this is a Type I Dependency.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="dep1-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, if <TT>server1</TT> and <TT>server2</TT> are to
+     be checked for <TT>http</TT>, both will first be examined for an
+     outstanding failure of <TT>ping</TT> before the <TT>http</TT> Check is
+     run.
+
+     <PRE>
+     depend {
+       checks { http }
+       for all hosts
+       on ping status
+     }
+     </PRE>
+
+     Replacing <TT>checks { http }</TT> with <TT>all checks</TT>
+     would make everything depend on <TT>ping</TT>.
+
+     <P>
+     
+ <LI>If only <TT>server2</TT> needed to be dependent, the following
+     could be used:
+
+     <PRE>
+     depend {
+       checks { http }
+       for hosts { server2 }
+       on ping status
+     }
+     </PRE>
+
+ 
+ <LI>If all hosts in the Group <TT>mroom1</TT> depended on
+     <TT>mroom-router</TT> being up, it would make sense to ping
+     the router before pinging the hosts.  If <TT>mroom-router</TT>
+     is monitored by the scheduler for <TT>ping</TT> also (ie:
+     <TT>mroom-router</TT> must also be a member of the <TT>ping</TT>
+     group).
+
+     <PRE>
+     depend {
+       checks { ping }
+       for groups { mroom1 }
+       on ping@mroom-router status
+     }
+     </PRE>
+ </OL>
+
+ <P>
+
+ <A ID="dep2"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Type II Dependencies
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>depend {</B>
+         (<B>checks {</B> &lt;name> ... <B>}</B>
+         |<B>fixes {</B> &lt;name> ... <B>}</B>
+	 |<B>all checks </B>[<B>except {</B> &lt;name> [...] <B>}</B>])
+	 |<B>all fixes </B>[<B>except {</B> &lt;name> [...] <B>}</B>])
+	 (<B>for hosts {</B> &lt;name> ... <B>}</B>
+	 |<B>for groups {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts except {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts except groups {</B> &lt;name> ... <B>}</B>
+	 |<B>for all hosts</B>)
+	 <B>on</B> &lt;name><B>@</B>&lt;name>
+     <B>}</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="dep2-about"></A>
+ <H3>About Type II Dependencies</H3>
+
+ A <I>Type II Dependency</I> is executed for the specified hostname
+ prior to the execution of the Depending Checks or Fixes.  The
+ Dependency Check must return <TT>MODEXEC_OK</TT> or the Depending
+ Checks and/or Fixes will not be run.  The target host may be any
+ host, it need not be defined in <TT>host.cf</TT>.
+
+ <P>
+
+ Type II Dependencies should be used with care.  If the Dependency
+ Check is run against a host that is not monitored by the scheduler
+ and the Dependency Check fails, no notification of the error will
+ be sent, since the Depending Checks will return <TT>MODEXEC_DEPEND</TT>
+ and nothing is monitoring the source of the underlying problem.
+ 
+ <A ID="dep2-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>The Depending Checks specified by the <TT>checks</TT> keyword
+     must be defined in <A HREF=cf-check.html>check.cf</A>.
+ <LI>The Depending Fixes specified by the <TT>fixes</TT> keyword
+     must be defined in <A HREF=cf-check.html>check.cf</A>.
+ <LI>The Dependency Check specified by the <TT>on</TT> keyword
+     must be defined in <A HREF=cf-check.html>check.cf</A>.
+ <LI>The hosts specified by the <TT>for hosts</TT> and
+     <TT>for all hosts except</TT> keywords must be defined in
+     <A HREF=cf-host.html>host.cf</A>.
+ <LI>The host Groups specified by the <TT>for groups</TT> and
+     <TT>for all hosts except groups</TT> keywords must be defined
+     in <A HREF=cf-host.html>host.cf</A>.
+ </UL>
+ <A ID="dep2-keywords"></A>
+ <H3>Type II Dependency Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-depend2"></A>
+  <B>depend</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Define a new Dependency.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-checks2"></A>
+  <B>checks</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the Depending Checks, those Checks that depend on the
+  Dependency.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-fixes"></A>
+  <B>fixes</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the Depending Fixes, those Fixes that depend on the
+  Dependency.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allchecks2"></A>
+  <B>all checks</B> [<B>except</B>]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that all Checks are Depending Checks, except those specified
+  in the exception list.  The Dependency Check (specified by the <TT>on</TT>
+  keyword) is automatically excepted.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-allfixes"></A>
+  <B>all fixes</B> [<B>except</B>]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that all Fixes are Depending Fixes, except those specified
+  in the exception list.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forhosts2"></A>
+  <B>for hosts</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the hosts for which the Dependency applies.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forgroups2"></A>
+  <B>for groups</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the hosts for which the Dependency applies as a list of Groups.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-forallhosts2"></A>
+  <B>for all hosts</B> [<B>except</B> [<B>groups</B>]]
+ </TD>
+ <TD CLASS=kwdef>
+  Specify that the Dependency applies to all hosts, except those
+  hosts or Groups explicitly listed.
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-on2"></A>
+  <B>on</B> &lt;name><B>@</B>&lt;name>
+ </TD>
+ <TD CLASS=kwdef>
+  Specify the Dependency Check, ie: the Check that must return
+  <TT>MODEXEC_OK</TT> for the Depending Check to run.  The form is
+  <I>service@host</I>.
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ <A ID="dep2-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, all servers that are monitored for <TT>http</TT>
+     will only be checked if the fileserver holding their data is up:
+
+     <PRE>
+     depend {
+       checks { http }
+       for all hosts
+       on ping@webfileserver
+     }
+     </PRE>
+
+ <LI>In this example, the servers running the application <TT>widget</TT>
+     in the Group <TT>widget1</TT> depend on the database server
+     <TT>db1</TT>.
+
+     <PRE>
+     depend {
+       checks { widget }
+       for groups { widget1 }
+       on dbcheck@db1
+     </PRE>
+
+ <LI>In this example, the Fix <TT>restart-app</TT> is dependent on the
+     application's keyserver running.
+
+     <PRE>
+     depend {
+       fixes { restart-app }
+       for all hosts
+       on keyserver@securehost1
+     }
+     </PRE>
+ </OL>
+
+ <P>
+
+ <A ID="max"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Maximum Dependencies
+ </TD>
+ </TR>
+ 
+ <TR>
+ <TD CLASS=hltitle>
+ syntax
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+     <B>maximum</B> &lt;number> <B>dependencies</B>
+ </PRE>
+ </TD>
+ </TR>
+ </TABLE>
+
+ <A ID="max-about"></A>
+ <H3>About Maximum Dependencies</H3>
+
+ A maximum number of Dependencies can be set to prevent infinite
+ Dependency recursion.  By default, this limit is 10 Dependencies
+ for a single Check or Fix.
+
+ <P>
+
+ This limit only applies to Type II Dependencies because Type I
+ Dependencies only examine existing data and so cannot loop.
+ 
+ <P>
+
+ <A ID="max-dependencies"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI>None.
+ </UL>
+
+ <A ID="max-keywords"></A>
+ <H3>Maximum Dependency Stanza Keywords</H3>
+
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS=keyword>
+  <A ID="kw-maximum"></A>
+  <B>maximum</B> &lt;number> <B>dependencies</B>
+ </TD>
+ <TD CLASS=kwdef>
+  Set the maximum number of Type II Dependencies for recursion.
+  If set to 0, recursion detection is disabled.
+ </TD>
+ </TR>
+ </TABLE>
+  
+ <A ID="max-examples"></A>
+ <H3>Examples</H3>
+
+ <OL>
+ <LI>In this example, the maximum number of Dependencies is set to 5.
+
+     <PRE>
+     maximum 5 dependencies
+     </PRE>
+ </OL>
+
+ <P>
+ 
+ <HR>
+ 
+ <I>$Date: 2006/11/19 16:37:10 $</I><BR>
+ <I>$Revision: 0.10 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+ <A CLASS="keywords" HREF=#kw-allchecks>all checks I</A><BR>
+ <A CLASS="keywords" HREF=#kw-allchecks2>all checks II</A><BR>
+ <A CLASS="keywords" HREF=#kw-allfixes>all fixes</A><BR>
+ <A CLASS="keywords" HREF=#kw-checks>checks I</A><BR>
+ <A CLASS="keywords" HREF=#kw-checks2>checks II</A><BR>
+ <A CLASS="keywords" HREF=#kw-fixes>fixes</A><BR>
+ <A CLASS="keywords" HREF=#kw-depend>depend I</A><BR>
+ <A CLASS="keywords" HREF=#kw-depend2>depend II</A><BR>
+ <A CLASS="keywords" HREF=#kw-forallhosts>for all hosts I</A><BR>
+ <A CLASS="keywords" HREF=#kw-forallhosts2>for all hosts II</A><BR>
+ <A CLASS="keywords" HREF=#kw-forgroups>for groups I</A><BR>
+ <A CLASS="keywords" HREF=#kw-forgroups2>for groups II</A><BR>
+ <A CLASS="keywords" HREF=#kw-forhosts>for hosts I</A><BR>
+ <A CLASS="keywords" HREF=#kw-forhosts2>for hosts II</A><BR>
+ <A CLASS="keywords" HREF=#kw-on>on I</A><BR>
+ <A CLASS="keywords" HREF=#kw-on2>on II</A><BR>
+ <A CLASS="keywords" HREF=#kw-status>status</A><BR>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,86 @@
+#!/usr/bin/perl -w
+
+# ndd module
+
+# Version: $Revision: 0.3 $
+# Author: Matt Selsky
+# Date: $Date: 2003/10/03 07:56:51 $
+#
+# Copyright (c) 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+my %argfmt = ('driver' => 'file',
+	      'instance' => 'optional number',
+	      'parameter' => 'string',
+	      'value' => 'relation');
+
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&NddValidate);
+
+my $NDD = $sc->Which('ndd');
+unless(defined $NDD) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, 'ndd executable not found');
+}
+
+my $r = $sc->Exec( \&NddCheck);
+
+exit($r);
+
+sub NddValidate {
+    return(MODEXEC_OK, 0, 'Ndd OK');
+}
+
+sub NddCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $driver = $self->Arg('driver');
+    my $instance = $self->Arg('instance');
+    my $parameter = $self->Arg('parameter');
+
+    # _S_et the instance if we need to
+    if(defined $instance) {
+	open(NDDS, "$NDD -set $driver instance $instance 2>&1|");
+
+	my $line = <NDDS>;
+
+	close(NDDS);
+
+	# Any output is bad. ndd command failed for some reason
+	if(defined $line) {
+	    $line =~ s/:/ -/;
+	    return(MODEXEC_PROBLEM, 0, 'Setting instance failed: '.$line);
+	}
+    }
+
+    # _G_et the info we need
+    open(NDDG, "$NDD $driver $parameter 2>&1|");
+
+    chomp(my $line = <NDDG>);
+
+    close(NDDG);
+
+    # ndd command failed for some reason
+    if($line =~ /\bfailed: /) {
+	$line =~ s/:/ -/;
+        return(MODEXEC_PROBLEM, 0, $line);
+    }
+
+    # Compare value
+    my($rc,$msg) = $self->RelationCompare( $self->Arg('value'), $line);
+
+    if($rc) {
+	return(MODEXEC_OK, 1, $msg);
+    } else {
+	return(MODEXEC_PROBLEM, 0, $msg);
+    }
+}

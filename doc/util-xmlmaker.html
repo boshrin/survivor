@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>survivor: XML Maker (xmlmaker)</TITLE>
+<LINK REL=STYLESHEET TYPE="text/css" HREF=style.css>
+</HEAD>
+
+<BODY>
+<TABLE BORDER=0 WIDTH=100%>
+<TR>
+<TD COLSPAN=2 CLASS="pagetop">SURVIVOR: XML Maker</TD>
+</TR>
+<TR>
+<TD VALIGN=TOP WIDTH=90%>
+
+ <UL>
+ <LI><A HREF=#about>About <TT>xmlmaker</TT></A>
+  <UL>
+  <LI><A HREF=#depend>Dependencies</A>
+  </UL>
+ <LI><A HREF=#install>Installation</A>
+ </UL>
+
+ <A ID="about"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ About <TT>xmlmaker</TT>
+ </TD>
+ </TR>
+
+ <TR>
+ <TD CLASS=hltitle WIDTH=10%>
+ usage
+ </TD>
+ <TD CLASS=highlight>
+ <PRE>
+    alertxml [-f fixreturncode] [-F fixsummary] -h hosts
+             [-H helpfile] -i instances -I instance
+              -r returncode -R module:calllists:recipients
+              -s summary -S service -t unixtime -T token
+
+    authreq -s sourceip -u uri [-o name=value[,name=value[...]]]
+
+    checkreq -h host[,host,...] [-t timeout]
+            [-o name=value[,name=value[...]]]
+
+    fixreq [-t timeout] [-o name=value[,name=value[...]]]
+
+    reportreq [-H] -h histdir -t tmpdir -u uriprefix
+              where histdir contains the history files to be read
+              (eg: INSTDIR/instance/history/host/foo/bar)
+
+    transportreq
+ </PRE>
+
+ where the arguments for each usage map more or less directly into the
+ fields defined in <A HREF="survivor.dtd"><TT>survivor.dtd</TT></A>
+
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The various modules used by SURVIVOR accept XML documents on stdin
+ for their configuration information.  This can make it difficult or
+ annoying to test these modules by hand.
+
+ <P>
+
+ The XML Maker utility will generate XML documents suitable for passing
+ to the SURVIVOR modules, as indicated in the following table:
+
+ <P>
+ 
+ <TABLE BORDER="0">
+ <TR>
+  <TD CLASS="info">alertxml</TD>
+  <TD CLASS="format"><A HREF="fm-about.html">Format Modules</A></TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="info">authreq</TD>
+  <TD CLASS="webauth"><A HREF="wam-about.html">Web Authentication
+   Modules</A></TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="info">checkreq</TD>
+  <TD CLASS="check"><A HREF="wam-about.html">Check Modules</A></TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="info">fixreq</TD>
+  <TD CLASS="fix"><A HREF="wam-about.html">Fix Modules</A></TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="info">reportreq</TD>
+  <TD CLASS="report"><A HREF="rm-about.html">Report Modules</A></TD>
+ </TR>
+ 
+ <TR>
+  <TD CLASS="info">transportreq</TD>
+  <TD CLASS="transport"><A HREF="wam-about.html">Transport Modules</A></TD>
+ </TR>
+ </TABLE>
+
+ <P>
+ 
+ <A ID="depend"></A>
+ <H3>Dependencies</H3>
+
+ <UL>
+ <LI><TT>xmlmaker</TT> must be run from a location from which it can
+     find the <TT>mod</TT> directory.  This includes <TT>src/util</TT>
+     and <TT>$INSTDIR/bin</TT>.
+ </UL>
+ 
+ <A ID="install"></A>
+ <TABLE BORDER=0 WIDTH=100%>
+ <TR>
+ <TD CLASS="section" COLSPAN=2>
+ Installation
+ </TD>
+ </TR>
+ </TABLE>
+
+ <P>
+
+ The <TT>xmlmaker</TT> utility is available in the SURVIVOR source
+ distribution, in the <TT>util</TT> directory.  It is not installed
+ by default.
+
+<HR>
+<I>$Date: 2006/11/20 00:03:30 $</I><BR>
+<I>$Revision: 0.3 $</I><BR>
+</TD>
+
+<TD CLASS="contents" WIDTH=10%>
+ <B>keywords</B><BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

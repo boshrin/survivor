@@ -1,0 +1,110 @@
+#!/usr/bin/perl -w
+
+# vmstat check module
+
+# Version: $Revision: 0.1 $
+# Author: David Filion
+# Date: $Date: 2006/01/25 03:49:26 $
+#
+# Copyright (c) 2005
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Based on the load module version 0.6 by Benjamin Oshrin and Matt Selsky.
+# 
+# Returns the swpd, free, buff and cache values reported by vmstat.
+#
+# Value descriptions:
+#	swpd:  the amount of virtual memory used.
+#	free:  the amount of idle memory.
+#	buff:  the amount of memory used as buffers.
+#	cache: the amount of memory used as cache.
+#
+# Parameters:
+#	units:		switches outputs between 1000, 1024, 1000000, or 1048576 bytes respectively
+#	swapwarn:	warning level for swpd
+#	swapprob:	problem level for swpd
+#	freewarn:	warning level for free
+#	freeprob:	problem level for free
+#
+# Setting any of the warn or prob values to 0 will cause that setting to be ignored.
+#
+# Based on the load module version 0.6 by Benjamin Oshrin and Matt Selsky.
+# Date: 2005/05/13
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+
+my %argfmt = ("units" => "one(k,K,m,M) optional string",
+	      "swapwarn" => "number",	# > than this value returns a warning
+	      "swapprob" => "number",	# > than this value returns a problem
+	      "freewarn" => "number",	# > than this value returns a warning
+	      "freeprob" => "number");	# > than this value returns a problem
+			  
+			  
+my $sc = new Survivor::Check();
+
+$sc->GetOpt(\%argfmt, \&VmstatValidate);
+
+my $rc = $sc->Exec( \&VmstatCheck);
+
+exit($rc);
+
+sub VmstatValidate {
+    return(MODEXEC_OK, 0, "Vmstat OK");
+}
+
+sub VmstatCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $vmstat = $self->Which('vmstat');
+    my $tail = $self->Which('tail');
+	
+    unless(defined $vmstat) {
+	return(MODEXEC_MISCONFIG, 0,'vmstat executable not found');
+    }
+	
+    unless(defined $tail) {
+	return(MODEXEC_MISCONFIG, 0,'tail executable not found');
+    }
+
+    if (($self->Arg('units')) && ($self->Arg('units') =~ m/[kKmM]/)) {
+	$vmstat .= " -S " . $self->Arg('units');
+    }
+	
+    my $cmd = "$vmstat | $tail -1";
+	
+    open(ANSWER, "$cmd 2>&1 |");
+    my $x = <ANSWER>;
+    close(ANSWER);
+    chomp($x);
+	
+    my ($ignore,$r,$b,$swpd,$free,$buff,$cache,$si,$so,$bi,$bo,$in,$cs,$us,$sy,$id,$wa)
+	= split /\s+/, $x;
+	
+    my $rc = MODEXEC_OK;
+    my $msg = "vmstat: swpd: $swpd, free: $free, buff: $buff, cache: $cache";
+    my $f = sprintf "%d", $free;
+
+    if ($self->Arg('swapprob') > 0 && $swpd > $self->Arg('swapprob')) {
+	$rc = MODEXEC_PROBLEM;
+	$msg = "SWPD problem; $msg";
+    } elsif ($self->Arg('swapwarn') > 0 && $swpd > $self->Arg('swapwarn')) {
+	$rc = MODEXEC_WARNING;
+	$msg = "SWPD WARNING; $msg";
+    }
+
+    if ($self->Arg('freeprob') > 0 && $free < $self->Arg('freeprob')) {
+	$rc = MODEXEC_PROBLEM;
+	$msg = "FREE problem; $msg";
+    } elsif ($self->Arg('freewarn') > 0 && $free < $self->Arg('freewarn')) {
+	$rc = MODEXEC_WARNING;
+	$msg = "FREE WARNING; $msg";
+    }
+    
+    return($rc, $f, $msg);
+}

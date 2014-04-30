@@ -1,0 +1,106 @@
+#!/usr/bin/perl -w
+
+# time check module
+
+# Version: $Revision: 0.6 $
+# Author: Matt Selsky <selsky@columbia.edu>
+# Date: $Date: 2003/01/29 01:32:03 $
+#
+# Copyright (c) 2002 - 2003
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Check;
+
+use Net::Time qw(inet_time);
+
+my %argfmt = ("server" => "string",
+	      "warn" => "optional number between(1,inf)",
+	      "prob" => "optional number between(1,inf)");
+
+my $sc = new Survivor::Check;
+
+$sc->GetOpt(\%argfmt, \&TimeValidate);
+
+unless(defined $sc->Arg("warn") || defined $sc->Arg("prob")) {
+    $sc->ExitError(MODEXEC_MISCONFIG, 0, 'Must specify warn or prob');
+}
+
+my $r = $sc->Exec( \&TimeCheck);
+
+exit($r);
+
+sub TimeValidate {
+    return(MODEXEC_OK, 0, "Time OK");
+}
+
+sub TimeCheck {
+    my $self = shift;
+    my $host = shift;
+
+    my $ref_time = inet_time($self->Arg("server"),'tcp');
+
+    unless(defined $ref_time) {
+        return(MODEXEC_PROBLEM, 0,
+	       'Unable to get time on reference time server');
+    }
+    else {
+        my $host_time;
+	
+        if( $host eq 'localhost' ) {
+            $host_time = time();
+        } else {
+            $host_time = inet_time($host,'tcp');
+        }
+
+	unless( defined $host_time ) {
+            return(MODEXEC_PROBLEM, 0, 'Unable to get time on host');
+        }
+        else {
+            my $offset = $ref_time - $host_time;
+
+	    # If we care about prob and we're over threshold
+            if( defined $self->Arg("prob") &&
+		abs $offset > $self->Arg("prob") ) {
+                if( $offset > 0 ) {
+		    return(MODEXEC_PROBLEM, $offset,
+			   &reportTime($offset, 'slow'));
+                } else {
+                    $offset = abs $offset;
+		    return(MODEXEC_PROBLEM, $offset,
+			   &reportTime($offset, 'fast'));
+                }
+	    # If we care about warn and we're over threshold
+            } elsif( defined $self->Arg("warn") &&
+		     abs $offset > $self->Arg("warn") ) {
+                if( $offset > 0 ) {
+		    return(MODEXEC_WARNING, $offset,
+			   &reportTime($offset, 'slow'));
+                } else {
+                    $offset = abs $offset;
+		    return(MODEXEC_WARNING, $offset,
+			   &reportTime($offset, 'fast'));
+                }
+	    } elsif( $offset == 0 ) {
+		return(MODEXEC_OK, 0, 'Host is on time');
+	    } elsif( $offset > 0 ) {
+		return(MODEXEC_OK, $offset, &reportTime($offset, 'slow'));
+	    } else {
+		$offset = abs $offset;
+		return(MODEXEC_OK, $offset, &reportTime($offset, 'fast'));
+            }
+        }
+    }
+}
+
+sub reportTime {
+    my($seconds,$direction) = @_;
+    return(sprintf("Host is $seconds %s $direction",
+		   ($seconds == 1) ? 'second' : 'seconds'));
+}

@@ -1,0 +1,47 @@
+----------------------------
+revision 0.11
+date: 2005/08/17 01:55:29;  author: selsky;  state: Exp;  lines: +11 -12
+Fix uninitialized variable. (#255)
+Reduce number of variables.
+----------------------------
+revision 0.10
+date: 2003/01/29 01:28:37;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.9
+date: 2002/12/31 04:12:07;  author: benno;  state: Exp;  lines: +7 -5
+Use defaults
+----------------------------
+revision 0.8
+date: 2002/12/19 06:59:51;  author: selsky;  state: Exp;  lines: +3 -4
+Look at swap line for linux, not total
+----------------------------
+revision 0.7
+date: 2002/12/19 06:57:00;  author: selsky;  state: Exp;  lines: +111 -131
+Update for Survivor::Check
+----------------------------
+revision 0.6
+date: 2002/05/31 18:47:42;  author: selsky;  state: Exp;  lines: +16 -4
+actually require both warn and prob
+----------------------------
+revision 0.5
+date: 2002/05/26 20:47:53;  author: selsky;  state: Exp;  lines: +45 -38
+port to Survivor.pm
+require both warning and problem arguments
+----------------------------
+revision 0.4
+date: 2002/04/30 17:50:56;  author: toor;  state: Exp;  lines: +6 -3
+fix not found error
+----------------------------
+revision 0.3
+date: 2002/04/30 17:50:13;  author: toor;  state: Exp;  lines: +31 -2
+use free if swap and pstat aren't available (linux)
+----------------------------
+revision 0.2
+date: 2002/04/04 21:06:05;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 21:51:41;  author: benno;  state: Exp;
+initial revision
+=============================================================================

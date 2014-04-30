@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+
+# ip based getenv module
+#
+# Version: $Revision: 0.1 $
+# Author: Benjamin Oshrin
+# Date: $Date: 2004/03/02 17:46:08 $
+#
+# Copyright (c) 2004
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::WebAuth;
+
+# Create a new WebAuth object.
+
+my $sw = new Survivor::WebAuth();
+
+my %argfmt = ("uservar" => "optional string default(REMOTE_USER)",
+	      "groupvar" => "optional string");
+
+$sw->ParseWebAuthRequest(\%argfmt);
+
+if(exists $ENV{$sw->Arg("uservar")} && $ENV{$sw->Arg("uservar")} ne "") {
+    my $groups = undef;
+    
+    if(defined $sw->Arg("groupvar")) {
+	my (@g) = split(/ /, $ENV{$sw->Arg("groupvar")});
+	$groups = \@g;
+    }
+    
+    $sw->GenerateWebAuthResult("yes", $ENV{$sw->Arg("uservar")}, $groups,
+			       undef, undef, undef);
+} else {
+    $sw->GenerateWebAuthResult("no", undef, undef, "Permission denied",
+			       undef, undef);
+}
+
+exit MODEXEC_OK;

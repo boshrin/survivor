@@ -1,0 +1,83 @@
+----------------------------
+revision 0.19
+date: 2007/02/11 02:08:13;  author: benno;  state: Exp;  lines: +11 -5
+Add snmptimeout
+----------------------------
+revision 0.18
+date: 2006/10/09 01:33:14;  author: benno;  state: Exp;  lines: +8 -5
+Add snmpversion
+More descriptive error messages
+----------------------------
+revision 0.17
+date: 2006/03/02 17:23:39;  author: benno;  state: Exp;  lines: +57 -72
+Add match, warncount, probcount
+Toss notwarncount, probcount
+Clean up
+----------------------------
+revision 0.16
+date: 2003/03/14 09:07:53;  author: selsky;  state: Exp;  lines: +4 -4
+Better test for non-responding snmp daemon
+----------------------------
+revision 0.15
+date: 2003/03/14 04:25:54;  author: selsky;  state: Exp;  lines: +45 -30
+Fix getnext() bug.  You need to call get() first.
+----------------------------
+revision 0.14
+date: 2003/03/04 17:37:25;  author: benno;  state: Exp;  lines: +5 -2
+Disable threading
+----------------------------
+revision 0.13
+date: 2003/01/29 01:28:25;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.12
+date: 2002/12/31 04:11:04;  author: benno;  state: Exp;  lines: +4 -2
+Adjust header
+----------------------------
+revision 0.11
+date: 2002/12/23 04:30:39;  author: selsky;  state: Exp;  lines: +36 -162
+Switch to notprobcount, notwarncount
+Use Survivor::RelationCompare()
+Correct output message headers
+----------------------------
+revision 0.10
+date: 2002/10/27 22:48:49;  author: selsky;  state: Exp;  lines: +5 -4
+Make use of default arguments in argfmt
+----------------------------
+revision 0.9
+date: 2002/10/23 01:19:01;  author: selsky;  state: Exp;  lines: +223 -181
+Transition to Survivor::Check
+----------------------------
+revision 0.8
+date: 2002/08/14 09:14:39;  author: selsky;  state: Exp;  lines: +6 -3
+Make sure getnext() doesn't exist if value == 0
+----------------------------
+revision 0.7
+date: 2002/07/26 21:54:36;  author: selsky;  state: Exp;  lines: +79 -73
+move error condition checks up
+----------------------------
+revision 0.6
+date: 2002/07/25 18:57:32;  author: selsky;  state: Exp;  lines: +8 -6
+clean up oid translation
+----------------------------
+revision 0.5
+date: 2002/07/25 18:06:01;  author: selsky;  state: Exp;  lines: +102 -78
+use perl SNMP module
+----------------------------
+revision 0.4
+date: 2002/06/07 19:12:22;  author: selsky;  state: Exp;  lines: +29 -18
+use numeric comparisons when the value is numeric (don't use ascii
+comparisons which will be "wrong")
+----------------------------
+revision 0.3
+date: 2002/06/07 06:50:34;  author: selsky;  state: Exp;  lines: +138 -109
+first crack at porting to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 21:05:57;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 21:51:11;  author: benno;  state: Exp;
+initial revision
+=============================================================================

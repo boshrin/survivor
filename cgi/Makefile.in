@@ -1,0 +1,60 @@
+# Makefile for Survivor web interface.
+
+# Version: $Revision: 0.16 $
+# Date: $Date: 2006/10/15 14:20:30 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+# Get common definitions
+include ../Makefile.inc
+
+# Set the paths to the source
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# Where to find install
+INSTALL=@INSTALL@
+
+OBJS=main.o \
+ Clipboard.o \
+ ClipboardManager.o \
+ PageFilter.o \
+ Session.o \
+ SessionState.o \
+ SWTag.o \
+ Variable.o \
+ mimetypes.o \
+ swtags.o
+
+LDFLAGS = -L../libparsecgi -lparsecgi -L../libui -lui ${CORELDFLAGS} \
+ ${NETLDFLAGS}
+
+all: sw
+
+install-remote:
+
+# cgi is installed setgid for write access
+install: all
+	${INSTALL} -o @INST_USER@ -g @INST_GROUP@ -m 2555 sw ${DESTDIR}@sbindir@/sw
+	(cd ${srcdir}/pagesets ; for i in * ; do \
+	    mkdir ${DESTDIR}@prefix@/html/sw/$$i ; \
+	    chown @INST_USER@ ${DESTDIR}@prefix@/html/sw/$$i ; \
+	    chgrp @INST_GROUP@ ${DESTDIR}@prefix@/html/sw/$$i ; \
+	    for j in $$i/* ; do \
+		${INSTALL} -o @INST_USER@ -g @INST_GROUP@ -m 444 $$j \
+		${DESTDIR}@prefix@/html/sw/$$j ; \
+	    done ; \
+	done)
+
+sw: ${OBJS} ${CORELIBS} ../libparsecgi/libparsecgi.a ../libui/libui.a
+	${CCC} -o sw ${OBJS} ${LDFLAGS}
+
+veryclean: clean
+	rm -f *.o *~
+
+clean:
+	rm -f sw ${OBJS}

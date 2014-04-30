@@ -1,0 +1,43 @@
+revision 0.10
+date: 2003/01/29 01:20:03;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.9
+date: 2002/12/31 04:07:36;  author: benno;  state: Exp;  lines: +32 -40
+Convert to named args
+----------------------------
+revision 0.8
+date: 2002/09/06 06:49:22;  author: selsky;  state: Exp;  lines: +7 -3
+Make sure variable is defined
+----------------------------
+revision 0.7
+date: 2002/05/22 23:28:58;  author: selsky;  state: Exp;  lines: +28 -26
+port to Survivor.pm
+----------------------------
+revision 0.6
+date: 2002/04/04 21:00:03;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.5
+date: 2002/04/03 20:58:12;  author: benno;  state: Exp;  lines: +4 -0
+rcs headers
+----------------------------
+revision 0.4
+date: 2001/12/05 22:23:07;  author: selsky;  state: Exp;  lines: +2 -2
+make error message more clear, typo
+----------------------------
+revision 0.3
+date: 2001/12/05 21:52:39;  author: selsky;  state: Exp;  lines: +15 -3
+fix pluralization problem
+return misconfig on host not resolvable
+----------------------------
+revision 0.2
+date: 2001/12/05 21:23:56;  author: selsky;  state: Exp;  lines: +33 -7
+print out unreachable peers
+use scalar value to count number of down peers
+deal with unreachable query hosts and hosts not running ntp
+----------------------------
+revision 0.1
+date: 2001/12/05 19:24:38;  author: selsky;  state: Exp;
+Initial revision
+=============================================================================

@@ -1,0 +1,38 @@
+----------------------------
+revision 0.9
+date: 2007/02/06 13:14:30;  author: benno;  state: Exp;  lines: +4 -5
+Close ANSWER before returning
+----------------------------
+revision 0.8
+date: 2006/10/08 03:28:50;  author: benno;  state: Exp;  lines: +10 -3
+rup on linux is space (not comma) separated
+----------------------------
+revision 0.7
+date: 2006/01/25 23:16:21;  author: benno;  state: Exp;  lines: +68 -15
+Add warn5, prob5, warn15, prob15
+----------------------------
+revision 0.6
+date: 2003/01/29 01:17:36;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.5
+date: 2002/12/31 04:05:18;  author: benno;  state: Exp;  lines: +5 -2
+Adjust header
+----------------------------
+revision 0.4
+date: 2002/12/05 00:57:23;  author: selsky;  state: Exp;  lines: +41 -61
+Update for Survivor::Check
+----------------------------
+revision 0.3
+date: 2002/05/27 17:53:06;  author: selsky;  state: Exp;  lines: +53 -35
+port to Survivor.pm
+clean up error strings
+----------------------------
+revision 0.2
+date: 2002/04/04 20:58:53;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:52:24;  author: benno;  state: Exp;
+initial revision
+=============================================================================

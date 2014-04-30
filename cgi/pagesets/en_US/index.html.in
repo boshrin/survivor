@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+@{SET version=@[VERSION type=package]}
+@{SET title=The Systems Monitor $version}
+@{INCLUDE header.html}
+
+<!-- index.html.in
+
+  If exactly one instance is defined, or if a specific instance has
+  been selected, generate the view menu.  Otherwise, prompt for an
+  instance.
+
+  -->
+
+<TABLE CLASS="navspacer">
+<TR CLASS="navspacer">
+<TD CLASS="navspacer">
+ <FONT CLASS="navspacer">
+ <A CLASS="navspacer" HREF="@{URITOP}">SURVIVOR</A>
+ @{IF STRING NOTEMPTY $instance}
+ > @{ECHO $instance}
+ @{ENDIF}
+ </FONT>
+</TD>
+</TR>
+</TABLE>
+
+@{IF STRING NOTEMPTY $instance}
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+
+ <TABLE CLASS="infobody">
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Select A View</TH>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-hostclass.html}">By HostClass</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-service.html}">By Service/Group</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-host.html}">By Host</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-long.html vf=error}">By Outstanding
+  Error</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-long.html vf=addressed}">Inhibited
+  And Acknowledged</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-long.html vf=escalated}">Escalated</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-all.html}">All Available (Grid)</A>
+ </TD>
+ </TR>
+
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=view-long.html}">All Available (Long)</A>
+ </TD>
+ </TR>
+
+ @{SET exec=@[AUTHLEVEL exec]}
+ @{IF NUMBER $exec = 1}
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI file=report.html}">Reporting</A>
+ </TD>
+ </TR>
+ @{ENDIF}
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+@{ELSE}
+<TABLE CLASS="spacer">
+<TR CLASS="spacer">
+<TD CLASS="spacer">
+ <TABLE CLASS="infobody">
+ <TR CLASS="infobody">
+ <TH CLASS="infobody">Select An Instance</TH>
+ </TR>
+
+ @{FOREACH i INSTANCE}
+ <TR CLASS="infobody">
+ <TD CLASS="infobar">
+  <A CLASS="table" HREF="@{URI i=$i}">@{ECHO $i}</A>
+ </TD>
+ </TR>
+ @{ENDEACH}
+ </TABLE>
+</TD>
+</TR>
+</TABLE>
+@{ENDIF}
+
+@{INCLUDE footer.html}
+</HTML>

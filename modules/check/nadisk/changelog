@@ -1,0 +1,46 @@
+----------------------------
+revision 0.11
+date: 2007/02/11 02:08:03;  author: benno;  state: Exp;  lines: +10 -4
+Add snmptimeout
+----------------------------
+revision 0.10
+date: 2007/01/25 03:39:04;  author: benno;  state: Exp;  lines: +32 -19
+Check values are defined before multiplying
+----------------------------
+revision 0.9
+date: 2006/10/12 03:34:19;  author: benno;  state: Exp;  lines: +9 -6
+Add snmpversion
+----------------------------
+revision 0.8
+date: 2003/02/23 13:36:09;  author: selsky;  state: Exp;  lines: +5 -2
+disable threading since SNMP module isn't thread-safe
+----------------------------
+revision 0.7
+date: 2003/01/29 01:19:06;  author: benno;  state: Exp;  lines: +3 -3
+Copyright
+----------------------------
+revision 0.6
+date: 2002/12/31 04:06:48;  author: benno;  state: Exp;  lines: +16 -27
+Adjust argument names to match disk
+----------------------------
+revision 0.5
+date: 2002/12/23 07:01:57;  author: selsky;  state: Exp;  lines: +66 -75
+Update for Survivor::Check
+----------------------------
+revision 0.4
+date: 2002/08/14 09:11:03;  author: selsky;  state: Exp;  lines: +143 -156
+Use SNMP perl module
+Clean up off-by-one error where last volume was skipped
+----------------------------
+revision 0.3
+date: 2002/05/31 23:45:41;  author: selsky;  state: Exp;  lines: +104 -98
+initial port to Survivor.pm
+----------------------------
+revision 0.2
+date: 2002/04/04 20:59:27;  author: benno;  state: Exp;  lines: +12 -3
+copyright
+----------------------------
+revision 0.1
+date: 2002/04/03 20:53:59;  author: benno;  state: Exp;
+initial revision
+=============================================================================

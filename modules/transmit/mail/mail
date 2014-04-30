@@ -1,0 +1,52 @@
+#! /usr/bin/perl -w
+
+# Survivor mail transmit module
+
+# Version: $Revision: 0.10 $
+# Date: $Date: 2006/01/23 02:18:15 $
+#
+# Copyright (c) 2002 - 2006
+# The Trustees of Columbia University in the City of New York
+# Academic Information Systems
+# 
+# License restrictions apply, see doc/license.html for details.
+
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../common";
+use Survivor::Transmit;
+
+use Mail::Mailer;
+
+# Create a new Transmit object.
+
+my $st = new Survivor::Transmit();
+
+my $r = $st->ParseFormattedAlert();
+
+if($r == MODEXEC_OK)
+{
+    # There can be multiple addresses.
+
+    my $addrs = join(',', @{$st->Data('Address')});
+    my $subject = $st->Data('Subject');
+    my $replyto = $st->Data('ReplyTo');
+
+    my $mailer = new Mail::Mailer;
+    if($mailer->open( (defined $replyto) ?
+		      { To => $addrs, Subject => $subject,
+			From => $replyto } :
+		      { To => $addrs, Subject => $subject } ))
+    {
+	print $mailer $st->Data('Message');
+	$mailer->close;
+
+	exit(MODEXEC_OK);
+    }
+    else
+    {
+	$r = MODEXEC_PROBLEM;
+    }
+}
+
+exit $r;
