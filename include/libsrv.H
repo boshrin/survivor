@@ -1239,7 +1239,7 @@ public:
   ~AlertHistory() {}
 
 private:
-  char *historyfilename() { return("alerthistory"); }
+  char *historyfilename() { return((char *)"alerthistory"); }
 };
 
 class CheckHistory : public History {
@@ -1252,7 +1252,7 @@ public:
   ~CheckHistory() {}
 
 private:
-  char *historyfilename() { return("checkhistory"); }
+  char *historyfilename() { return((char *)"checkhistory"); }
 };
 
 class CommandHistory : public History {
@@ -1265,7 +1265,7 @@ public:
   ~CommandHistory() {}
 
 private:
-  char *historyfilename() { return("commandhistory"); }
+  char *historyfilename() { return((char *)"commandhistory"); }
 };
 
 class FixHistory : public History {
@@ -1278,7 +1278,7 @@ public:
   ~FixHistory() {}
 
 private:
-  char *historyfilename() { return("fixhistory"); }
+  char *historyfilename() { return((char *)"fixhistory"); }
 };
 
 class CommonStateData {

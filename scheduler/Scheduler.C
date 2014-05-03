@@ -128,8 +128,8 @@ Scheduler::Scheduler(ProcessControl *p)
   // Returns: A new Scheduler object.
 
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MAJTRC, "Scheduler::Scheduler(%d)", p);
-  dlog->log_exit(DEBUG_MAJTRC, "Scheduler::Scheduler()");
+  dlog->log_entry(DEBUG_MAJTRC, (char *)"Scheduler::Scheduler(%d)", p);
+  dlog->log_exit(DEBUG_MAJTRC, (char *)"Scheduler::Scheduler()");
 #endif
 
   pc = p;
@@ -159,7 +159,7 @@ void Scheduler::begin_alert()
     locks->cf_unlock();
   }
   else
-    wlog->warn("Failed to obtain cf read lock");
+    wlog->warn((char *)"Failed to obtain cf read lock");
 
   sleep(s);
   
@@ -186,8 +186,8 @@ bool Scheduler::end()
   // Returns: true if the request is sent, false otherwise.
 
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MAJTRC, "Scheduler::end");
-  dlog->log_exit(DEBUG_MAJTRC, "Scheduler::end = true");
+  dlog->log_entry(DEBUG_MAJTRC, (char *)"Scheduler::end");
+  dlog->log_exit(DEBUG_MAJTRC, (char *)"Scheduler::end = true");
 #endif
   
   exit = true;
@@ -201,8 +201,8 @@ Scheduler::~Scheduler()
   // Returns: Nothing.
 
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MAJTRC, "Scheduler::~Scheduler()");
-  dlog->log_exit(DEBUG_MAJTRC, "Scheduler::~Scheduler()");
+  dlog->log_entry(DEBUG_MAJTRC, (char *)"Scheduler::~Scheduler()");
+  dlog->log_exit(DEBUG_MAJTRC, (char *)"Scheduler::~Scheduler()");
 #endif
 
   pc = NULL;
@@ -222,7 +222,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
   int r = throttle;
   
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MINTRC, "Scheduler::run_alert(%d,%d,%d)",
+  dlog->log_entry(DEBUG_MINTRC, (char *)"Scheduler::run_alert(%d,%d,%d)",
 		  c, g, throttle);
 #endif
 
@@ -237,7 +237,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
   {
 #if defined(DEBUG)
     dlog->log_progress(DEBUG_SCHEDS,
-		       "Looking for alerts for Check %s using group %s",
+		       (char *)"Looking for alerts for Check %s using group %s",
 		       IONULL(c ? c->name() : "?"),
 		       IONULL(g ? g->name() : "?"));
 #endif
@@ -308,7 +308,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
 
 #if defined(DEBUG)
 		dlog->log_progress(DEBUG_SCHEDS,
-				   "- Not clearing state for %s@%s (return code changed from %d to %d",
+				   (char *)"- Not clearing state for %s@%s (return code changed from %d to %d",
 				   IONULL(c->name()),
 				   IONULL(g->retrieve(i)),
 				   as->alertfor(),
@@ -346,7 +346,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
 		
 #if defined(DEBUG)
 		dlog->log_progress(DEBUG_SCHEDS,
-				   "- Outstanding error return on host %s, lastalert = %d, lastfix = %d, noteclear = %s",
+				   (char *)"- Outstanding error return on host %s, lastalert = %d, lastfix = %d, noteclear = %s",
 				   IONULL(g->retrieve(i)), as->lastalert(),
 				   fs->lastfix(), IOTF(noteclear));
 #endif
@@ -371,7 +371,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
 		    r--;
 		}
 		else
-		  wlog->warn("Scheduler::run_alert received return code %d, which exceeds maximum value of %d",
+		  wlog->warn((char *)"Scheduler::run_alert received return code %d, which exceeds maximum value of %d",
 			     cs->returncode(), MODEXEC_MAXRETURN);
 	      }
 	    
@@ -394,13 +394,13 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
 	    else
 	    {
 	      dlog->log_progress(DEBUG_SCHEDS,
-				 "Scheduler::run_alert did not find AlertPlan for Check '%s' or host '%s'",
+				 (char *)"Scheduler::run_alert did not find AlertPlan for Check '%s' or host '%s'",
 				 IONULL(c->name()), IONULL(g->retrieve(i)));
 	    }
 #endif	      
 	  }
 	  else
-	    wlog->warn("Scheduler::run_alert failed to allocate AlertState and FixState");
+	    wlog->warn((char *)"Scheduler::run_alert failed to allocate AlertState and FixState");
 
 	  // On error, one or both of these may be undefined
 	  as = scache->release(as);
@@ -411,7 +411,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
 	cs = scache->release(cs);
       }
       else
-	wlog->warn("Scheduler::run_alert failed to allocate CheckState");
+	wlog->warn((char *)"Scheduler::run_alert failed to allocate CheckState");
 
       // If we've reached the throttle limit, break.
       
@@ -421,7 +421,7 @@ int Scheduler::run_alert(Check *c, List *g, int throttle)
   }
 
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MINTRC, "Scheduler::run_alert = %d", r);
+  dlog->log_exit(DEBUG_MINTRC, (char *)"Scheduler::run_alert = %d", r);
 #endif
 
   return(r);
@@ -437,7 +437,7 @@ void Scheduler::run_check(Check *c, List *g)
   // Return: Nothing.
 
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MINTRC, "Scheduler::run_check(%d,%d)", c, g);
+  dlog->log_entry(DEBUG_MINTRC, (char *)"Scheduler::run_check(%d,%d)", c, g);
 #endif
 
   // for each check module
@@ -490,7 +490,7 @@ void Scheduler::run_check(Check *c, List *g)
 	    
 #if defined(DEBUG)
 	    dlog->log_progress(DEBUG_SCHEDS,
-			       "Checking %s for %s using %s schedule",
+			       (char *)"Checking %s for %s using %s schedule",
 			       c->name(), g->retrieve(j), dsched->name());
 	    /* XXX The methods that return char * (c->name()
 	       and dsched->name(), but also c->helpfile())
@@ -510,7 +510,7 @@ void Scheduler::run_check(Check *c, List *g)
 	      {
 #if defined(DEBUG)
 		dlog->log_progress(DEBUG_SCHEDS,
-				   "-- Scheduling check %s for %s",
+				   (char *)"-- Scheduling check %s for %s",
 				   c->name(), g->retrieve(j));
 #endif
 
@@ -523,7 +523,7 @@ void Scheduler::run_check(Check *c, List *g)
 	}
 #if defined(DEBUG)
 	else
-	  dlog->log_progress(DEBUG_SCHEDS, "Unable to find schedule for %s",
+	  dlog->log_progress(DEBUG_SCHEDS, (char *)"Unable to find schedule for %s",
 			     g->retrieve(j));
 #endif
       }
@@ -537,7 +537,7 @@ void Scheduler::run_check(Check *c, List *g)
 	if(pc->queue_check(c->name(), tocheck))
 	  tocheck = NULL;
 	else
-	  wlog->warn("Failed to queue check '%s' (check may already be scheduled)",
+	  wlog->warn((char *)"Failed to queue check '%s' (check may already be scheduled)",
 		     c->name());
       }
       
@@ -545,14 +545,14 @@ void Scheduler::run_check(Check *c, List *g)
       // something went wrong (or there were no hosts to check).
     }
     else
-      wlog->warn("Unable to allocate tocheck List and Counter hash");
+      wlog->warn((char *)"Unable to allocate tocheck List and Counter hash");
     
     xdelete(tocheck);
     xhdelete(ctrs, Counter);
   }
   
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MINTRC, "Scheduler::run_check()");
+  dlog->log_exit(DEBUG_MINTRC, (char *)"Scheduler::run_check()");
 #endif
 }
 
@@ -566,7 +566,7 @@ void Scheduler::run_loop(bool alert, bool check)
   // Returns: Nothing.
   
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MAJTRC, "Scheduler::run_loop(%s,%s)",
+  dlog->log_entry(DEBUG_MAJTRC, (char *)"Scheduler::run_loop(%s,%s)",
 		  IOTF(alert), IOTF(check));
 #endif
 
@@ -587,20 +587,20 @@ void Scheduler::run_loop(bool alert, bool check)
 	bool x = false;
 	
 	if(alert)
-	  x = runstate->note("alert");
+	  x = runstate->note((char *)"alert");
 	else
 	{
 	  if(check)
-	    x = runstate->note("check");
+	    x = runstate->note((char *)"check");
 	}
 
 	if(!x)
-	  wlog->warn("Scheduler::run_loop failed to update running state");
+	  wlog->warn((char *)"Scheduler::run_loop failed to update running state");
 
 	xdelete(runstate);
       }
       else
-	wlog->warn("Scheduler::run_loop failed to allocate runstate");
+	wlog->warn((char *)"Scheduler::run_loop failed to allocate runstate");
       
       // Obtain a read lock on the Configuration
     
@@ -643,16 +643,16 @@ void Scheduler::run_loop(bool alert, bool check)
 	      }
 #if defined(DEBUG)
 	      else
-		dlog->log_progress(DEBUG_SCHEDS, "No group found for %s",
+		dlog->log_progress(DEBUG_SCHEDS, (char *)"No group found for %s",
 				   c->name());
 #endif
 	    }
 	    
 	    if(throttle == 0)
 	    {
-	      wlog->warn("Scheduler::run_loop has reached alert throttle value (%d)",
+	      wlog->warn((char *)"Scheduler::run_loop has reached alert throttle value (%d)",
 			 cf->alert_throttle());
-	      wlog->warn("Alert queuing will resume in about a minute");
+	      wlog->warn((char *)"Alert queuing will resume in about a minute");
 	      break;
 	    }
 	  }
@@ -663,7 +663,7 @@ void Scheduler::run_loop(bool alert, bool check)
 	locks->cf_unlock();
       }
       else
-	wlog->warn("Failed to obtain cf read lock");
+	wlog->warn((char *)"Failed to obtain cf read lock");
 
       if(gettimeofday(&end, NULL)==0)
       {
@@ -687,7 +687,7 @@ void Scheduler::run_loop(bool alert, bool check)
       // If gettimeofday fails here, we'll display an error and sleep for a
       // minute before trying again.
 
-      wlog->warn("gettimeofday failed");
+      wlog->warn((char *)"gettimeofday failed");
 
       if(!exit)
 	sleep(60);
@@ -695,7 +695,7 @@ void Scheduler::run_loop(bool alert, bool check)
   }
   
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MAJTRC, "Scheduler::run_loop()");
+  dlog->log_exit(DEBUG_MAJTRC, (char *)"Scheduler::run_loop()");
 #endif
 }
 
@@ -714,7 +714,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 
 #if defined(DEBUG)
   dlog->log_entry(DEBUG_MAJTRC,
-		  "Scheduler::schedule_alert(%d,%d,%d,%s,%d,%d,%d)",
+		  (char *)"Scheduler::schedule_alert(%d,%d,%d,%s,%d,%d,%d)",
 		  ap, c, g, IONULL(host), as, cs, fs);
 #endif
 
@@ -726,7 +726,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
     if(!as->quiet())
     {
 #if defined(DEBUG)
-      dlog->log_progress(DEBUG_SCHEDS, "-- AlertState is not quiet");
+      dlog->log_progress(DEBUG_SCHEDS, (char *)"-- AlertState is not quiet");
 #endif
 
       if(cs->returncode() == 0)
@@ -745,7 +745,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 	  // there are addresses to notify.
 	  
 #if defined(DEBUG)
-	  dlog->log_progress(DEBUG_SCHEDS, "-- Notify on clear is in effect");
+	  dlog->log_progress(DEBUG_SCHEDS, (char *)"-- Notify on clear is in effect");
 #endif
 	  
 	  // Lookup previous recipients and queue an alert for them
@@ -781,7 +781,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 	      {
 		if(!pc->queue_alert(a))
 		{
-		  wlog->warn("Scheduler::schedule_alert failed to queue alert for host '%s'",
+		  wlog->warn((char *)"Scheduler::schedule_alert failed to queue alert for host '%s'",
 			     host);
 
 		  xdelete(a);
@@ -791,20 +791,20 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 	      }
 	      else
 	      {
-		wlog->warn("Scheduler::schedule_alert failed to allocate Alert");
+		wlog->warn((char *)"Scheduler::schedule_alert failed to allocate Alert");
 
 		xdelete(rsetdupe);
 	      }
 	    }
 	    else
-	      wlog->warn("Scheduler::schedule_alert failed to allocate RecipientSet");
+	      wlog->warn((char *)"Scheduler::schedule_alert failed to allocate RecipientSet");
 	  }
 	  // else nobody to notify, just move on
 	}
 #if defined(DEBUG)
 	else
 	  dlog->log_progress(DEBUG_SCHEDS,
-			     "-- Notify on clear is not in effect");
+			     (char *)"-- Notify on clear is not in effect");
 #endif
       }
       else
@@ -832,7 +832,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 	    {
 #if defined(DEBUG)
 	      dlog->log_progress(DEBUG_SCHEDS,
-				 "-- AlertSchedule entry %d is now in effect",
+				 (char *)"-- AlertSchedule entry %d is now in effect",
 				 i);
 #endif
 	      // Next, see if it is time to schedule an(other) alert
@@ -846,7 +846,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 	      {
 #if defined(DEBUG)
 		dlog->log_progress(DEBUG_SCHEDS,
-				   "-- AlertSchedule interval has been reached");
+				   (char *)"-- AlertSchedule interval has been reached");
 #endif
 	      
 		// We stop on the first schedule found to be in effect.
@@ -908,7 +908,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 			    // here.
 #if defined(DEBUG)
 			    dlog->log_progress(DEBUG_SCHEDS,
-					       "-- Using CallList %s",
+					       (char *)"-- Using CallList %s",
 					       cl->name());
 #endif
 			    CallListState *cls = new CallListState(cl);
@@ -975,7 +975,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 				}
 				break;
 			      default:
-				wlog->warn("Unknown calllist type %s received by Scheduler::schedule_alert",
+				wlog->warn((char *)"Unknown calllist type %s received by Scheduler::schedule_alert",
 					   cl->listtype());
 				break;
 			      }
@@ -985,7 +985,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 				// Store the address for later
 #if defined(DEBUG)
 				dlog->log_progress(DEBUG_SCHEDS,
-						   "-- Notifying %s via %s for %s",
+						   (char *)"-- Notifying %s via %s for %s",
 						   n, cl->module()->name(),
 						   c->name());
 #endif
@@ -995,7 +995,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 			      xdelete(cls);
 			    }
 			    else
-			      wlog->warn("Scheduler::schedule_alert failed to retrieve CallList '%s'",
+			      wlog->warn((char *)"Scheduler::schedule_alert failed to retrieve CallList '%s'",
 					 cl->name());
 			  }
 			}
@@ -1003,7 +1003,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 			locks->cl_unlock();
 		      }
 		      else
-			wlog->warn("Scheduler::schedule_alert failed to obtain CallList lock");
+			wlog->warn((char *)"Scheduler::schedule_alert failed to obtain CallList lock");
 		    }
 
 		    if(rset->modules() > 0 || at->fix() == always_fix ||
@@ -1043,7 +1043,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 		      {
 			if(!pc->queue_alert(al))
 			{
-			  wlog->warn("Scheduler::schedule_alert failed to queue alert for host '%s'",
+			  wlog->warn((char *)"Scheduler::schedule_alert failed to queue alert for host '%s'",
 				     host);
 			  
 			  xdelete(al);
@@ -1053,7 +1053,7 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 		      }
 		      else
 		      {
-			wlog->warn("Scheduler::schedule_alert failed to allocate Alert");
+			wlog->warn((char *)"Scheduler::schedule_alert failed to allocate Alert");
 
 			xdelete(rset);
 		      }
@@ -1061,16 +1061,16 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 #if defined(DEBUG)
 		    else
 		      dlog->log_progress(DEBUG_SCHEDS,
-					 "-- No useful addresses to notify");
+					 (char *)"-- No useful addresses to notify");
 #endif
 		  }
 		  else
-		    wlog->warn("Scheduler::schedule_alert failed to allocate RecipientSet");
+		    wlog->warn((char *)"Scheduler::schedule_alert failed to allocate RecipientSet");
 		}
 #if defined(DEBUG)
 		else
 		  dlog->log_progress(DEBUG_SCHEDS,
-				     "-- No matching AlertTry for attempt %d, or degraded mode in effect",
+				     (char *)"-- No matching AlertTry for attempt %d, or degraded mode in effect",
 				     alertnum);
 #endif
 	      }
@@ -1085,14 +1085,14 @@ bool Scheduler::schedule_alert(AlertPlan *ap, Check *c, List *g, char *host,
 #if defined(DEBUG)
 	else
 	  dlog->log_progress(DEBUG_SCHEDS,
-			     "-- No matching ReturnGroup/failure threshold found");
+			     (char *)"-- No matching ReturnGroup/failure threshold found");
 #endif
       }
     }
   }
 
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MAJTRC, "Scheduler::schedule_alert = %s", IOTF(r));
+  dlog->log_exit(DEBUG_MAJTRC, (char *)"Scheduler::schedule_alert = %s", IOTF(r));
 #endif
 
   return(r);
@@ -1111,14 +1111,14 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
   bool ret = false;
   
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MINTRC, "Scheduler::schedule_check(%d,%s,%d,%d,%d)",
+  dlog->log_entry(DEBUG_MINTRC, (char *)"Scheduler::schedule_check(%d,%s,%d,%d,%d)",
 		  c, host, sched, cs, ctrs);
 #endif
 
   if(c && host && sched && cs)
   {
 #if defined(DEBUG)
-    dlog->log_progress(DEBUG_SCHEDS, "- Last check at %d", cs->lastcheck());
+    dlog->log_progress(DEBUG_SCHEDS, (char *)"- Last check at %d", cs->lastcheck());
 #endif
 
     Schedule *matchsched = NULL;
@@ -1131,7 +1131,7 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
       {
 #if defined(DEBUG)
 	dlog->log_progress(DEBUG_SCHEDS,
-			   "- Using %s schedule, line %d, for %s",
+			   (char *)"- Using %s schedule, line %d, for %s",
 			   sched->name(), i+1, c->name());
 #endif
 	if(s->now(cs->lastcheck(), 0))
@@ -1184,7 +1184,7 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
 	    {
 #if defined(DEBUG)
 	      dlog->log_progress(DEBUG_SCHEDS,
-				 "-- NOT scheduling check %s for %s (stagger limit reached)",
+				 (char *)"-- NOT scheduling check %s for %s (stagger limit reached)",
 				 c->name(), host);
 #endif	      
 	      ret = false;
@@ -1210,7 +1210,7 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
 	      xdelete(ctr);
 	  }
 	  else
-	    wlog->warn("Scheduler::schedule_check failed to allocate Counter");
+	    wlog->warn((char *)"Scheduler::schedule_check failed to allocate Counter");
 	}
       }
 	    
@@ -1220,7 +1220,7 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
       {
 #if defined(DEBUG)
 	dlog->log_progress(DEBUG_SCHEDS,
-			   "-- NOT scheduling check %s for %s (outstanding dependency)",
+			   (char *)"-- NOT scheduling check %s for %s (outstanding dependency)",
 			   c->name(), host);
 #endif
 
@@ -1230,7 +1230,7 @@ bool Scheduler::schedule_check(Check *c, char *host, Array<Schedule> *sched,
   }
 
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MINTRC, "Scheduler::schedule_check = %s", IOTF(ret));
+  dlog->log_exit(DEBUG_MINTRC, (char *)"Scheduler::schedule_check = %s", IOTF(ret));
 #endif
   
   return(ret);
@@ -1254,7 +1254,7 @@ bool Scheduler::verify_degraded(int hostfail, int checkfail, Check *c,
 
 #if defined(DEBUG)
   dlog->log_entry(DEBUG_MINTRC,
-		  "Scheduler::verify_degraded(%d,%d,%d,%d,%s,%d)",
+		  (char *)"Scheduler::verify_degraded(%d,%d,%d,%d,%s,%d)",
 		  hostfail, checkfail, c, g, IONULL(host), sched);
 #endif
 
@@ -1278,7 +1278,7 @@ bool Scheduler::verify_degraded(int hostfail, int checkfail, Check *c,
 
 #if defined(DEBUG)
 	  dlog->log_progress(DEBUG_SCHEDS,
-			     "- Degraded moded in effect by schedule %s, line %d",
+			     (char *)"- Degraded mode in effect by schedule %s, line %d",
 			     sched->name(), i+1);
 #endif
 	  
@@ -1354,7 +1354,7 @@ bool Scheduler::verify_degraded(int hostfail, int checkfail, Check *c,
     r = true;
   
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MINTRC, "Scheduler::verify_degraded = %s", IOTF(r));
+  dlog->log_exit(DEBUG_MINTRC, (char *)"Scheduler::verify_degraded = %s", IOTF(r));
 #endif
   
   return(r);
@@ -1373,7 +1373,7 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
   bool r = true;
 
 #if defined(DEBUG)
-  dlog->log_entry(DEBUG_MINTRC, "Scheduler::verify_type1_dependencies(%d,%s)",
+  dlog->log_entry(DEBUG_MINTRC, (char *)"Scheduler::verify_type1_dependencies(%d,%s)",
 		  c, IONULL(host));
 #endif
 
@@ -1420,7 +1420,7 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
 	    {
 #if defined(DEBUG)
 	      dlog->log_progress(DEBUG_SCHEDS,
-				 "-- %s is dependent on %s, which has an error status of %d",
+				 (char *)"-- %s is dependent on %s, which has an error status of %d",
 				 c->name(),
 				 d->dependency()->name(),
 				 cs->returncode());
@@ -1445,9 +1445,9 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
 
 		if(cra && cbuf)
 		{
-		  cbuf->append("Dependency \"");
+		  cbuf->append((char *)"Dependency \"");
 		  cbuf->append(d->dependency()->name());
-		  cbuf->append("\" has error status ");
+		  cbuf->append((char *)"\" has error status ");
 		  cbuf->append(crc);
 		  
 		  CheckResult *cr = new CheckResult(host,
@@ -1472,10 +1472,10 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
 		    }
 		  }
 		  else
-		    wlog->warn("verify_type1_dependencies failed to allocate CheckResult");
+		    wlog->warn((char *)"verify_type1_dependencies failed to allocate CheckResult");
 		}
 		else
-		  wlog->warn("verify_type1_dependencies failed to allocate Array or CharBuffer");
+		  wlog->warn((char *)"verify_type1_dependencies failed to allocate Array or CharBuffer");
 
 		// If cra is still valid, we need to toss it
 		xadelete(cra, CheckResult);
@@ -1490,7 +1490,7 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
 	      cs = scache->release(cs);
 	  }
 	  else
-	    wlog->warn("verify_type1_dependencies failed to allocate CheckState for %s@%s",
+	    wlog->warn((char *)"verify_type1_dependencies failed to allocate CheckState for %s@%s",
 		       d->dependency()->name(), host);
 	}
 
@@ -1501,7 +1501,7 @@ bool Scheduler::verify_type1_dependencies(Check *c, char *host)
   }
   
 #if defined(DEBUG)
-  dlog->log_exit(DEBUG_MINTRC, "Scheduler::verify_type1_dependencies = %s",
+  dlog->log_exit(DEBUG_MINTRC, (char *)"Scheduler::verify_type1_dependencies = %s",
 		 IOTF(r));
 #endif
   

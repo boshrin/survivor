@@ -140,7 +140,7 @@ using namespace std;
 #include <signal.h>
 #include <math.h>
 #include <strings.h>
-#include <string>
+#include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
