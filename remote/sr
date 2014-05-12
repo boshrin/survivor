@@ -155,7 +155,7 @@ if($exitcode == 0) {
 
 			my @xmlblock = read_data();
 
-			if(defined(@xmlblock)) {
+			if(@xmlblock) {
 			    # Pull out the timeout since we need it.
 			    # We pass the whole XML doc to the module,
 			    # so we don't need to figure out the args.
